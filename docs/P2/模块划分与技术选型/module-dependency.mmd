@@ -1,0 +1,17 @@
+graph LR
+  UI[frontend-ui]
+  WC[web-controller]
+  AUTH[auth]
+  USER[user]
+  EXP[experiment]
+  PERSIST[persistence]
+  INFRA[infra]
+
+  UI -->|REST| WC
+  WC -->|calls| AUTH
+  WC -->|calls| USER
+  WC -->|calls| EXP
+  EXP -->|reads/writes| PERSIST
+  USER -->|reads/writes| PERSIST
+  INFRA --- WC
+  INFRA --- PERSIST
