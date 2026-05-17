@@ -1,0 +1,303 @@
+@startuml
+title CampusHub Chen-style ER Diagram
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam rectangle {
+  BorderColor #222222
+  BackgroundColor #F8FAFC
+}
+skinparam usecase {
+  BorderColor #1D4ED8
+  BackgroundColor #EFF6FF
+}
+
+' 说明：
+' - rectangle 表示实体
+' - diamond 表示关系
+' - usecase 的椭圆外观表示属性
+' - 属性名前缀 PK / FK 标注主键、外键
+' - 关系连线标签标注基数：1、0..1、0..2、N
+
+left to right direction
+
+rectangle "用户\nusers" as U
+usecase "PK id" as U_id
+usecase "username UNIQUE" as U_username
+usecase "password_hash" as U_password
+usecase "phone_cipher / phone_hash" as U_phone
+usecase "student_id UNIQUE" as U_student
+usecase "real_name" as U_real
+usecase "credit_score" as U_credit
+usecase "role / status" as U_status
+U -- U_id
+U -- U_username
+U -- U_password
+U -- U_phone
+U -- U_student
+U -- U_real
+U -- U_credit
+U -- U_status
+
+rectangle "实名认证\ncertifications" as CERT
+usecase "PK id" as CERT_id
+usecase "FK user_id UNIQUE" as CERT_user
+usecase "cert_type" as CERT_type
+usecase "student_id" as CERT_student
+usecase "card_image_url" as CERT_card
+usecase "status" as CERT_status
+usecase "FK reviewed_by" as CERT_reviewer
+CERT -- CERT_id
+CERT -- CERT_user
+CERT -- CERT_type
+CERT -- CERT_student
+CERT -- CERT_card
+CERT -- CERT_status
+CERT -- CERT_reviewer
+
+rectangle "信用记录\ncredit_records" as CR
+usecase "PK id" as CR_id
+usecase "FK user_id" as CR_user
+usecase "change_amount" as CR_amount
+usecase "reason" as CR_reason
+usecase "FK related_order_id" as CR_order
+CR -- CR_id
+CR -- CR_user
+CR -- CR_amount
+CR -- CR_reason
+CR -- CR_order
+
+rectangle "需求\ndemands" as D
+usecase "PK id" as D_id
+usecase "FK publisher_id" as D_publisher
+usecase "title" as D_title
+usecase "description" as D_description
+usecase "category" as D_category
+usecase "reward_amount / reward_type" as D_reward
+usecase "status" as D_status
+usecase "is_urgent / urgent_deadline" as D_urgent
+usecase "location_tag" as D_location
+D -- D_id
+D -- D_publisher
+D -- D_title
+D -- D_description
+D -- D_category
+D -- D_reward
+D -- D_status
+D -- D_urgent
+D -- D_location
+
+rectangle "需求图片\ndemand_images" as DI
+usecase "PK id" as DI_id
+usecase "FK demand_id" as DI_demand
+usecase "image_url" as DI_url
+usecase "sort_order" as DI_sort
+DI -- DI_id
+DI -- DI_demand
+DI -- DI_url
+DI -- DI_sort
+
+rectangle "标签\ntags" as T
+usecase "PK id" as T_id
+usecase "name UNIQUE" as T_name
+T -- T_id
+T -- T_name
+
+rectangle "需求标签\ndemand_tags" as DT
+usecase "PK/FK demand_id" as DT_demand
+usecase "PK/FK tag_id" as DT_tag
+DT -- DT_demand
+DT -- DT_tag
+
+rectangle "订单\norders" as O
+usecase "PK id" as O_id
+usecase "FK demand_id UNIQUE" as O_demand
+usecase "FK publisher_id" as O_publisher
+usecase "FK acceptor_id" as O_acceptor
+usecase "status" as O_status
+usecase "accepted_at" as O_accepted
+usecase "auto_confirm_deadline" as O_deadline
+usecase "completed_at / cancelled_at" as O_finish
+O -- O_id
+O -- O_demand
+O -- O_publisher
+O -- O_acceptor
+O -- O_status
+O -- O_accepted
+O -- O_deadline
+O -- O_finish
+
+rectangle "订单状态日志\norder_status_logs" as OSL
+usecase "PK id" as OSL_id
+usecase "FK order_id" as OSL_order
+usecase "from_status / to_status" as OSL_status
+usecase "FK operator_id" as OSL_operator
+usecase "remark" as OSL_remark
+OSL -- OSL_id
+OSL -- OSL_order
+OSL -- OSL_status
+OSL -- OSL_operator
+OSL -- OSL_remark
+
+rectangle "评价\nreviews" as R
+usecase "PK id" as R_id
+usecase "FK order_id" as R_order
+usecase "FK reviewer_id" as R_reviewer
+usecase "FK reviewee_id" as R_reviewee
+usecase "reviewer_role" as R_role
+usecase "rating" as R_rating
+usecase "content / image_urls" as R_content
+R -- R_id
+R -- R_order
+R -- R_reviewer
+R -- R_reviewee
+R -- R_role
+R -- R_rating
+R -- R_content
+
+rectangle "仲裁工单\narbitration_tickets" as AT
+usecase "PK id" as AT_id
+usecase "FK review_id" as AT_review
+usecase "FK order_id" as AT_order
+usecase "FK reporter_id" as AT_reporter
+usecase "reason / evidence_urls" as AT_reason
+usecase "status / resolution" as AT_status
+usecase "FK resolved_by" as AT_resolver
+AT -- AT_id
+AT -- AT_review
+AT -- AT_order
+AT -- AT_reporter
+AT -- AT_reason
+AT -- AT_status
+AT -- AT_resolver
+
+rectangle "通知\nnotifications" as N
+usecase "PK id" as N_id
+usecase "FK user_id" as N_user
+usecase "type" as N_type
+usecase "title / content" as N_content
+usecase "related_id" as N_related
+usecase "is_read" as N_read
+N -- N_id
+N -- N_user
+N -- N_type
+N -- N_content
+N -- N_related
+N -- N_read
+
+rectangle "会话\nconversations" as C
+usecase "PK id" as C_id
+usecase "FK user1_id" as C_user1
+usecase "FK user2_id" as C_user2
+usecase "FK related_demand_id" as C_demand
+usecase "last_message_content" as C_last
+C -- C_id
+C -- C_user1
+C -- C_user2
+C -- C_demand
+C -- C_last
+
+rectangle "消息\nmessages" as M
+usecase "PK id" as M_id
+usecase "FK conversation_id" as M_conversation
+usecase "FK sender_id" as M_sender
+usecase "content" as M_content
+usecase "message_type" as M_type
+usecase "is_read" as M_read
+M -- M_id
+M -- M_conversation
+M -- M_sender
+M -- M_content
+M -- M_type
+M -- M_read
+
+rectangle "管理员操作日志\nadmin_operation_logs" as AOL
+usecase "PK id" as AOL_id
+usecase "FK admin_id" as AOL_admin
+usecase "operation" as AOL_operation
+usecase "target_type / target_id" as AOL_target
+usecase "detail" as AOL_detail
+AOL -- AOL_id
+AOL -- AOL_admin
+AOL -- AOL_operation
+AOL -- AOL_target
+AOL -- AOL_detail
+
+diamond "发布" as REL_PUBLISH
+U -- REL_PUBLISH : 1
+REL_PUBLISH -- D : N
+
+diamond "提交认证" as REL_CERT
+U -- REL_CERT : 1
+REL_CERT -- CERT : 0..1
+
+diamond "产生信用流水" as REL_CREDIT
+U -- REL_CREDIT : 1
+REL_CREDIT -- CR : N
+
+diamond "包含图片" as REL_IMAGE
+D -- REL_IMAGE : 1
+REL_IMAGE -- DI : N
+
+diamond "需求-标签关联" as REL_DEMAND_TAG
+D -- REL_DEMAND_TAG : 1
+REL_DEMAND_TAG -- DT : N
+
+diamond "标签-需求关联" as REL_TAG_DEMAND
+T -- REL_TAG_DEMAND : 1
+REL_TAG_DEMAND -- DT : N
+
+diamond "生成订单" as REL_ORDER
+D -- REL_ORDER : 1
+REL_ORDER -- O : 0..1
+
+diamond "作为需求方" as REL_ORDER_PUB
+U -- REL_ORDER_PUB : 1
+REL_ORDER_PUB -- O : N
+
+diamond "作为服务方" as REL_ORDER_ACC
+U -- REL_ORDER_ACC : 1
+REL_ORDER_ACC -- O : N
+
+diamond "记录状态变化" as REL_STATUS_LOG
+O -- REL_STATUS_LOG : 1
+REL_STATUS_LOG -- OSL : N
+
+diamond "收到评价" as REL_REVIEW
+O -- REL_REVIEW : 1
+REL_REVIEW -- R : 0..2
+
+diamond "评价人" as REL_REVIEWER
+U -- REL_REVIEWER : 1
+REL_REVIEWER -- R : N
+
+diamond "被评价人" as REL_REVIEWEE
+U -- REL_REVIEWEE : 1
+REL_REVIEWEE -- R : N
+
+diamond "触发仲裁" as REL_ARBITRATION
+R -- REL_ARBITRATION : 1
+REL_ARBITRATION -- AT : 0..1
+
+diamond "接收通知" as REL_NOTIFY
+U -- REL_NOTIFY : 1
+REL_NOTIFY -- N : N
+
+diamond "参与会话A" as REL_CONV_A
+U -- REL_CONV_A : 1
+REL_CONV_A -- C : N
+
+diamond "包含消息" as REL_MESSAGE
+C -- REL_MESSAGE : 1
+REL_MESSAGE -- M : N
+
+diamond "发送消息" as REL_SEND
+U -- REL_SEND : 1
+REL_SEND -- M : N
+
+diamond "产生审计日志" as REL_ADMIN_LOG
+U -- REL_ADMIN_LOG : 1
+REL_ADMIN_LOG -- AOL : N
+
+@enduml
