@@ -1,0 +1,120 @@
+digraph CampusHubChenER {
+  graph [rankdir=LR, splines=true, overlap=false, fontname="Microsoft YaHei", bgcolor="white"];
+  node [fontname="Microsoft YaHei", fontsize=10];
+  edge [fontname="Microsoft YaHei", fontsize=9];
+
+  // Entities: rectangles
+  users [shape=box, label="用户\nusers"];
+  certifications [shape=box, label="实名认证\ncertifications"];
+  credit_records [shape=box, label="信用记录\ncredit_records"];
+  demands [shape=box, label="需求\ndemands"];
+  demand_images [shape=box, label="需求图片\ndemand_images"];
+  tags [shape=box, label="标签\ntags"];
+  demand_tags [shape=box, label="需求标签\ndemand_tags"];
+  orders [shape=box, label="订单\norders"];
+  order_status_logs [shape=box, label="订单状态日志\norder_status_logs"];
+  reviews [shape=box, label="评价\nreviews"];
+  arbitration_tickets [shape=box, label="仲裁工单\narbitration_tickets"];
+  notifications [shape=box, label="通知\nnotifications"];
+  conversations [shape=box, label="会话\nconversations"];
+  messages [shape=box, label="消息\nmessages"];
+  admin_operation_logs [shape=box, label="管理员操作日志\nadmin_operation_logs"];
+
+  // Relationships: diamonds
+  rel_publish [shape=diamond, label="发布"];
+  rel_cert [shape=diamond, label="提交认证"];
+  rel_credit [shape=diamond, label="产生信用流水"];
+  rel_image [shape=diamond, label="包含图片"];
+  rel_demand_tag [shape=diamond, label="需求-标签关联"];
+  rel_tag_demand [shape=diamond, label="标签-需求关联"];
+  rel_order [shape=diamond, label="生成订单"];
+  rel_order_pub [shape=diamond, label="作为需求方"];
+  rel_order_acc [shape=diamond, label="作为服务方"];
+  rel_status_log [shape=diamond, label="记录状态变化"];
+  rel_review [shape=diamond, label="收到评价"];
+  rel_reviewer [shape=diamond, label="评价人"];
+  rel_reviewee [shape=diamond, label="被评价人"];
+  rel_arbitration [shape=diamond, label="触发仲裁"];
+  rel_notify [shape=diamond, label="接收通知"];
+  rel_conv [shape=diamond, label="参与会话"];
+  rel_message [shape=diamond, label="包含消息"];
+  rel_send [shape=diamond, label="发送消息"];
+  rel_admin_log [shape=diamond, label="产生审计日志"];
+
+  // Attributes: ellipses, PK/FK marked in labels
+  u_id [shape=ellipse, label="PK id"];
+  u_username [shape=ellipse, label="username UNIQUE"];
+  u_pwd [shape=ellipse, label="password_hash"];
+  u_phone [shape=ellipse, label="phone_cipher / phone_hash"];
+  u_student [shape=ellipse, label="student_id UNIQUE"];
+  u_credit [shape=ellipse, label="credit_score"];
+  users -> {u_id u_username u_pwd u_phone u_student u_credit} [dir=none, color="#64748B"];
+
+  cert_id [shape=ellipse, label="PK id"];
+  cert_user [shape=ellipse, label="FK user_id UNIQUE"];
+  cert_status [shape=ellipse, label="status"];
+  certifications -> {cert_id cert_user cert_status} [dir=none, color="#64748B"];
+
+  d_id [shape=ellipse, label="PK id"];
+  d_publisher [shape=ellipse, label="FK publisher_id"];
+  d_title [shape=ellipse, label="title"];
+  d_category [shape=ellipse, label="category"];
+  d_status [shape=ellipse, label="status"];
+  d_reward [shape=ellipse, label="reward_amount / reward_type"];
+  d_location [shape=ellipse, label="location_tag"];
+  demands -> {d_id d_publisher d_title d_category d_status d_reward d_location} [dir=none, color="#64748B"];
+
+  o_id [shape=ellipse, label="PK id"];
+  o_demand [shape=ellipse, label="FK demand_id UNIQUE"];
+  o_publisher [shape=ellipse, label="FK publisher_id"];
+  o_acceptor [shape=ellipse, label="FK acceptor_id"];
+  o_status [shape=ellipse, label="status"];
+  orders -> {o_id o_demand o_publisher o_acceptor o_status} [dir=none, color="#64748B"];
+
+  r_id [shape=ellipse, label="PK id"];
+  r_order [shape=ellipse, label="FK order_id"];
+  r_reviewer [shape=ellipse, label="FK reviewer_id"];
+  r_reviewee [shape=ellipse, label="FK reviewee_id"];
+  r_rating [shape=ellipse, label="rating"];
+  reviews -> {r_id r_order r_reviewer r_reviewee r_rating} [dir=none, color="#64748B"];
+
+  // Core relationship cardinalities
+  users -> rel_publish [label="1", dir=none];
+  rel_publish -> demands [label="N", dir=none];
+  users -> rel_cert [label="1", dir=none];
+  rel_cert -> certifications [label="0..1", dir=none];
+  users -> rel_credit [label="1", dir=none];
+  rel_credit -> credit_records [label="N", dir=none];
+  demands -> rel_image [label="1", dir=none];
+  rel_image -> demand_images [label="N", dir=none];
+  demands -> rel_demand_tag [label="1", dir=none];
+  rel_demand_tag -> demand_tags [label="N", dir=none];
+  tags -> rel_tag_demand [label="1", dir=none];
+  rel_tag_demand -> demand_tags [label="N", dir=none];
+  demands -> rel_order [label="1", dir=none];
+  rel_order -> orders [label="0..1", dir=none];
+  users -> rel_order_pub [label="1", dir=none];
+  rel_order_pub -> orders [label="N", dir=none];
+  users -> rel_order_acc [label="1", dir=none];
+  rel_order_acc -> orders [label="N", dir=none];
+  orders -> rel_status_log [label="1", dir=none];
+  rel_status_log -> order_status_logs [label="N", dir=none];
+  orders -> rel_review [label="1", dir=none];
+  rel_review -> reviews [label="0..2", dir=none];
+  users -> rel_reviewer [label="1", dir=none];
+  rel_reviewer -> reviews [label="N", dir=none];
+  users -> rel_reviewee [label="1", dir=none];
+  rel_reviewee -> reviews [label="N", dir=none];
+  reviews -> rel_arbitration [label="1", dir=none];
+  rel_arbitration -> arbitration_tickets [label="0..1", dir=none];
+  users -> rel_notify [label="1", dir=none];
+  rel_notify -> notifications [label="N", dir=none];
+  users -> rel_conv [label="1", dir=none];
+  rel_conv -> conversations [label="N", dir=none];
+  conversations -> rel_message [label="1", dir=none];
+  rel_message -> messages [label="N", dir=none];
+  users -> rel_send [label="1", dir=none];
+  rel_send -> messages [label="N", dir=none];
+  users -> rel_admin_log [label="1", dir=none];
+  rel_admin_log -> admin_operation_logs [label="N", dir=none];
+}
