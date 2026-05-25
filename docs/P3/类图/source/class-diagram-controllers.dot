@@ -1,0 +1,199 @@
+
+digraph G {
+  graph [rankdir=LR, bgcolor="white", fontname="Noto Sans CJK SC", fontsize=22, labelloc="t", label="CampusHub Controller 层类图（优化版）", pad="0.45", nodesep="0.45", ranksep="0.7", splines=ortho, outputorder=edgesfirst, pack=true, packmode="array_t4", newrank=true];
+  node [shape=plaintext, fontname="Noto Sans CJK SC", fontsize=12, margin=0];
+  edge [fontname="Noto Sans CJK SC", fontsize=10, color="#475569", penwidth=1.25, arrowsize=0.75];
+  ApiResponse [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>ApiResponse&lt;T&gt;</B><BR/><FONT POINT-SIZE="10">«统一响应»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">code: Integer<BR ALIGN="LEFT"/>message: String<BR ALIGN="LEFT"/>data: T</FONT></TD></TR>
+  
+</TABLE>
+>];
+  AuthNote [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#CBD5E1" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FEF3C7" ALIGN="CENTER"><B>统一约定</B></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFFFFF"><FONT POINT-SIZE="10">所有鉴权接口读取 Authorization: Bearer &lt;JWT_TOKEN&gt;<BR ALIGN="LEFT"/>URL 使用小写复数名词；请求/响应字段使用 camelCase<BR ALIGN="LEFT"/>Controller 只负责参数接收、鉴权入口和统一响应</FONT></TD></TR>
+</TABLE>
+>];
+  subgraph cluster_auth {
+    label="认证接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    AuthController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>AuthController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/auth</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /register<BR ALIGN="LEFT"/>POST /login<BR ALIGN="LEFT"/>POST /logout</FONT></TD></TR>
+</TABLE>
+>];
+    S_AuthService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>AuthService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  AuthController -> S_AuthService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_cert {
+    label="实名认证接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    CertificationController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>CertificationController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/certifications</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>GET /me<BR ALIGN="LEFT"/>PUT /{id}/review</FONT></TD></TR>
+</TABLE>
+>];
+    S_CertificationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>CertificationService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  CertificationController -> S_CertificationService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_user {
+    label="用户信息接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    UserController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>UserController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/users</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">GET /me<BR ALIGN="LEFT"/>PUT /me<BR ALIGN="LEFT"/>GET /{id}<BR ALIGN="LEFT"/>GET /me/credit-records</FONT></TD></TR>
+</TABLE>
+>];
+    S_UserService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>UserService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  UserController -> S_UserService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_demand {
+    label="需求发布接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    DemandController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>DemandController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/demands</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>GET /<BR ALIGN="LEFT"/>GET /{id}<BR ALIGN="LEFT"/>PUT /{id}<BR ALIGN="LEFT"/>PUT /{id}/cancel</FONT></TD></TR>
+</TABLE>
+>];
+    S_DemandService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  DemandController -> S_DemandService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_order {
+    label="订单业务接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    OrderController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>OrderController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/orders</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>GET /mine<BR ALIGN="LEFT"/>GET /{id}<BR ALIGN="LEFT"/>PUT /{id}/delivered<BR ALIGN="LEFT"/>PUT /{id}/confirm<BR ALIGN="LEFT"/>PUT /{id}/cancel</FONT></TD></TR>
+</TABLE>
+>];
+    S_OrderService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>OrderService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  OrderController -> S_OrderService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_review {
+    label="评价管理接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    ReviewController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>ReviewController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/reviews</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>GET /users/{id}<BR ALIGN="LEFT"/>GET /orders/{id}</FONT></TD></TR>
+</TABLE>
+>];
+    S_ReviewService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>ReviewService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  ReviewController -> S_ReviewService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_arb {
+    label="纠纷仲裁接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    ArbitrationController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>ArbitrationController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/arbitrations</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>PUT /{id}/process<BR ALIGN="LEFT"/>GET /pending</FONT></TD></TR>
+</TABLE>
+>];
+    S_ArbitrationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>ArbitrationService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  ArbitrationController -> S_ArbitrationService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_notif {
+    label="站内通知接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    NotificationController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>NotificationController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/notifications</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">GET /<BR ALIGN="LEFT"/>GET /unread-count<BR ALIGN="LEFT"/>PUT /{id}/read<BR ALIGN="LEFT"/>PUT /read-all</FONT></TD></TR>
+</TABLE>
+>];
+    S_NotificationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>NotificationService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  NotificationController -> S_NotificationService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_conv {
+    label="聊天会话接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    ConversationController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>ConversationController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/conversations</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">POST /<BR ALIGN="LEFT"/>GET /<BR ALIGN="LEFT"/>POST /{id}/messages<BR ALIGN="LEFT"/>GET /{id}/messages<BR ALIGN="LEFT"/>PUT /{id}/read</FONT></TD></TR>
+</TABLE>
+>];
+    S_ConversationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>ConversationService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  ConversationController -> S_ConversationService [label="调用", arrowhead=vee, color="#2563EB"];
+  subgraph cluster_admin {
+    label="后台管理接口"; fontname="Noto Sans CJK SC"; fontsize=15; color="#CBD5E1"; style="rounded,dashed"; penwidth=1.2;
+    AdminController [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>AdminController</B><BR/><FONT POINT-SIZE="10">«controller»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">baseUrl: /api/admin</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">GET /dashboard<BR ALIGN="LEFT"/>GET /users<BR ALIGN="LEFT"/>PUT /users/{id}/ban<BR ALIGN="LEFT"/>PUT /users/{id}/unban</FONT></TD></TR>
+</TABLE>
+>];
+    S_AdminService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>AdminService</B><BR/><FONT POINT-SIZE="10">«service interface»</FONT></TD></TR>
+  
+  
+</TABLE>
+>];
+  }
+  AdminController -> S_AdminService [label="调用", arrowhead=vee, color="#2563EB"];
+}

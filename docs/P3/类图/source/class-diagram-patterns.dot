@@ -1,0 +1,259 @@
+
+digraph G {
+  graph [rankdir=TB, bgcolor="white", fontname="Noto Sans CJK SC", fontsize=22, labelloc="t", label="CampusHub 设计模式类图（优化版）", pad="0.45", nodesep="0.5", ranksep="0.8", splines=ortho, outputorder=edgesfirst, newrank=true];
+  node [shape=plaintext, fontname="Noto Sans CJK SC", fontsize=12, margin=0];
+  edge [fontname="Noto Sans CJK SC", fontsize=10, color="#475569", penwidth=1.25, arrowsize=0.75];
+  subgraph cluster_strategy {
+    label="1. 策略模式：订单状态流转"; fontname="Noto Sans CJK SC"; fontsize=15; color="#BFDBFE"; style="rounded,dashed"; penwidth=1.2;
+
+    OrderService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>OrderService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">+ acceptDemand(demandId)<BR ALIGN="LEFT"/>+ markDelivered(orderId)<BR ALIGN="LEFT"/>+ confirmCompleted(orderId)<BR ALIGN="LEFT"/>+ cancelOrder(orderId)</FONT></TD></TR>
+</TABLE>
+>];
+    OrderStateContext [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>OrderStateContext</B><BR/><FONT POINT-SIZE="10">«context»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">- strategies: Map&lt;OrderStatus, IOrderStateStrategy&gt;</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ getStrategy(status)<BR ALIGN="LEFT"/>+ canOperate(order, action)</FONT></TD></TR>
+</TABLE>
+>];
+    IOrderStateStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>IOrderStateStrategy</B><BR/><FONT POINT-SIZE="10">«interface»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ canAccept(order): boolean<BR ALIGN="LEFT"/>+ canComplete(order): boolean<BR ALIGN="LEFT"/>+ canCancel(order): boolean<BR ALIGN="LEFT"/>+ canConfirm(order): boolean<BR ALIGN="LEFT"/>+ nextStatuses(): List&lt;OrderStatus&gt;</FONT></TD></TR>
+  
+</TABLE>
+>];
+    PendingAcceptStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>PendingAcceptStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">待接单：接单 / 取消</FONT></TD></TR>
+  
+</TABLE>
+>];
+    AcceptedStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>AcceptedStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">已接单：开始 / 取消</FONT></TD></TR>
+  
+</TABLE>
+>];
+    InProgressStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>InProgressStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">进行中：完成 / 取消</FONT></TD></TR>
+  
+</TABLE>
+>];
+    PendingConfirmStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>PendingConfirmStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">待确认：确认完成</FONT></TD></TR>
+  
+</TABLE>
+>];
+    CompletedStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>CompletedStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">已完成：终态</FONT></TD></TR>
+  
+</TABLE>
+>];
+    CancelledStrategy [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>CancelledStrategy</B><BR/><FONT POINT-SIZE="10">«strategy»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">已取消：终态</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_factory {
+    label="2. 工厂模式：多类型需求创建校验"; fontname="Noto Sans CJK SC"; fontsize=15; color="#BBF7D0"; style="rounded,dashed"; penwidth=1.2;
+
+    DemandParam [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandParam</B><BR/><FONT POINT-SIZE="10">«DTO»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">title, description, category<BR ALIGN="LEFT"/>rewardAmount, rewardType<BR ALIGN="LEFT"/>locationTag, tagIds, imageUrls</FONT></TD></TR>
+  
+</TABLE>
+>];
+    DemandFactory [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandFactory</B><BR/><FONT POINT-SIZE="10">«factory»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">- validators: Map&lt;DemandCategory, DemandValidator&gt;</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ createDemand(param): Demand</FONT></TD></TR>
+</TABLE>
+>];
+    DemandValidator [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandValidator</B><BR/><FONT POINT-SIZE="10">«interface»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ validate(param: DemandParam): void</FONT></TD></TR>
+  
+</TABLE>
+>];
+    ErrandValidator [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>ErrandValidator</B><BR/><FONT POINT-SIZE="10">«validator»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">强制位置标签</FONT></TD></TR>
+  
+</TABLE>
+>];
+    SkillValidator [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>SkillValidator</B><BR/><FONT POINT-SIZE="10">«validator»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">强制技能标签</FONT></TD></TR>
+  
+</TABLE>
+>];
+    StudyValidator [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>StudyValidator</B><BR/><FONT POINT-SIZE="10">«validator»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">强制时间段</FONT></TD></TR>
+  
+</TABLE>
+>];
+    SecondhandValidator [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>SecondhandValidator</B><BR/><FONT POINT-SIZE="10">«validator»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">强制实物配图</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_observer {
+    label="3. 观察者模式：订单事件解耦通知"; fontname="Noto Sans CJK SC"; fontsize=15; color="#FED7AA"; style="rounded,dashed"; penwidth=1.2;
+
+    OrderEventPublisher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>OrderEventPublisher</B><BR/><FONT POINT-SIZE="10">«publisher»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">- applicationEventPublisher</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ publish(event): void</FONT></TD></TR>
+</TABLE>
+>];
+    OrderStatusChangedEvent [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>OrderStatusChangedEvent</B><BR/><FONT POINT-SIZE="10">«event»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">orderId: Long<BR ALIGN="LEFT"/>fromStatus / toStatus<BR ALIGN="LEFT"/>operatorId: Long</FONT></TD></TR>
+  
+</TABLE>
+>];
+    NotificationListener [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>NotificationListener</B><BR/><FONT POINT-SIZE="10">«listener»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">监听：接单/完成/取消</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ onOrderChanged(event): void</FONT></TD></TR>
+</TABLE>
+>];
+    CreditScoreListener [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>CreditScoreListener</B><BR/><FONT POINT-SIZE="10">«listener»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">监听：完结/违约</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ onOrderChanged(event): void</FONT></TD></TR>
+</TABLE>
+>];
+    DemandStatusListener [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>DemandStatusListener</B><BR/><FONT POINT-SIZE="10">«listener»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">监听：需求状态同步</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ onOrderChanged(event): void</FONT></TD></TR>
+</TABLE>
+>];
+    NotificationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>NotificationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">创建站内通知</FONT></TD></TR>
+  
+</TABLE>
+>];
+    CreditService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>CreditService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">信用分变动流水</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_matcher {
+    label="4. 组合策略模式：智能匹配推荐"; fontname="Noto Sans CJK SC"; fontsize=15; color="#E9D5FF"; style="rounded,dashed"; penwidth=1.2;
+
+    RecommendationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>RecommendationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">需求推荐 / 接单人推荐</FONT></TD></TR>
+  
+</TABLE>
+>];
+    CompositeDemandMatcher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>CompositeDemandMatcher</B><BR/><FONT POINT-SIZE="10">«composite»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">- matchers: List&lt;DemandMatcher&gt;</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">+ match(demand): List&lt;User&gt;</FONT></TD></TR>
+</TABLE>
+>];
+    DemandMatcher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>DemandMatcher</B><BR/><FONT POINT-SIZE="10">«interface»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">+ match(demand): List&lt;User&gt;<BR ALIGN="LEFT"/>+ score(user, demand): double</FONT></TD></TR>
+  
+</TABLE>
+>];
+    LocationMatcher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>LocationMatcher</B><BR/><FONT POINT-SIZE="10">«matcher»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">位置标签匹配</FONT></TD></TR>
+  
+</TABLE>
+>];
+    SkillMatcher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>SkillMatcher</B><BR/><FONT POINT-SIZE="10">«matcher»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">技能标签匹配</FONT></TD></TR>
+  
+</TABLE>
+>];
+    CreditScoreMatcher [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>CreditScoreMatcher</B><BR/><FONT POINT-SIZE="10">«matcher»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">信用分权重排序</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+
+  OrderService -> OrderStateContext [label="委托状态校验", arrowhead=vee, color="#2563EB"];
+  OrderStateContext -> IOrderStateStrategy [label="选择策略", arrowhead=vee, color="#2563EB"];
+  PendingAcceptStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+  AcceptedStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+  InProgressStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+  PendingConfirmStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+  CompletedStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+  CancelledStrategy -> IOrderStateStrategy [arrowhead=empty, style=dashed];
+
+  DemandParam -> DemandFactory [label="输入", arrowhead=vee, color="#16A34A"];
+  DemandFactory -> DemandValidator [label="Map 注册/选择", arrowhead=vee, color="#16A34A"];
+  ErrandValidator -> DemandValidator [arrowhead=empty, style=dashed];
+  SkillValidator -> DemandValidator [arrowhead=empty, style=dashed];
+  StudyValidator -> DemandValidator [arrowhead=empty, style=dashed];
+  SecondhandValidator -> DemandValidator [arrowhead=empty, style=dashed];
+
+  OrderEventPublisher -> OrderStatusChangedEvent [label="发布", arrowhead=vee, color="#EA580C"];
+  NotificationListener -> OrderStatusChangedEvent [label="订阅", style=dashed, arrowhead=vee, color="#EA580C"];
+  CreditScoreListener -> OrderStatusChangedEvent [label="订阅", style=dashed, arrowhead=vee, color="#EA580C"];
+  DemandStatusListener -> OrderStatusChangedEvent [label="订阅", style=dashed, arrowhead=vee, color="#EA580C"];
+  NotificationListener -> NotificationService [label="调用", arrowhead=vee];
+  CreditScoreListener -> CreditService [label="调用", arrowhead=vee];
+
+  RecommendationService -> CompositeDemandMatcher [label="使用", arrowhead=vee, color="#9333EA"];
+  CompositeDemandMatcher -> DemandMatcher [label="组合", arrowhead=odiamond, color="#9333EA"];
+  LocationMatcher -> DemandMatcher [arrowhead=empty, style=dashed];
+  SkillMatcher -> DemandMatcher [arrowhead=empty, style=dashed];
+  CreditScoreMatcher -> DemandMatcher [arrowhead=empty, style=dashed];
+
+  // Force vertical stacking between the four pattern groups
+  IOrderStateStrategy -> DemandFactory [style=invis, weight=100];
+  DemandValidator -> OrderEventPublisher [style=invis, weight=100];
+  OrderStatusChangedEvent -> RecommendationService [style=invis, weight=100];
+}
