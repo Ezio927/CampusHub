@@ -1,0 +1,188 @@
+
+digraph G {
+  graph [
+    rankdir=LR,
+    bgcolor="white",
+    fontname="Noto Sans CJK SC",
+    fontsize=22,
+    labelloc="t",
+    label="CampusHub 核心实体类图（优化版）",
+    pad="0.45",
+    nodesep="0.55",
+    ranksep="0.85",
+    splines=ortho,
+    outputorder=edgesfirst
+  ];
+  node [shape=plaintext, fontname="Noto Sans CJK SC", fontsize=12, margin=0];
+  edge [fontname="Noto Sans CJK SC", fontsize=10, color="#475569", penwidth=1.25, arrowsize=0.75];
+  subgraph cluster_user {
+    label="用户中心 / User Center";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#BFDBFE";
+    style="rounded,dashed";
+    penwidth=1.2;
+    User [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>User 用户</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- username: String {unique}<BR ALIGN="LEFT"/>- passwordHash: String<BR ALIGN="LEFT"/>- phoneCipher / phoneHash: String<BR ALIGN="LEFT"/>- studentId: String {unique}<BR ALIGN="LEFT"/>- realName: String<BR ALIGN="LEFT"/>- avatarUrl: String<BR ALIGN="LEFT"/>- creditScore: Integer<BR ALIGN="LEFT"/>- role: UserRole<BR ALIGN="LEFT"/>- status: UserStatus<BR ALIGN="LEFT"/>- createdAt / updatedAt: LocalDateTime</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ isCreditSufficient(): boolean<BR ALIGN="LEFT"/>+ addCredit(amount: int): void<BR ALIGN="LEFT"/>+ deductCredit(amount: int): void</FONT></TD></TR>
+</TABLE>
+>];
+    Certification [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>Certification 实名认证</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- userId: Long {FK, unique}<BR ALIGN="LEFT"/>- certType: CertType<BR ALIGN="LEFT"/>- studentId: String<BR ALIGN="LEFT"/>- cardImageUrl: String<BR ALIGN="LEFT"/>- status: CertStatus<BR ALIGN="LEFT"/>- rejectReason: String<BR ALIGN="LEFT"/>- reviewedBy: Long<BR ALIGN="LEFT"/>- reviewedAt / createdAt: LocalDateTime</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ approve(reviewerId: Long): void<BR ALIGN="LEFT"/>+ reject(reviewerId: Long, reason: String): void</FONT></TD></TR>
+</TABLE>
+>];
+    CreditRecord [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>CreditRecord 信用流水</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- userId: Long {FK}<BR ALIGN="LEFT"/>- changeAmount: Integer<BR ALIGN="LEFT"/>- reason: String<BR ALIGN="LEFT"/>- relatedOrderId: Long {FK}<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_demand {
+    label="需求与标签 / Demand & Tag";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#BBF7D0";
+    style="rounded,dashed";
+    penwidth=1.2;
+    Demand [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>Demand 校园需求</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- publisherId: Long {FK}<BR ALIGN="LEFT"/>- title: String<BR ALIGN="LEFT"/>- description: String<BR ALIGN="LEFT"/>- category: DemandCategory<BR ALIGN="LEFT"/>- rewardAmount: BigDecimal<BR ALIGN="LEFT"/>- rewardType: RewardType<BR ALIGN="LEFT"/>- status: DemandStatus<BR ALIGN="LEFT"/>- isUrgent: Boolean<BR ALIGN="LEFT"/>- urgentDeadline: LocalDateTime<BR ALIGN="LEFT"/>- locationTag: String<BR ALIGN="LEFT"/>- createdAt / updatedAt: LocalDateTime</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ isOpen(): boolean<BR ALIGN="LEFT"/>+ markAsAccepted(): void<BR ALIGN="LEFT"/>+ markAsCompleted(): void<BR ALIGN="LEFT"/>+ cancel(): void</FONT></TD></TR>
+</TABLE>
+>];
+    DemandImage [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandImage 需求图片</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- demandId: Long {FK}<BR ALIGN="LEFT"/>- imageUrl: String<BR ALIGN="LEFT"/>- sortOrder: Integer</FONT></TD></TR>
+  
+</TABLE>
+>];
+    Tag [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>Tag 标签</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- name: String {unique}</FONT></TD></TR>
+  
+</TABLE>
+>];
+    DemandTag [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>DemandTag 需求标签</B><BR/><FONT POINT-SIZE="10">«Join Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">- demandId: Long {PK, FK}<BR ALIGN="LEFT"/>- tagId: Long {PK, FK}</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_order {
+    label="订单评价 / Order & Review";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#FED7AA";
+    style="rounded,dashed";
+    penwidth=1.2;
+    Order [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>Order 订单</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- demandId: Long {FK, unique}<BR ALIGN="LEFT"/>- publisherId: Long {FK}<BR ALIGN="LEFT"/>- acceptorId: Long {FK}<BR ALIGN="LEFT"/>- status: OrderStatus<BR ALIGN="LEFT"/>- acceptedAt: LocalDateTime<BR ALIGN="LEFT"/>- completedAt / cancelledAt: LocalDateTime<BR ALIGN="LEFT"/>- cancelReason: String<BR ALIGN="LEFT"/>- autoConfirmDeadline: LocalDateTime<BR ALIGN="LEFT"/>- createdAt / updatedAt: LocalDateTime</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ canAccept(): boolean<BR ALIGN="LEFT"/>+ canCancel(): boolean<BR ALIGN="LEFT"/>+ isAutoConfirmExpired(): boolean</FONT></TD></TR>
+</TABLE>
+>];
+    OrderStatusLog [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>OrderStatusLog 状态日志</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- orderId: Long {FK}<BR ALIGN="LEFT"/>- fromStatus: OrderStatus<BR ALIGN="LEFT"/>- toStatus: OrderStatus<BR ALIGN="LEFT"/>- operatorId: Long {FK}<BR ALIGN="LEFT"/>- remark: String<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+    Review [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>Review 双向评价</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- orderId: Long {FK}<BR ALIGN="LEFT"/>- reviewerId: Long {FK}<BR ALIGN="LEFT"/>- revieweeId: Long {FK}<BR ALIGN="LEFT"/>- reviewerRole: ReviewerRole<BR ALIGN="LEFT"/>- rating: Integer<BR ALIGN="LEFT"/>- content: String<BR ALIGN="LEFT"/>- imageUrls: JSON<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+    ArbitrationTicket [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>ArbitrationTicket 仲裁工单</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- reviewId: Long {FK}<BR ALIGN="LEFT"/>- orderId: Long {FK}<BR ALIGN="LEFT"/>- reporterId: Long {FK}<BR ALIGN="LEFT"/>- reason / evidenceUrls<BR ALIGN="LEFT"/>- status: ArbitrationStatus<BR ALIGN="LEFT"/>- resolution: String<BR ALIGN="LEFT"/>- resolvedBy / resolvedAt<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  subgraph cluster_comm {
+    label="消息、会话与后台 / Messaging & Admin";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#E9D5FF";
+    style="rounded,dashed";
+    penwidth=1.2;
+    Notification [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>Notification 站内通知</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- userId: Long {FK}<BR ALIGN="LEFT"/>- type: NotificationType<BR ALIGN="LEFT"/>- title: String<BR ALIGN="LEFT"/>- content: String<BR ALIGN="LEFT"/>- relatedId: Long<BR ALIGN="LEFT"/>- isRead: Boolean<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+    Conversation [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>Conversation 会话</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- user1Id / user2Id: Long {FK}<BR ALIGN="LEFT"/>- relatedDemandId: Long {FK}<BR ALIGN="LEFT"/>- lastMessageContent: String<BR ALIGN="LEFT"/>- lastMessageAt: LocalDateTime<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+    Message [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>Message 消息</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- conversationId: Long {FK}<BR ALIGN="LEFT"/>- senderId: Long {FK}<BR ALIGN="LEFT"/>- content: String<BR ALIGN="LEFT"/>- messageType: MessageType<BR ALIGN="LEFT"/>- isRead: Boolean<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+    AdminOperationLog [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>AdminOperationLog 管理日志</B><BR/><FONT POINT-SIZE="10">«Entity»</FONT></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">- id: Long<BR ALIGN="LEFT"/>- adminId: Long {FK}<BR ALIGN="LEFT"/>- operation: String<BR ALIGN="LEFT"/>- targetType: String<BR ALIGN="LEFT"/>- targetId: Long<BR ALIGN="LEFT"/>- detail: String<BR ALIGN="LEFT"/>- createdAt: LocalDateTime</FONT></TD></TR>
+  
+</TABLE>
+>];
+  }
+  Enums [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#CBD5E1" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FEF3C7" ALIGN="CENTER"><B>全局枚举 Enums</B></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFFFFF"><FONT POINT-SIZE="10">UserRole / UserStatus<BR ALIGN="LEFT"/>CertType / CertStatus<BR ALIGN="LEFT"/>DemandCategory / DemandStatus<BR ALIGN="LEFT"/>RewardType / OrderStatus<BR ALIGN="LEFT"/>ReviewerRole / ArbitrationStatus<BR ALIGN="LEFT"/>NotificationType / MessageType</FONT></TD></TR>
+</TABLE>
+>];
+
+  // Layout guides
+  User -> Demand -> Order -> Review -> ArbitrationTicket [style=invis, weight=30];
+  Demand -> Conversation [style=invis, weight=5];
+
+  // Associations
+  User -> Certification [dir=none, label="提交认证", taillabel="1", headlabel="0..1", labeldistance=1.7, color="#2563EB"];
+  User -> CreditRecord [dir=none, label="产生信用流水", taillabel="1", headlabel="N", color="#2563EB"];
+  User -> Demand [dir=none, label="发布", taillabel="1", headlabel="N", color="#16A34A"];
+  Demand -> DemandImage [dir=none, label="包含图片", taillabel="1", headlabel="N", color="#16A34A"];
+  Demand -> DemandTag [dir=none, label="标记", taillabel="1", headlabel="N", color="#16A34A"];
+  Tag -> DemandTag [dir=none, label="关联", taillabel="1", headlabel="N", color="#16A34A"];
+  Demand -> Order [dir=none, label="生成订单", taillabel="1", headlabel="0..1", color="#EA580C", penwidth=1.6];
+  User -> Order [dir=none, label="作为需求方/服务方", taillabel="1", headlabel="N", color="#EA580C"];
+  Order -> OrderStatusLog [dir=none, label="记录状态", taillabel="1", headlabel="N", color="#EA580C"];
+  Order -> Review [dir=none, label="收到评价", taillabel="1", headlabel="0..2", color="#EA580C"];
+  User -> Review [dir=none, label="评价人/被评价人", taillabel="1", headlabel="N", color="#EA580C"];
+  Review -> ArbitrationTicket [dir=none, label="触发仲裁", taillabel="1", headlabel="0..1", color="#DC2626", penwidth=1.6];
+  User -> Notification [dir=none, label="接收通知", taillabel="1", headlabel="N", color="#9333EA"];
+  User -> Conversation [dir=none, label="参与会话", taillabel="1", headlabel="N", color="#9333EA"];
+  Conversation -> Message [dir=none, label="包含消息", taillabel="1", headlabel="N", color="#9333EA"];
+  User -> Message [dir=none, label="发送", taillabel="1", headlabel="N", color="#9333EA"];
+  User -> AdminOperationLog [dir=none, label="产生审计日志", taillabel="1", headlabel="N", color="#9333EA"];
+  CreditRecord -> Order [dir=none, style=dashed, label="关联订单", color="#64748B"];
+  Notification -> Enums [dir=none, style=dashed, color="#94A3B8"];
+  Demand -> Enums [dir=none, style=dashed, color="#94A3B8"];
+  Order -> Enums [dir=none, style=dashed, color="#94A3B8"];
+}

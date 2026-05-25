@@ -1,0 +1,15 @@
+/**
+ * 全局样式 & CSS 变量
+ *
+ * 职责：定义全局 CSS 变量（主题色、字体、间距），以及 reset / 通用工具类
+ *
+ * 预期内容：
+ *   - :root { --color-primary: #...; --color-danger: #...; ... }
+ *   - body reset（margin、font-family）
+ *   - 通用工具类（.text-center, .flex-row, .gap-sm 等）
+ *   - 移动端响应式断点变量（--bp-sm: 768px 等）
+ *
+ * 待完成：
+ *   - 与设计师对齐色板
+ *   - 适配移动端安全区（safe-area-inset）
+ */
