@@ -53,5 +53,7 @@ docker-compose.override.yml
 *.env.docker
 
 logs/
+*.log
 
+.tools/
 .claude/
