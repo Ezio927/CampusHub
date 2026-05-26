@@ -1,0 +1,3 @@
+/**
+ * 仲裁工单状态 — PENDING / PROCESSING / RESOLVED / DISMISSED
+ */

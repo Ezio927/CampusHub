@@ -1,0 +1,3 @@
+/**
+ * 需求发布状态 — OPEN / ACCEPTED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED
+ */
