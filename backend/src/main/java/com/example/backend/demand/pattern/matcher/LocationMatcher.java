@@ -1,3 +1,20 @@
-/**
- * 位置匹配器 — 按位置标签匹配，同校区同楼栋得分高
- */
+package com.example.backend.demand.pattern.matcher;
+
+import com.example.backend.demand.entity.Demand;
+import com.example.backend.user.entity.User;
+
+import java.util.Collections;
+import java.util.List;
+
+public class LocationMatcher implements DemandMatcher {
+
+    @Override
+    public List<User> match(Demand demand) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public double score(User user, Demand demand) {
+        return 0;
+    }
+}

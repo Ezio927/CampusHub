@@ -1,3 +1,6 @@
-/**
- * 用户角色枚举 — STUDENT（学生）/ ADMIN（管理员）
- */
+package com.example.backend.common.enums;
+
+public enum UserRole {
+    STUDENT,
+    ADMIN
+}

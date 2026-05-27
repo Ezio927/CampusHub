@@ -1,12 +1,132 @@
-/**
- * 订单实体 — orders 表
- *
- * 核心字段：id, demandId(FK unique), publisherId(FK), acceptorId(FK),
- *           status, acceptedAt, completedAt, cancelledAt, cancelReason,
- *           autoConfirmDeadline(24h), createdAt, updatedAt
- *
- * 实体方法：
- *   canAccept()               — 当前是否允许接单
- *   canCancel()               — 当前是否允许取消
- *   isAutoConfirmExpired()    — 是否触发 24h 自动确认
- */
+package com.example.backend.demand.entity;
+
+import com.example.backend.common.enums.OrderStatus;
+
+import java.time.LocalDateTime;
+
+public class Order {
+
+    private Long id;
+    private Long demandId;
+    private Long publisherId;
+    private Long acceptorId;
+    private OrderStatus status = OrderStatus.PENDING_ACCEPT;
+    private LocalDateTime acceptedAt;
+    private LocalDateTime completedAt;
+    private LocalDateTime cancelledAt;
+    private String cancelReason;
+    private LocalDateTime autoConfirmDeadline;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public boolean canAccept() {
+        return status == OrderStatus.PENDING_ACCEPT;
+    }
+
+    public boolean canCancel() {
+        return status == OrderStatus.PENDING_ACCEPT
+                || status == OrderStatus.ACCEPTED
+                || status == OrderStatus.IN_PROGRESS
+                || status == OrderStatus.PENDING_CONFIRM;
+    }
+
+    public boolean isAutoConfirmExpired() {
+        return autoConfirmDeadline != null && autoConfirmDeadline.isBefore(LocalDateTime.now());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getDemandId() {
+        return demandId;
+    }
+
+    public void setDemandId(Long demandId) {
+        this.demandId = demandId;
+    }
+
+    public Long getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(Long publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public Long getAcceptorId() {
+        return acceptorId;
+    }
+
+    public void setAcceptorId(Long acceptorId) {
+        this.acceptorId = acceptorId;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getAcceptedAt() {
+        return acceptedAt;
+    }
+
+    public void setAcceptedAt(LocalDateTime acceptedAt) {
+        this.acceptedAt = acceptedAt;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public LocalDateTime getAutoConfirmDeadline() {
+        return autoConfirmDeadline;
+    }
+
+    public void setAutoConfirmDeadline(LocalDateTime autoConfirmDeadline) {
+        this.autoConfirmDeadline = autoConfirmDeadline;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}

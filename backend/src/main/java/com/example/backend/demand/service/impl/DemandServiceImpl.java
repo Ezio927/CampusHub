@@ -1,9 +1,254 @@
-/**
- * 需求服务实现
- *
- * 待完成：
- *   - createDemand: 调 DemandFactory.createDemand(param) 校验+创建 → save
- *   - search: 动态查询，支持 category/status/keyword/locationTag/isUrgent 组合筛选
- *             支持 sortBy(createdAt/rewardAmount/urgentDeadline) + sortDir
- *   - 关键词搜索使用 GIN 索引或 LIKE 模糊匹配
- */
+package com.example.backend.demand.service.impl;
+
+import com.example.backend.auth.security.AuthContext;
+import com.example.backend.common.BusinessException;
+import com.example.backend.common.ErrorCode;
+import com.example.backend.common.enums.DemandCategory;
+import com.example.backend.common.enums.DemandStatus;
+import com.example.backend.common.enums.UserStatus;
+import com.example.backend.demand.dto.DemandCreateDto;
+import com.example.backend.demand.dto.DemandDto;
+import com.example.backend.demand.dto.DemandSearchCriteria;
+import com.example.backend.demand.dto.DemandUpdateDto;
+import com.example.backend.demand.entity.Demand;
+import com.example.backend.demand.entity.DemandImage;
+import com.example.backend.demand.entity.Tag;
+import com.example.backend.demand.pattern.factory.DemandFactory;
+import com.example.backend.demand.repository.DemandImageRepository;
+import com.example.backend.demand.repository.DemandRepository;
+import com.example.backend.demand.repository.TagRepository;
+import com.example.backend.demand.service.DemandService;
+import com.example.backend.user.dto.UserPublicDto;
+import com.example.backend.user.entity.User;
+import com.example.backend.user.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+@Service
+public class DemandServiceImpl implements DemandService {
+
+    private final DemandFactory demandFactory;
+    private final DemandRepository demandRepository;
+    private final DemandImageRepository demandImageRepository;
+    private final TagRepository tagRepository;
+    private final UserRepository userRepository;
+
+    public DemandServiceImpl(DemandFactory demandFactory,
+                             DemandRepository demandRepository,
+                             DemandImageRepository demandImageRepository,
+                             TagRepository tagRepository,
+                             UserRepository userRepository) {
+        this.demandFactory = demandFactory;
+        this.demandRepository = demandRepository;
+        this.demandImageRepository = demandImageRepository;
+        this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public DemandDto createDemand(Long userId, DemandCreateDto req) {
+        User publisher = requireActiveUser(userId);
+        Demand demand = demandFactory.createDemand(req);
+        demand.setPublisherId(publisher.getId());
+        demandRepository.save(demand);
+        saveImages(demand.getId(), req == null ? null : req.getImageUrls());
+        return toDto(demand);
+    }
+
+    @Override
+    public List<DemandDto> search(DemandSearchCriteria criteria) {
+        List<Demand> demands = demandRepository.findAll();
+        if (criteria != null) {
+            demands = demands.stream()
+                    .filter(demand -> criteria.getCategory() == null || demand.getCategory() == criteria.getCategory())
+                    .filter(demand -> criteria.getStatus() == null || demand.getStatus() == criteria.getStatus())
+                    .filter(demand -> criteria.getUrgent() == null || demand.getUrgent().equals(criteria.getUrgent()))
+                    .filter(demand -> isBlank(criteria.getLocationTag()) || containsIgnoreCase(demand.getLocationTag(), criteria.getLocationTag()))
+                    .filter(demand -> isBlank(criteria.getKeyword())
+                            || containsIgnoreCase(demand.getTitle(), criteria.getKeyword())
+                            || containsIgnoreCase(demand.getDescription(), criteria.getKeyword()))
+                    .collect(Collectors.toList());
+            demands = sortDemands(demands, criteria.getSortBy(), criteria.getSortDir());
+        }
+        return demands.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public DemandDto getDetail(Long demandId) {
+        Demand demand = requireDemand(demandId);
+        return toDto(demand);
+    }
+
+    @Override
+    public DemandDto update(Long demandId, Long userId, DemandUpdateDto req) {
+        Demand demand = requireDemand(demandId);
+        ensureOwner(userId, demand);
+        if (!demand.isOpen()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "demand is not open");
+        }
+
+        if (req != null) {
+            if (req.getTitle() != null) {
+                demand.setTitle(req.getTitle());
+            }
+            if (req.getDescription() != null) {
+                demand.setDescription(req.getDescription());
+            }
+            if (req.getCategory() != null) {
+                demand.setCategory(req.getCategory());
+            }
+            if (req.getRewardAmount() != null) {
+                demand.setRewardAmount(req.getRewardAmount());
+            }
+            if (req.getRewardType() != null) {
+                demand.setRewardType(req.getRewardType());
+            }
+            if (req.getStatus() != null) {
+                demand.setStatus(req.getStatus());
+            }
+            if (req.getUrgent() != null) {
+                demand.setUrgent(req.getUrgent());
+            }
+            if (req.getUrgentDeadline() != null) {
+                demand.setUrgentDeadline(req.getUrgentDeadline());
+            }
+            if (req.getLocationTag() != null) {
+                demand.setLocationTag(req.getLocationTag());
+            }
+            if (req.getTagIds() != null) {
+                updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());
+            }
+            validateUpdatedDemand(demand);
+        }
+        demandRepository.save(demand);
+        return toDto(demand);
+    }
+
+    @Override
+    public void cancel(Long demandId, Long userId) {
+        Demand demand = requireDemand(demandId);
+        ensureOwner(userId, demand);
+        if (!demand.isOpen()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "demand is not open");
+        }
+        demand.cancel();
+        demandRepository.save(demand);
+    }
+
+    private void validateUpdatedDemand(Demand demand) {
+        DemandCreateDto validate = new DemandCreateDto();
+        validate.setTitle(demand.getTitle());
+        validate.setDescription(demand.getDescription());
+        validate.setCategory(demand.getCategory());
+        validate.setRewardAmount(demand.getRewardAmount());
+        validate.setRewardType(demand.getRewardType());
+        validate.setUrgent(demand.getUrgent());
+        validate.setUrgentDeadline(demand.getUrgentDeadline());
+        validate.setLocationTag(demand.getLocationTag());
+        validate.setTagIds(getTagIdsForDemand(demand.getCategory()));
+        validate.setImageUrls(getImageUrlsForDemand(demand.getId()));
+        demandFactory.createDemand(validate);
+    }
+
+    private void updateImagesAndTags(Long demandId, List<Long> tagIds, List<String> imageUrls) {
+        demandImageRepository.deleteByDemandId(demandId);
+        saveImages(demandId, imageUrls);
+    }
+
+    private List<Long> getTagIdsForDemand(DemandCategory category) {
+        if (category == DemandCategory.SKILL) {
+            return tagRepository.findAll().stream().map(Tag::getId).collect(Collectors.toList());
+        }
+        return new ArrayList<Long>();
+    }
+
+    private List<String> getImageUrlsForDemand(Long demandId) {
+        List<DemandImage> images = demandImageRepository.findByDemandIdOrderBySortOrderAsc(demandId);
+        List<String> urls = new ArrayList<String>();
+        for (DemandImage image : images) {
+            urls.add(image.getImageUrl());
+        }
+        return urls;
+    }
+
+    private void saveImages(Long demandId, List<String> imageUrls) {
+        if (imageUrls == null) {
+            return;
+        }
+        for (int i = 0; i < imageUrls.size(); i++) {
+            String imageUrl = imageUrls.get(i);
+            if (isBlank(imageUrl)) {
+                continue;
+            }
+            DemandImage image = new DemandImage();
+            image.setDemandId(demandId);
+            image.setImageUrl(imageUrl);
+            image.setSortOrder(i);
+            demandImageRepository.save(image);
+        }
+    }
+
+    private Demand requireDemand(Long demandId) {
+        if (demandId == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "demandId cannot be blank");
+        }
+        return demandRepository.findById(demandId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DEMAND_NOT_FOUND));
+    }
+
+    private User requireActiveUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.NOT_CERTIFIED);
+        }
+        return user;
+    }
+
+    private void ensureOwner(Long userId, Demand demand) {
+        if (userId == null || demand.getPublisherId() == null || !demand.getPublisherId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private List<Demand> sortDemands(List<Demand> demands, String sortBy, String sortDir) {
+        Comparator<Demand> comparator;
+        if ("rewardAmount".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Demand::getRewardAmount, Comparator.nullsLast(Integer::compareTo));
+        } else if ("urgentDeadline".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Demand::getUrgentDeadline, Comparator.nullsLast(java.util.Comparator.naturalOrder()));
+        } else {
+            comparator = Comparator.comparing(Demand::getCreatedAt, Comparator.nullsLast(java.util.Comparator.naturalOrder()));
+        }
+        if ("asc".equalsIgnoreCase(sortDir)) {
+            return demands.stream().sorted(comparator).collect(Collectors.toList());
+        }
+        return demands.stream().sorted(comparator.reversed()).collect(Collectors.toList());
+    }
+
+    private boolean containsIgnoreCase(String source, String keyword) {
+        if (isBlank(source) || isBlank(keyword)) {
+            return false;
+        }
+        return source.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private DemandDto toDto(Demand demand) {
+        DemandDto dto = DemandDto.from(demand);
+        if (demand != null) {
+            userRepository.findById(demand.getPublisherId()).ifPresent(user -> dto.setPublisher(UserPublicDto.from(user)));
+            dto.setImages(demandImageRepository.findByDemandIdOrderBySortOrderAsc(demand.getId()));
+            dto.setTags(tagRepository.findAll());
+        }
+        return dto;
+    }
+}

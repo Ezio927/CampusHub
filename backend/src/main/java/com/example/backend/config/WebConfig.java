@@ -1,10 +1,18 @@
-/**
- * Web MVC 配置
- *
- * 职责：配置 CORS 跨域，允许前端 localhost:5173 访问后端 localhost:8080
- *
- * 待完成：
- *   - 开发环境允许 localhost:5173 origin
- *   - 允许 Authorization / Content-Type 等 Header
- *   - 允许 GET / POST / PUT / DELETE 方法
- */
+package com.example.backend.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+}

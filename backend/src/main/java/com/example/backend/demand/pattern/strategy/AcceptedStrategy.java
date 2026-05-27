@@ -1,4 +1,25 @@
-/**
- * 已接单状态策略 — ACCEPTED
- * 允许：开始服务 → IN_PROGRESS / 取消 → CANCELLED
- */
+package com.example.backend.demand.pattern.strategy;
+
+import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.demand.entity.Order;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class AcceptedStrategy implements IOrderStateStrategy {
+
+    @Override
+    public boolean supports(OrderStatus status) {
+        return status == OrderStatus.ACCEPTED;
+    }
+
+    @Override
+    public List<OrderStatus> nextStatuses() {
+        return Arrays.asList(OrderStatus.IN_PROGRESS, OrderStatus.CANCELLED);
+    }
+
+    @Override
+    public void transition(Order order, OrderStatus nextStatus) {
+        order.setStatus(nextStatus);
+    }
+}

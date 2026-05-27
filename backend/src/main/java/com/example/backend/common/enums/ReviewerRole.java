@@ -1,3 +1,6 @@
-/**
- * 评价者身份 — PUBLISHER（需求方）/ ACCEPTOR（服务方）
- */
+package com.example.backend.common.enums;
+
+public enum ReviewerRole {
+    PUBLISHER,
+    ACCEPTOR
+}

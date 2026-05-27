@@ -1,4 +1,25 @@
-/**
- * 待确认状态策略 — PENDING_CONFIRM
- * 允许：确认验收 → COMPLETED / 超时自动确认 → COMPLETED
- */
+package com.example.backend.demand.pattern.strategy;
+
+import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.demand.entity.Order;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class PendingConfirmStrategy implements IOrderStateStrategy {
+
+    @Override
+    public boolean supports(OrderStatus status) {
+        return status == OrderStatus.PENDING_CONFIRM;
+    }
+
+    @Override
+    public List<OrderStatus> nextStatuses() {
+        return Arrays.asList(OrderStatus.COMPLETED, OrderStatus.CANCELLED);
+    }
+
+    @Override
+    public void transition(Order order, OrderStatus nextStatus) {
+        order.setStatus(nextStatus);
+    }
+}

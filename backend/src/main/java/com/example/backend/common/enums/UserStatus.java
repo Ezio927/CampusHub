@@ -1,3 +1,7 @@
-/**
- * 用户账号状态 — ACTIVE（正常）/ BANNED（封禁）/ PENDING_CERT（未实名）
- */
+package com.example.backend.common.enums;
+
+public enum UserStatus {
+    ACTIVE,
+    BANNED,
+    PENDING_CERT
+}

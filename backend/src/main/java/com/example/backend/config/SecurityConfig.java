@@ -1,11 +1,30 @@
-/**
- * Spring Security 安全配置
- *
- * 职责：配置 SecurityFilterChain，将 JwtAuthFilter 注册到过滤器链
- *
- * 待完成：
- *   - 放行 /api/auth/login、/api/auth/register（无需认证）
- *   - 其余 /api/** 全部需要认证
- *   - 注册 JwtAuthFilter 在 UsernamePasswordAuthenticationFilter 之前
- *   - 配置 CorsFilter
- */
+package com.example.backend.config;
+
+import com.example.backend.auth.security.JwtAuthFilter;
+import com.example.backend.auth.security.JwtTokenProvider;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public JwtTokenProvider jwtTokenProvider(JwtConfig jwtConfig) {
+        return new JwtTokenProvider(jwtConfig);
+    }
+
+    @Bean
+    public JwtAuthFilter jwtAuthFilter(JwtTokenProvider jwtTokenProvider) {
+        return new JwtAuthFilter(jwtTokenProvider);
+    }
+
+    @Bean
+    public FilterRegistrationBean<JwtAuthFilter> jwtAuthFilterRegistration(JwtAuthFilter jwtAuthFilter) {
+        FilterRegistrationBean<JwtAuthFilter> registration = new FilterRegistrationBean<JwtAuthFilter>();
+        registration.setFilter(jwtAuthFilter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(1);
+        return registration;
+    }
+}
