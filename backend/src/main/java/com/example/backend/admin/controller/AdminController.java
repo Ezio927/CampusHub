@@ -9,6 +9,10 @@ import com.example.backend.common.ApiResponse;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.UserRole;
+import com.example.backend.demand.dto.ArbitrationDto;
+import com.example.backend.demand.dto.ArbitrationResolveDto;
+import com.example.backend.user.dto.CertificationDto;
+import com.example.backend.user.dto.CertificationReviewDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +59,20 @@ public class AdminController {
         requireAdmin();
         adminService.unbanUser(id, AuthContext.requireUserId());
         return ApiResponse.success();
+    }
+
+    @PutMapping("/certifications/{id}/review")
+    public ApiResponse<CertificationDto> reviewCertification(@PathVariable Long id,
+                                                             @RequestBody CertificationReviewDto request) {
+        requireAdmin();
+        return ApiResponse.success(adminService.reviewCertification(id, AuthContext.requireUserId(), request));
+    }
+
+    @PutMapping("/arbitrations/{id}/resolve")
+    public ApiResponse<ArbitrationDto> resolveArbitration(@PathVariable Long id,
+                                                          @RequestBody ArbitrationResolveDto request) {
+        requireAdmin();
+        return ApiResponse.success(adminService.resolveArbitration(id, AuthContext.requireUserId(), request));
     }
 
     private void requireAdmin() {

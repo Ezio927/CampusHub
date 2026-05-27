@@ -50,6 +50,11 @@ public class ConversationServiceImpl implements ConversationService {
         if (req == null || req.getTargetUserId() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "targetUserId cannot be blank");
         }
+        if (userId == null || userId.equals(req.getTargetUserId())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "conversation requires two different users");
+        }
+        userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        userRepository.findById(req.getTargetUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Long left = Math.min(userId, req.getTargetUserId());
         Long right = Math.max(userId, req.getTargetUserId());
         Conversation conversation = conversationRepository
@@ -135,6 +140,7 @@ public class ConversationServiceImpl implements ConversationService {
         ConversationDto dto = ConversationDto.from(conversation);
         Long targetUserId = conversation.getUser1Id().equals(userId) ? conversation.getUser2Id() : conversation.getUser1Id();
         userRepository.findById(targetUserId).ifPresent(user -> dto.setTargetUser(com.example.backend.user.dto.UserPublicDto.from(user)));
+        dto.setUnreadCount(messageRepository.countByConversationIdAndSenderIdNotAndReadFalse(conversation.getId(), userId));
         return dto;
     }
 
