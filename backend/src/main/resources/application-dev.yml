@@ -1,25 +1,19 @@
 # ===========================================
-# 开发环境配置
+# 开发环境配置（连接本地 MySQL）
 # 使用方式：不改 application.yml 的 profile，IDE 启动默认 dev
+# 前置条件：本地 MySQL 已建库 campushub
 # ===========================================
 
 spring:
   datasource:
-    url: jdbc:h2:mem:campushub;DB_CLOSE_DELAY=-1;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true           # http://localhost:8080/h2-console
-      path: /h2-console
+    url: jdbc:mysql://localhost:3306/campushub?characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: ${DB_PASSWORD:root}
   jpa:
     hibernate:
-      ddl-auto: create-drop   # 每次重启重建表结构
+      ddl-auto: update        # 开发阶段自动建表，实体变动自动同步
     show-sql: true
-  sql:
-    init:
-      mode: always            # 启动时执行 schema.sql + data.sql
 
 logging:
   level:
