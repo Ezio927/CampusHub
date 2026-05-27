@@ -1,4 +1,25 @@
-/**
- * 已完成状态策略 — COMPLETED
- * 允许：无操作（终态），仅可查看和评价
- */
+package com.example.backend.demand.pattern.strategy;
+
+import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.demand.entity.Order;
+
+import java.util.Collections;
+import java.util.List;
+
+public class CompletedStrategy implements IOrderStateStrategy {
+
+    @Override
+    public boolean supports(OrderStatus status) {
+        return status == OrderStatus.COMPLETED;
+    }
+
+    @Override
+    public List<OrderStatus> nextStatuses() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void transition(Order order, OrderStatus nextStatus) {
+        order.setStatus(nextStatus);
+    }
+}

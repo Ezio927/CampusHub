@@ -1,3 +1,8 @@
-/**
- * 仲裁工单状态 — PENDING / PROCESSING / RESOLVED / DISMISSED
- */
+package com.example.backend.common.enums;
+
+public enum ArbitrationStatus {
+    PENDING,
+    PROCESSING,
+    RESOLVED,
+    DISMISSED
+}

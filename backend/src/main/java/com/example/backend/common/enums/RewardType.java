@@ -1,3 +1,6 @@
-/**
- * 报酬结算类型 — MONEY（现金）/ POINT（积分）
- */
+package com.example.backend.common.enums;
+
+public enum RewardType {
+    MONEY,
+    POINT
+}

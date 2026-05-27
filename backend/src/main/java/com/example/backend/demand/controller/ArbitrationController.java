@@ -1,10 +1,43 @@
-/**
- * 仲裁接口控制器 — /api/arbitrations
- *
- * 对外接口：
- *   POST /              — 创建仲裁工单（低分评价自动触发 / 用户手动申诉）
- *   GET  /              — 待处理工单列表（需 ADMIN 角色）
- *   PUT  /{id}/resolve  — 处理工单（需 ADMIN 角色，DISMISS / PENALIZE_PUBLISHER / PENALIZE_ACCEPTOR）
- *
- * 依赖：ArbitrationService
- */
+package com.example.backend.demand.controller;
+
+import com.example.backend.auth.security.AuthContext;
+import com.example.backend.common.ApiResponse;
+import com.example.backend.demand.dto.ArbitrationCreateDto;
+import com.example.backend.demand.dto.ArbitrationDto;
+import com.example.backend.demand.dto.ArbitrationResolveDto;
+import com.example.backend.demand.service.ArbitrationService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/arbitrations")
+public class ArbitrationController {
+
+    private final ArbitrationService arbitrationService;
+
+    public ArbitrationController(ArbitrationService arbitrationService) {
+        this.arbitrationService = arbitrationService;
+    }
+
+    @PostMapping
+    public ApiResponse<ArbitrationDto> create(@RequestBody ArbitrationCreateDto request) {
+        return ApiResponse.success(arbitrationService.createTicket(AuthContext.requireUserId(), request));
+    }
+
+    @GetMapping
+    public ApiResponse<List<ArbitrationDto>> listPending() {
+        return ApiResponse.success(arbitrationService.listPending());
+    }
+
+    @PutMapping("/{id}/resolve")
+    public ApiResponse<ArbitrationDto> resolve(@PathVariable Long id, @RequestBody ArbitrationResolveDto request) {
+        return ApiResponse.success(arbitrationService.resolve(id, AuthContext.requireUserId(), request));
+    }
+}

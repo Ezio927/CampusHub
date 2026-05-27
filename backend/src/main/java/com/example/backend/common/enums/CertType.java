@@ -1,3 +1,6 @@
-/**
- * 实名认证方式 — STUDENT_ID（学号核验）/ STUDENT_CARD（学生证图片审核）
- */
+package com.example.backend.common.enums;
+
+public enum CertType {
+    STUDENT_ID,
+    STUDENT_CARD
+}
