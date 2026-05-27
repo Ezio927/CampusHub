@@ -1,3 +1,7 @@
-/**
- * 认证审核状态 — PENDING（待审核）/ APPROVED（通过）/ REJECTED（驳回）
- */
+package com.example.backend.common.enums;
+
+public enum CertStatus {
+    PENDING,
+    APPROVED,
+    REJECTED
+}

@@ -1,40 +1,85 @@
 package com.example.backend.demand.pattern.strategy;
 
+import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
-import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.demand.entity.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.EnumMap;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
 public class OrderStateContext {
-    private final Map<OrderStatus, IOrderStateStrategy> strategyMap = new EnumMap<>(OrderStatus.class);
+
+    private final Map<OrderStatus, IOrderStateStrategy> strategyMap = new HashMap<OrderStatus, IOrderStateStrategy>();
+
+    public OrderStateContext() {
+        register(new PendingAcceptStrategy());
+        register(new AcceptedStrategy());
+        register(new InProgressStrategy());
+        register(new PendingConfirmStrategy());
+        register(new CompletedStrategy());
+        register(new CancelledStrategy());
+    }
 
     public OrderStateContext(List<IOrderStateStrategy> strategies) {
+        if (strategies == null || strategies.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "order strategies cannot be empty");
+        }
         for (IOrderStateStrategy strategy : strategies) {
-            strategyMap.put(strategy.supportStatus(), strategy);
+            register(strategy);
         }
     }
 
-    // [Human-written] 根据订单当前状态找到对应策略，再判断这个操作能不能做。
+    public IOrderStateStrategy getStrategy(OrderStatus status) {
+        return strategyMap.get(status);
+    }
+
+    public void assertCanTransition(Order order, OrderStatus nextStatus) {
+        if (order == null || order.getStatus() == null || nextStatus == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "invalid order status transition");
+        }
+        IOrderStateStrategy strategy = getStrategy(order.getStatus());
+        if (strategy == null || !strategy.nextStatuses().contains(nextStatus)) {
+            throw new BusinessException(ErrorCode.CONFLICT, "order status transition not allowed");
+        }
+    }
+
+    // [Human-written] 把操作映射成目标状态后，用状态策略统一校验是否合法。
+    public void assertCanOperate(Order order, OrderAction action) {
+        if (action == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "action cannot be null");
+        }
+        OrderStatus nextStatus = switch (action) {
+            case ACCEPT -> OrderStatus.ACCEPTED;
+            case MARK_DELIVERED -> OrderStatus.PENDING_CONFIRM;
+            case CONFIRM_COMPLETED -> OrderStatus.COMPLETED;
+            case CANCEL -> OrderStatus.CANCELLED;
+        };
+        assertCanTransition(order, nextStatus);
+    }
+
     public boolean canOperate(Order order, OrderAction action) {
-        if (order == null || order.getStatus() == null || action == null) {
+        try {
+            assertCanOperate(order, action);
+            return true;
+        } catch (BusinessException ex) {
             return false;
         }
-        IOrderStateStrategy strategy = strategyMap.get(order.getStatus());
-        return strategy != null && strategy.canOperate(action);
     }
 
-    public void assertCanOperate(Order order, OrderAction action) {
-        if (order != null && order.getStatus() == OrderStatus.CANCELLED) {
-            throw new BusinessException(ErrorCode.ORDER_CANCELLED);
+    private void register(IOrderStateStrategy strategy) {
+        for (OrderStatus status : allStatuses()) {
+            if (strategy.supports(status)) {
+                strategyMap.put(status, strategy);
+            }
         }
-        if (!canOperate(order, action)) {
-            throw new BusinessException(ErrorCode.STATUS_NOT_ALLOWED);
-        }
+    }
+
+    private List<OrderStatus> allStatuses() {
+        return Arrays.asList(OrderStatus.values());
     }
 }

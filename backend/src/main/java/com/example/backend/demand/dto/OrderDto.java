@@ -1,34 +1,45 @@
 package com.example.backend.demand.dto;
 
-import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.OrderStatus;
-import com.example.backend.common.enums.RewardType;
+import com.example.backend.demand.entity.Order;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class OrderDto {
+
     private Long id;
     private Long demandId;
-    private String demandTitle;
-    private String demandDescription;
-    private DemandCategory category;
-    private BigDecimal rewardAmount;
-    private RewardType rewardType;
-    private UserSummary publisher;
-    private UserSummary acceptor;
+    private Long publisherId;
+    private Long acceptorId;
     private OrderStatus status;
     private LocalDateTime acceptedAt;
     private LocalDateTime completedAt;
     private LocalDateTime cancelledAt;
     private String cancelReason;
+    private Integer creditPenalty;
     private LocalDateTime autoConfirmDeadline;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Integer creditPenalty;
-    private List<StatusLogDto> statusLogs = new ArrayList<>();
+
+    public static OrderDto from(Order order) {
+        if (order == null) {
+            return null;
+        }
+        OrderDto dto = new OrderDto();
+        dto.setId(order.getId());
+        dto.setDemandId(order.getDemandId());
+        dto.setPublisherId(order.getPublisherId());
+        dto.setAcceptorId(order.getAcceptorId());
+        dto.setStatus(order.getStatus());
+        dto.setAcceptedAt(order.getAcceptedAt());
+        dto.setCompletedAt(order.getCompletedAt());
+        dto.setCancelledAt(order.getCancelledAt());
+        dto.setCancelReason(order.getCancelReason());
+        dto.setAutoConfirmDeadline(order.getAutoConfirmDeadline());
+        dto.setCreatedAt(order.getCreatedAt());
+        dto.setUpdatedAt(order.getUpdatedAt());
+        return dto;
+    }
 
     public Long getId() {
         return id;
@@ -46,60 +57,20 @@ public class OrderDto {
         this.demandId = demandId;
     }
 
-    public String getDemandTitle() {
-        return demandTitle;
+    public Long getPublisherId() {
+        return publisherId;
     }
 
-    public void setDemandTitle(String demandTitle) {
-        this.demandTitle = demandTitle;
+    public void setPublisherId(Long publisherId) {
+        this.publisherId = publisherId;
     }
 
-    public String getDemandDescription() {
-        return demandDescription;
+    public Long getAcceptorId() {
+        return acceptorId;
     }
 
-    public void setDemandDescription(String demandDescription) {
-        this.demandDescription = demandDescription;
-    }
-
-    public DemandCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(DemandCategory category) {
-        this.category = category;
-    }
-
-    public BigDecimal getRewardAmount() {
-        return rewardAmount;
-    }
-
-    public void setRewardAmount(BigDecimal rewardAmount) {
-        this.rewardAmount = rewardAmount;
-    }
-
-    public RewardType getRewardType() {
-        return rewardType;
-    }
-
-    public void setRewardType(RewardType rewardType) {
-        this.rewardType = rewardType;
-    }
-
-    public UserSummary getPublisher() {
-        return publisher;
-    }
-
-    public void setPublisher(UserSummary publisher) {
-        this.publisher = publisher;
-    }
-
-    public UserSummary getAcceptor() {
-        return acceptor;
-    }
-
-    public void setAcceptor(UserSummary acceptor) {
-        this.acceptor = acceptor;
+    public void setAcceptorId(Long acceptorId) {
+        this.acceptorId = acceptorId;
     }
 
     public OrderStatus getStatus() {
@@ -142,6 +113,14 @@ public class OrderDto {
         this.cancelReason = cancelReason;
     }
 
+    public Integer getCreditPenalty() {
+        return creditPenalty;
+    }
+
+    public void setCreditPenalty(Integer creditPenalty) {
+        this.creditPenalty = creditPenalty;
+    }
+
     public LocalDateTime getAutoConfirmDeadline() {
         return autoConfirmDeadline;
     }
@@ -164,106 +143,5 @@ public class OrderDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Integer getCreditPenalty() {
-        return creditPenalty;
-    }
-
-    public void setCreditPenalty(Integer creditPenalty) {
-        this.creditPenalty = creditPenalty;
-    }
-
-    public List<StatusLogDto> getStatusLogs() {
-        return statusLogs;
-    }
-
-    public void setStatusLogs(List<StatusLogDto> statusLogs) {
-        this.statusLogs = statusLogs;
-    }
-
-    public static class UserSummary {
-        private Long id;
-        private String username;
-        private Integer creditScore;
-
-        public UserSummary() {
-        }
-
-        public UserSummary(Long id) {
-            this.id = id;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public Integer getCreditScore() {
-            return creditScore;
-        }
-
-        public void setCreditScore(Integer creditScore) {
-            this.creditScore = creditScore;
-        }
-    }
-
-    public static class StatusLogDto {
-        private OrderStatus fromStatus;
-        private OrderStatus toStatus;
-        private Long operatorId;
-        private String remark;
-        private LocalDateTime createdAt;
-
-        public OrderStatus getFromStatus() {
-            return fromStatus;
-        }
-
-        public void setFromStatus(OrderStatus fromStatus) {
-            this.fromStatus = fromStatus;
-        }
-
-        public OrderStatus getToStatus() {
-            return toStatus;
-        }
-
-        public void setToStatus(OrderStatus toStatus) {
-            this.toStatus = toStatus;
-        }
-
-        public Long getOperatorId() {
-            return operatorId;
-        }
-
-        public void setOperatorId(Long operatorId) {
-            this.operatorId = operatorId;
-        }
-
-        public String getRemark() {
-            return remark;
-        }
-
-        public void setRemark(String remark) {
-            this.remark = remark;
-        }
-
-        public LocalDateTime getCreatedAt() {
-            return createdAt;
-        }
-
-        public void setCreatedAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-        }
     }
 }

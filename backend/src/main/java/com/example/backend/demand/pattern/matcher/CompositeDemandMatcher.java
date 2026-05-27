@@ -1,8 +1,32 @@
-/**
- * 组合匹配器（组合策略模式）
- *
- * 职责：整合多个单维度 Matcher，加权求和后排序，输出最优候选用户列表
- *
- * 对外接口：
- *   List<User> match(Demand demand) — 加权综合排序后的候选用户
- */
+package com.example.backend.demand.pattern.matcher;
+
+import com.example.backend.demand.entity.Demand;
+import com.example.backend.user.entity.User;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CompositeDemandMatcher implements DemandMatcher {
+
+    private final List<DemandMatcher> matchers = new ArrayList<DemandMatcher>();
+
+    public void addMatcher(DemandMatcher matcher) {
+        if (matcher != null) {
+            matchers.add(matcher);
+        }
+    }
+
+    @Override
+    public List<User> match(Demand demand) {
+        return new ArrayList<User>();
+    }
+
+    @Override
+    public double score(User user, Demand demand) {
+        double total = 0;
+        for (DemandMatcher matcher : matchers) {
+            total += matcher.score(user, demand);
+        }
+        return total;
+    }
+}

@@ -1,17 +1,25 @@
 package com.example.backend.demand.pattern.strategy;
 
 import com.example.backend.common.enums.OrderStatus;
-import org.springframework.stereotype.Component;
+import com.example.backend.demand.entity.Order;
 
-@Component
+import java.util.Collections;
+import java.util.List;
+
 public class CompletedStrategy implements IOrderStateStrategy {
+
     @Override
-    public OrderStatus supportStatus() {
-        return OrderStatus.COMPLETED;
+    public boolean supports(OrderStatus status) {
+        return status == OrderStatus.COMPLETED;
     }
 
     @Override
-    public boolean canOperate(OrderAction action) {
-        return false;
+    public List<OrderStatus> nextStatuses() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void transition(Order order, OrderStatus nextStatus) {
+        order.setStatus(nextStatus);
     }
 }

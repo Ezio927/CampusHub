@@ -1,7 +1,23 @@
-/**
- * 标签实体 — tags 表
- *
- * 核心字段：id, name(unique)
- *
- * 用于位置标签、技能标签等公共字典。与 Demand 为多对多关系（通过 demand_tags 关联表）。
- */
+package com.example.backend.demand.entity;
+
+public class Tag {
+
+    private Long id;
+    private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}

@@ -7,14 +7,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OrderEventPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public OrderEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
+
+    public OrderEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 
     public void publish(Order order, OrderStatus fromStatus, Long operatorId, String remark) {
-        applicationEventPublisher.publishEvent(new OrderStatusChangedEvent(
+        if (order == null) {
+            return;
+        }
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(
                 order.getId(),
                 order.getDemandId(),
                 order.getPublisherId(),
@@ -22,7 +26,6 @@ public class OrderEventPublisher {
                 fromStatus,
                 order.getStatus(),
                 operatorId,
-                remark
-        ));
+                remark));
     }
 }

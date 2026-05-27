@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationListener {
+
     private final NotificationService notificationService;
 
     public NotificationListener(NotificationService notificationService) {
@@ -17,35 +18,35 @@ public class NotificationListener {
     @EventListener
     public void onOrderStatusChanged(OrderStatusChangedEvent event) {
         if (event.getToStatus() == OrderStatus.ACCEPTED) {
-            notificationService.create(
+            notificationService.createNotification(
                     event.getPublisherId(),
                     NotificationType.ORDER_ACCEPTED,
-                    "您的需求已被接单",
-                    "用户 " + event.getAcceptorId() + " 已接下您的需求，订单号：" + event.getOrderId(),
+                    "Demand accepted",
+                    "Your demand has been accepted.",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.PENDING_CONFIRM) {
-            notificationService.create(
+            notificationService.createNotification(
                     event.getPublisherId(),
                     NotificationType.ORDER_COMPLETED,
-                    "服务方已标记送达",
-                    "订单 " + event.getOrderId() + " 已送达，请及时确认验收。",
+                    "Order pending confirmation",
+                    "The order is delivered and waiting for your confirmation.",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.COMPLETED) {
-            notificationService.create(
+            notificationService.createNotification(
                     event.getAcceptorId(),
                     NotificationType.ORDER_COMPLETED,
-                    "订单已完成",
-                    "订单 " + event.getOrderId() + " 已确认完成，请关注评价与信用变化。",
+                    "Order completed",
+                    "The order has been confirmed by the publisher.",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.CANCELLED) {
             Long receiverId = event.getOperatorId() != null && event.getOperatorId().equals(event.getPublisherId())
                     ? event.getAcceptorId()
                     : event.getPublisherId();
-            notificationService.create(
+            notificationService.createNotification(
                     receiverId,
                     NotificationType.ORDER_CANCELLED,
-                    "订单已取消",
-                    "订单 " + event.getOrderId() + " 已取消，原因：" + event.getRemark(),
+                    "Order cancelled",
+                    event.getRemark() == null ? "The order has been cancelled." : event.getRemark(),
                     event.getOrderId());
         }
     }

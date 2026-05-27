@@ -1,24 +1,22 @@
 package com.example.backend.demand.service;
 
-import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.demand.dto.AcceptOrderDto;
 import com.example.backend.demand.dto.OrderCancelDto;
 import com.example.backend.demand.dto.OrderDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface OrderService {
-    OrderDto acceptDemand(Long userId, AcceptOrderDto request);
 
-    Page<OrderDto> listMyOrders(Long userId, String role, OrderStatus status, Pageable pageable);
+    OrderDto acceptDemand(Long userId, AcceptOrderDto req);
+
+    List<OrderDto> list(Long userId, String role, String status);
 
     OrderDto getDetail(Long orderId, Long userId);
 
-    OrderDto markDelivered(Long orderId, Long userId);
+    OrderDto deliver(Long orderId, Long userId);
 
-    OrderDto confirmCompleted(Long orderId, Long userId);
+    OrderDto confirm(Long orderId, Long userId);
 
-    OrderDto cancelOrder(Long orderId, Long userId, OrderCancelDto request);
-
-    void autoConfirmExpired();
+    OrderDto cancel(Long orderId, Long userId, OrderCancelDto req);
 }

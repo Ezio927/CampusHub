@@ -1,3 +1,20 @@
-/**
- * 技能匹配器 — 按技能标签匹配（SKILL 类需求专用）
- */
+package com.example.backend.demand.pattern.matcher;
+
+import com.example.backend.demand.entity.Demand;
+import com.example.backend.user.entity.User;
+
+import java.util.Collections;
+import java.util.List;
+
+public class SkillMatcher implements DemandMatcher {
+
+    @Override
+    public List<User> match(Demand demand) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public double score(User user, Demand demand) {
+        return 0;
+    }
+}

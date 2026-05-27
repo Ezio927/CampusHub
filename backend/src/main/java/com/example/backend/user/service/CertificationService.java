@@ -1,8 +1,13 @@
-/**
- * 实名认证服务接口
- *
- * 对外接口：
- *   CertificationDto submit(Long userId, CertificationSubmitDto req) — 提交认证
- *   CertificationDto getMyCertification(Long userId)                 — 查询认证状态
- *   void review(Long id, boolean approve, String reason, Long reviewerId) — 管理员审核
- */
+package com.example.backend.user.service;
+
+import com.example.backend.user.dto.CertificationDto;
+import com.example.backend.user.dto.CertificationSubmitDto;
+
+public interface CertificationService {
+
+    CertificationDto submit(Long userId, CertificationSubmitDto req);
+
+    CertificationDto getMyCertification(Long userId);
+
+    CertificationDto review(Long id, boolean approve, String reason, Long reviewerId);
+}

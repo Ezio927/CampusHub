@@ -1,9 +1,17 @@
-/**
- * 认证服务接口
- *
- * 对外接口：
- *   UserDto register(RegisterRequest req)       — 注册新用户
- *   TokenResponse login(LoginRequest req)        — 验证用户 + 签发票据
- *   void logout(String token)                    — 登出（可选黑名单）
- *   boolean validateToken(String token)          — 校验 Token 有效性
- */
+package com.example.backend.auth.service;
+
+import com.example.backend.auth.dto.LoginRequest;
+import com.example.backend.auth.dto.RegisterRequest;
+import com.example.backend.auth.dto.TokenResponse;
+import com.example.backend.user.dto.UserDto;
+
+public interface AuthService {
+
+    UserDto register(RegisterRequest req);
+
+    TokenResponse login(LoginRequest req);
+
+    void logout(String authorizationHeader);
+
+    boolean validateToken(String token);
+}

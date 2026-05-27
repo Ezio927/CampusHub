@@ -1,22 +1,25 @@
 package com.example.backend.demand.pattern.strategy;
 
 import com.example.backend.common.enums.OrderStatus;
-import org.springframework.stereotype.Component;
+import com.example.backend.demand.entity.Order;
 
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
-@Component
 public class PendingAcceptStrategy implements IOrderStateStrategy {
-    private static final Set<OrderAction> ALLOWED = EnumSet.of(OrderAction.ACCEPT, OrderAction.CANCEL);
 
     @Override
-    public OrderStatus supportStatus() {
-        return OrderStatus.PENDING_ACCEPT;
+    public boolean supports(OrderStatus status) {
+        return status == OrderStatus.PENDING_ACCEPT;
     }
 
     @Override
-    public boolean canOperate(OrderAction action) {
-        return ALLOWED.contains(action);
+    public List<OrderStatus> nextStatuses() {
+        return Arrays.asList(OrderStatus.ACCEPTED, OrderStatus.CANCELLED);
+    }
+
+    @Override
+    public void transition(Order order, OrderStatus nextStatus) {
+        order.setStatus(nextStatus);
     }
 }

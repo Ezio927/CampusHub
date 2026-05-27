@@ -3,6 +3,7 @@ package com.example.backend.demand.pattern.observer;
 import com.example.backend.common.enums.OrderStatus;
 
 public class OrderStatusChangedEvent {
+
     private final Long orderId;
     private final Long demandId;
     private final Long publisherId;

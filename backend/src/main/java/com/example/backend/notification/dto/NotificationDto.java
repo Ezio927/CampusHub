@@ -1,17 +1,34 @@
 package com.example.backend.notification.dto;
 
 import com.example.backend.common.enums.NotificationType;
+import com.example.backend.notification.entity.Notification;
 
 import java.time.LocalDateTime;
 
 public class NotificationDto {
+
     private Long id;
     private NotificationType type;
     private String title;
     private String content;
     private Long relatedId;
-    private boolean read;
+    private Boolean read;
     private LocalDateTime createdAt;
+
+    public static NotificationDto from(Notification notification) {
+        if (notification == null) {
+            return null;
+        }
+        NotificationDto dto = new NotificationDto();
+        dto.setId(notification.getId());
+        dto.setType(notification.getType());
+        dto.setTitle(notification.getTitle());
+        dto.setContent(notification.getContent());
+        dto.setRelatedId(notification.getRelatedId());
+        dto.setRead(notification.getRead());
+        dto.setCreatedAt(notification.getCreatedAt());
+        return dto;
+    }
 
     public Long getId() {
         return id;
@@ -53,11 +70,11 @@ public class NotificationDto {
         this.relatedId = relatedId;
     }
 
-    public boolean isRead() {
+    public Boolean getRead() {
         return read;
     }
 
-    public void setRead(boolean read) {
+    public void setRead(Boolean read) {
         this.read = read;
     }
 

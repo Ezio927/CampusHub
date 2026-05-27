@@ -2,17 +2,18 @@ package com.example.backend.notification.service;
 
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.notification.dto.NotificationDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface NotificationService {
-    NotificationDto create(Long userId, NotificationType type, String title, String content, Long relatedId);
 
-    Page<NotificationDto> list(Long userId, Pageable pageable);
+    NotificationDto createNotification(Long userId, NotificationType type, String title, String content, Long relatedId);
 
-    long unreadCount(Long userId);
+    List<NotificationDto> listNotifications(Long userId, int page, int size);
 
-    NotificationDto markRead(Long notificationId, Long userId);
+    long countUnread(Long userId);
+
+    void markRead(Long notificationId, Long userId);
 
     void markAllRead(Long userId);
 }

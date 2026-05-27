@@ -1,9 +1,30 @@
-/**
- * JWT 配置属性
- *
- * 职责：从 application.yml 读取 JWT 相关配置（密钥、过期时间等）
- *
- * 待完成：
- *   - 注入 jwt.secret（生产通过环境变量注入）
- *   - 注入 jwt.expiration（Token 有效期，默认 1h）
- */
+package com.example.backend.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class JwtConfig {
+
+    @Value("${jwt.secret:campushub-secret-key}")
+    private String secret;
+
+    @Value("${jwt.expiration-minutes:60}")
+    private long expirationMinutes;
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public long getExpirationMinutes() {
+        return expirationMinutes;
+    }
+
+    public void setExpirationMinutes(long expirationMinutes) {
+        this.expirationMinutes = expirationMinutes;
+    }
+}

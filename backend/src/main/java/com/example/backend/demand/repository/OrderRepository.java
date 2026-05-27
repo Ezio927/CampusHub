@@ -2,35 +2,67 @@ package com.example.backend.demand.repository;
 
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.demand.entity.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
-    Optional<Order> findByDemandId(Long demandId);
+@Repository
+public class OrderRepository {
 
-    boolean existsByDemandId(Long demandId);
+    private final ConcurrentHashMap<Long, Order> storage = new ConcurrentHashMap<Long, Order>();
+    private final AtomicLong idGenerator = new AtomicLong(1L);
 
-    Page<Order> findByPublisherId(Long publisherId, Pageable pageable);
+    public synchronized Order save(Order order) {
+        if (order.getId() == null) {
+            order.setId(idGenerator.getAndIncrement());
+        }
+        if (order.getCreatedAt() == null) {
+            order.setCreatedAt(LocalDateTime.now());
+        }
+        order.setUpdatedAt(LocalDateTime.now());
+        storage.put(order.getId(), order);
+        return order;
+    }
 
-    Page<Order> findByPublisherIdAndStatus(Long publisherId, OrderStatus status, Pageable pageable);
+    public Optional<Order> findById(Long id) {
+        return Optional.ofNullable(storage.get(id));
+    }
 
-    Page<Order> findByAcceptorId(Long acceptorId, Pageable pageable);
+    public Optional<Order> findByDemandId(Long demandId) {
+        return storage.values().stream().filter(order -> order.getDemandId().equals(demandId)).findFirst();
+    }
 
-    Page<Order> findByAcceptorIdAndStatus(Long acceptorId, OrderStatus status, Pageable pageable);
+    public List<Order> findByPublisherIdAndStatus(Long publisherId, OrderStatus status) {
+        return filterByUserAndStatus(publisherId, status, true);
+    }
 
-    @Query("""
-            select o from DemandOrder o
-            where (o.publisherId = :userId or o.acceptorId = :userId)
-              and (:status is null or o.status = :status)
-            """)
-    Page<Order> findParticipatedOrders(@Param("userId") Long userId, @Param("status") OrderStatus status, Pageable pageable);
+    public List<Order> findByAcceptorIdAndStatus(Long acceptorId, OrderStatus status) {
+        return filterByUserAndStatus(acceptorId, status, false);
+    }
 
-    List<Order> findByStatusAndAutoConfirmDeadlineBefore(OrderStatus status, LocalDateTime deadline);
+    public List<Order> findByStatusAndAutoConfirmDeadlineBefore(OrderStatus status, LocalDateTime deadline) {
+        return storage.values().stream()
+                .filter(order -> order.getStatus() == status)
+                .filter(order -> order.getAutoConfirmDeadline() != null && order.getAutoConfirmDeadline().isBefore(deadline))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public List<Order> findAll() {
+        return Collections.unmodifiableList(new ArrayList<Order>(storage.values()));
+    }
+
+    private List<Order> filterByUserAndStatus(Long userId, OrderStatus status, boolean publisher) {
+        return storage.values().stream()
+                .filter(order -> publisher ? order.getPublisherId().equals(userId) : order.getAcceptorId().equals(userId))
+                .filter(order -> status == null || order.getStatus() == status)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .collect(Collectors.toList());
+    }
 }

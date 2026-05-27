@@ -1,14 +1,57 @@
-/**
- * 统一响应包装类
- *
- * 职责：所有 Controller 返回值都通过此类包装，保证前端收到的 JSON 格式统一
- *
- * 结构：
- *   code    — 业务状态码（20000 成功，40000+ 客户端错误，50000+ 服务端错误）
- *   message — 提示信息
- *   data    — 实际数据，泛型 T，错误时为 null
- *
- * 对外接口：
- *   ApiResponse.success(T data)       — 20000 + "success"
- *   ApiResponse.error(int code, String msg) — 自定义错误码 + 消息
- */
+package com.example.backend.common;
+
+public class ApiResponse<T> {
+
+    private int code;
+    private String message;
+    private T data;
+
+    public ApiResponse() {
+    }
+
+    public ApiResponse(int code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
+    }
+
+    public static <T> ApiResponse<T> success() {
+        return success(null);
+    }
+
+    public static <T> ApiResponse<T> error(ErrorCode code) {
+        return new ApiResponse<>(code.getCode(), code.getMessage(), null);
+    }
+
+    public static <T> ApiResponse<T> error(int code, String message) {
+        return new ApiResponse<>(code, message, null);
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}

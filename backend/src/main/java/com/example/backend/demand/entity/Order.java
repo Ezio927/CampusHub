@@ -1,76 +1,26 @@
 package com.example.backend.demand.entity;
 
 import com.example.backend.common.enums.OrderStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "DemandOrder")
-@Table(name = "orders")
 public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @Column(name = "demand_id", nullable = false, unique = true)
     private Long demandId;
-
-    @Column(name = "publisher_id", nullable = false)
     private Long publisherId;
-
-    @Column(name = "acceptor_id", nullable = false)
     private Long acceptorId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status = OrderStatus.ACCEPTED;
-
-    @Column(name = "accepted_at", nullable = false)
+    private OrderStatus status = OrderStatus.PENDING_ACCEPT;
     private LocalDateTime acceptedAt;
-
-    @Column(name = "completed_at")
     private LocalDateTime completedAt;
-
-    @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
-
-    @Column(name = "cancel_reason", length = 500)
     private String cancelReason;
-
-    @Column(name = "auto_confirm_deadline", nullable = false)
     private LocalDateTime autoConfirmDeadline;
-
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        if (acceptedAt == null) {
-            acceptedAt = now;
-        }
-        if (autoConfirmDeadline == null) {
-            autoConfirmDeadline = acceptedAt.plusHours(24);
-        }
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    void preUpdate() {
-        updatedAt = LocalDateTime.now();
+    public boolean canAccept() {
+        return status == OrderStatus.PENDING_ACCEPT;
     }
 
     public boolean isParticipant(Long userId) {
@@ -85,8 +35,19 @@ public class Order {
         return userId != null && userId.equals(acceptorId);
     }
 
+    public boolean canCancel() {
+        return status == OrderStatus.PENDING_ACCEPT
+                || status == OrderStatus.ACCEPTED
+                || status == OrderStatus.IN_PROGRESS
+                || status == OrderStatus.PENDING_CONFIRM;
+    }
+
+    public boolean isAutoConfirmExpired() {
+        return autoConfirmDeadline != null && autoConfirmDeadline.isBefore(LocalDateTime.now());
+    }
+
     public boolean isAutoConfirmExpired(LocalDateTime now) {
-        return status == OrderStatus.PENDING_CONFIRM && !autoConfirmDeadline.isAfter(now);
+        return autoConfirmDeadline != null && now != null && autoConfirmDeadline.isBefore(now);
     }
 
     public Long getId() {

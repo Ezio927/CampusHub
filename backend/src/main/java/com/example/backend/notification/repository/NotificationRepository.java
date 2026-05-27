@@ -1,19 +1,48 @@
 package com.example.backend.notification.repository;
 
 import com.example.backend.notification.entity.Notification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
-    long countByUserIdAndReadFalse(Long userId);
+@Repository
+public class NotificationRepository {
 
-    @Modifying
-    @Query("update Notification n set n.read = true where n.userId = :userId and n.read = false")
-    int markAllReadByUserId(@Param("userId") Long userId);
+    private final ConcurrentHashMap<Long, Notification> storage = new ConcurrentHashMap<Long, Notification>();
+    private final AtomicLong idGenerator = new AtomicLong(1L);
+
+    public synchronized Notification save(Notification notification) {
+        if (notification.getId() == null) {
+            notification.setId(idGenerator.getAndIncrement());
+        }
+        if (notification.getCreatedAt() == null) {
+            notification.setCreatedAt(LocalDateTime.now());
+        }
+        storage.put(notification.getId(), notification);
+        return notification;
+    }
+
+    public Optional<Notification> findById(Long id) {
+        return Optional.ofNullable(storage.get(id));
+    }
+
+    public List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId) {
+        return storage.values().stream()
+                .filter(notification -> notification.getUserId().equals(userId))
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public long countByUserIdAndReadFalse(Long userId) {
+        return storage.values().stream()
+                .filter(notification -> notification.getUserId().equals(userId))
+                .filter(notification -> !Boolean.TRUE.equals(notification.getRead()))
+                .count();
+    }
 }
