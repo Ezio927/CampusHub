@@ -1,4 +1,22 @@
-/**
- * 已接单状态策略 — ACCEPTED
- * 允许：开始服务 → IN_PROGRESS / 取消 → CANCELLED
- */
+package com.example.backend.demand.pattern.strategy;
+
+import com.example.backend.common.enums.OrderStatus;
+import org.springframework.stereotype.Component;
+
+import java.util.EnumSet;
+import java.util.Set;
+
+@Component
+public class AcceptedStrategy implements IOrderStateStrategy {
+    private static final Set<OrderAction> ALLOWED = EnumSet.of(OrderAction.MARK_DELIVERED, OrderAction.CANCEL);
+
+    @Override
+    public OrderStatus supportStatus() {
+        return OrderStatus.ACCEPTED;
+    }
+
+    @Override
+    public boolean canOperate(OrderAction action) {
+        return ALLOWED.contains(action);
+    }
+}

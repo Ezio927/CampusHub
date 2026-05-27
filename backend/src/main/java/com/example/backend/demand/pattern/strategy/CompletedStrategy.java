@@ -1,4 +1,17 @@
-/**
- * 已完成状态策略 — COMPLETED
- * 允许：无操作（终态），仅可查看和评价
- */
+package com.example.backend.demand.pattern.strategy;
+
+import com.example.backend.common.enums.OrderStatus;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CompletedStrategy implements IOrderStateStrategy {
+    @Override
+    public OrderStatus supportStatus() {
+        return OrderStatus.COMPLETED;
+    }
+
+    @Override
+    public boolean canOperate(OrderAction action) {
+        return false;
+    }
+}

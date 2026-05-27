@@ -1,9 +1,28 @@
-/**
- * 订单事件发布器（观察者模式）
- *
- * 职责：在订单状态变更后，通过 Spring ApplicationEventPublisher 发布事件，
- *       各 Listener 独立处理后续衍生逻辑（通知、信用分、需求状态同步）
- *
- * 对外接口：
- *   void publish(OrderStatusChangedEvent event)
- */
+package com.example.backend.demand.pattern.observer;
+
+import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.demand.entity.Order;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+
+@Component
+public class OrderEventPublisher {
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public OrderEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    public void publish(Order order, OrderStatus fromStatus, Long operatorId, String remark) {
+        applicationEventPublisher.publishEvent(new OrderStatusChangedEvent(
+                order.getId(),
+                order.getDemandId(),
+                order.getPublisherId(),
+                order.getAcceptorId(),
+                fromStatus,
+                order.getStatus(),
+                operatorId,
+                remark
+        ));
+    }
+}
