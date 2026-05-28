@@ -21,7 +21,11 @@ import { demandAPI } from '@/api/demands'
 const ro=useRouter()
 const f=reactive({title:'',description:'',category:'',rewardAmount:0,rewardType:'MONEY',locationTag:'',urgent:false,tagIds:[],imageUrls:[]})
 const err=ref('');const ing=ref(false)
-async function pub(){err.value='';ing.value=true;try{await demandAPI.create({...f});ro.push('/')}catch(e){err.value=e.message||'发布失败'}finally{ing.value=false}}
+async function pub(){
+  err.value='';ing.value=true
+  const body={...f,rewardAmount:Number(f.rewardAmount)||0}
+  try{await demandAPI.create(body);ro.push('/')}catch(e){err.value=e.message||'发布失败'}finally{ing.value=false}
+}
 </script>
 <style scoped>
 .pc{background:#fff;border-radius:16px;padding:28px;border:1px solid var(--border)}

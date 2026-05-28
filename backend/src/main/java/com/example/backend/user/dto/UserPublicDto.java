@@ -48,14 +48,17 @@ public class UserPublicDto {
     }
 
     private static String maskEmail(String email) {
-        if (email == null) {
-            return null;
+        if (email == null || email.isEmpty()) {
+            return email;
         }
         int at = email.indexOf('@');
+        if (at < 0) {
+            return email.charAt(0) + "***";
+        }
         if (at <= 1) {
             return "***" + email.substring(at);
         }
-        return email.substring(0, 1) + "***" + email.substring(at - 1);
+        return email.charAt(0) + "***" + email.substring(at - 1);
     }
 
     public Long getId() {
