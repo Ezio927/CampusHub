@@ -1,2 +1,18 @@
-job:
-  script: echo ok
+stages:
+  - build
+  - test
+
+frontend:
+  stage: build
+  image: node:20-alpine
+  script:
+    - cd frontend
+    - npm install
+    - npm run build
+
+backend:
+  stage: test
+  image: maven:3.9.9-eclipse-temurin-17
+  script:
+    - cd backend
+    - mvn -B test
