@@ -1,21 +1,34 @@
-<!--
-  需求详情页 — 路由 /demands/:id
-
-  职责：展示需求完整信息 + 接单按钮入口
-
-  展示内容：
-    需求信息：标题、描述、板块、报酬、位置、发布时间
-    发布者信息：username、creditScore、平均评分（调 UserAvatar + CreditScore）
-    图片轮播（DemandImage[]）
-    标签列表
-
-  交互：
-    当前用户是发布者 → 编辑 / 取消按钮
-    当前用户是其他人   → "接单"按钮（需已实名 + 信用≥60）
-
-  待完成：
-    - 接单前二次确认弹窗
-    - 已接单/已完成状态下按钮置灰
-    - 40402 需求不存在处理
-    - "联系对方"入口 → 跳聊天页
--->
+<template>
+  <div v-if="demand">
+    <div class="card">
+      <div class="flex-between"><h3>{{ demand.title }}</h3><span class="badge" :style="{ background: catColor(demand.category) }">{{ catText(demand.category) }}</span></div>
+      <p style="margin:12px 0;white-space:pre-wrap">{{ demand.description }}</p>
+      <p><strong>报酬:</strong> {{ demand.rewardType === 'MONEY' ? '¥' + demand.rewardAmount : demand.rewardAmount + '积分' }}</p>
+      <p><strong>位置:</strong> {{ demand.locationTag || '不限' }}</p>
+      <p><strong>发布者:</strong> {{ demand.publisher?.username }} (信用分: {{ demand.publisher?.creditScore }})</p>
+      <p><strong>发布时间:</strong> {{ demand.createdAt }}</p>
+      <span v-if="demand.urgent" class="badge" style="background:var(--danger)">紧急</span>
+    </div>
+    <div v-if="auth.isLoggedIn && demand.status === 'OPEN' && demand.publisherId !== auth.currentUser?.id" class="card">
+      <button class="btn-primary" style="width:100%" @click="acceptDemand">接单</button>
+    </div>
+    <div v-if="auth.isLoggedIn && demand.publisherId === auth.currentUser?.id && demand.status === 'OPEN'" class="card">
+      <button class="btn-outline btn-sm" @click="cancelDemand">取消需求</button>
+    </div>
+  </div>
+  <div v-else class="empty-state">加载中...</div>
+</template>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { demandAPI } from '@/api/demands'
+import { orderAPI } from '@/api/orders'
+const route = useRoute(); const router = useRouter(); const auth = useAuthStore()
+const demand = ref(null)
+function catText(c) { return { ERRAND:'跑腿', SKILL:'技能', STUDY:'学习', SECONDHAND:'二手' }[c] || c }
+function catColor(c) { return { ERRAND:'#f59e0b', SKILL:'#4f46e5', STUDY:'#22c55e', SECONDHAND:'#ef4444' }[c] || '#888' }
+async function acceptDemand() { try { await orderAPI.accept({ demandId: demand.value.id }); router.push('/orders') } catch(e) { alert(e.message) } }
+async function cancelDemand() { try { await demandAPI.cancel(demand.value.id); router.go(0) } catch(e) { alert(e.message) } }
+onMounted(async () => { const r = await demandAPI.getDetail(route.params.id); demand.value = r.data })
+</script>

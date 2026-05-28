@@ -1,18 +1,27 @@
-<!--
-  仲裁处理页 — 路由 /admin/arbitrations
-
-  职责：管理员处理纠纷仲裁工单
-
-  功能：
-    待处理/处理中工单列表
-    查看工单详情：订单信息、评价内容、证据截图
-    处理操作：
-      驳回工单 → DISMISS
-      惩罚发布方 → PENALIZE_PUBLISHER + creditPenalty
-      惩罚接单方 → PENALIZE_ACCEPTOR + creditPenalty + banDays
-
-  待完成：
-    - 证据图片预览
-    - 处理结果表单校验
-    - 处理后列表刷新
--->
+<template>
+  <div class="page-container">
+    <h2>仲裁处理</h2>
+    <div v-if="tickets.length===0" class="empty-state">暂无待处理仲裁</div>
+    <div v-for="t in tickets" :key="t.id" class="card">
+      <p><strong>工单 #{{ t.id }}</strong> · {{ t.status }}</p>
+      <p>订单ID: {{ t.orderId }}</p>
+      <p>原因: {{ t.reason }}</p>
+      <div class="flex-row gap-sm" style="margin-top:8px">
+        <button class="btn-primary btn-sm" @click="resolve(t.id, 'RESOLVE')">处理</button>
+        <button class="btn-danger btn-sm" @click="resolve(t.id, 'DISMISS')">驳回</button>
+      </div>
+    </div>
+  </div>
+</template>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { arbAPI } from '@/api/arbitrations'
+const tickets = ref([])
+async function resolve(id, action) {
+  const resolution = prompt('处理说明')
+  await arbAPI.resolve(id, { action, resolution })
+  load()
+}
+async function load() { const r = await arbAPI.listPending(); tickets.value = r.data || [] }
+onMounted(load)
+</script>

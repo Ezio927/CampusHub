@@ -1,16 +1,22 @@
-<!--
-  用户管理页 — 路由 /admin/users
-
-  职责：管理员查看用户列表 + 封禁/解封操作
-
-  功能：
-    搜索（用户名/学号模糊）
-    状态筛选（ACTIVE / BANNED / PENDING_CERT）
-    封禁按钮 → ConfirmModal → 填写封禁原因 → api/admin.banUser()
-    解封按钮 → ConfirmModal → api/admin.unbanUser()
-
-  待完成：
-    - 分页表格
-    - 封禁原因必填校验
-    - 操作后刷新列表
--->
+<template>
+  <div class="page-container">
+    <h2>用户管理</h2>
+    <div class="form-group"><input v-model="keyword" placeholder="搜索用户名/姓名/学号" @input="search" /></div>
+    <div v-for="u in users" :key="u.id" class="card flex-between">
+      <div><strong>{{ u.username }}</strong> ({{ u.realName }})<br /><small class="text-secondary">{{ u.studentId }} · {{ u.status }} · 信用{{ u.creditScore }}</small></div>
+      <div class="flex-row gap-sm">
+        <button v-if="u.status !== 'BANNED'" class="btn-danger btn-sm" @click="ban(u.id)">封禁</button>
+        <button v-else class="btn-outline btn-sm" @click="unban(u.id)">解封</button>
+      </div>
+    </div>
+  </div>
+</template>
+<script setup>
+import { ref } from 'vue'
+import { adminAPI } from '@/api/admin'
+const users = ref([]); const keyword = ref('')
+async function search() { const r = await adminAPI.listUsers({ keyword: keyword.value }); users.value = r.data || [] }
+async function ban(id) { await adminAPI.banUser(id); search() }
+async function unban(id) { await adminAPI.unbanUser(id); search() }
+search()
+</script>

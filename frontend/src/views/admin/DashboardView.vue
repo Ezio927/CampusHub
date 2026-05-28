@@ -1,14 +1,22 @@
-<!--
-  管理后台数据看板 — 路由 /admin
-
-  职责：平台核心数据一览
-
-  展示卡片：
-    注册用户总数、活跃需求数、已完成订单数、平均评分、待处理仲裁数
-    调用 api/admin.getDashboard()
-
-  待完成：
-    - 数字卡片布局（4-5 个统计卡片）
-    - 可选：近 7 天趋势图
-    - 路由守卫：仅 ADMIN 可访问
--->
+<template>
+  <div class="page-container">
+    <h2>管理后台</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="card"><strong>总用户</strong><h3>{{ d.totalUsers }}</h3></div>
+      <div class="card"><strong>活跃需求</strong><h3>{{ d.activeDemands }}</h3></div>
+      <div class="card"><strong>已完成订单</strong><h3>{{ d.completedOrders }}</h3></div>
+      <div class="card"><strong>平均评分</strong><h3>{{ d.averageRating?.toFixed(1) }}</h3></div>
+    </div>
+    <div class="flex-row gap-sm" style="flex-wrap:wrap">
+      <router-link to="/admin/users" class="btn-outline btn-sm">用户管理</router-link>
+      <router-link to="/admin/certifications" class="btn-outline btn-sm">认证审核</router-link>
+      <router-link to="/admin/arbitrations" class="btn-outline btn-sm">仲裁处理</router-link>
+    </div>
+  </div>
+</template>
+<script setup>
+import { reactive, onMounted } from 'vue'
+import { adminAPI } from '@/api/admin'
+const d = reactive({ totalUsers:0, activeDemands:0, completedOrders:0, averageRating:0, pendingArbitrations:0 })
+onMounted(async () => { try { const r = await adminAPI.getDashboard(); Object.assign(d, r.data) } catch(e) { alert(e.message) } })
+</script>

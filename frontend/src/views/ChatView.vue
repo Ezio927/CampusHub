@@ -1,19 +1,25 @@
-<!--
-  聊天页 — 路由 /chat/:conversationId
-
-  职责：一对一即时通讯界面
-
-  组装：
-    ChatWindow   — 消息列表 + 输入框
-    MessageBubble — 单条消息气泡（区分自己/对方、TEXT/IMAGE/SYSTEM）
-
-  流程：
-    onMounted → api/conversations.getMessages(id) 拉历史消息
-    用户输入发送 → api/conversations.sendMessage(id, { content, messageType })
-    新消息 → 轮询 或 WebSocket 更新
-
-  待完成：
-    - 图片消息的发送与展示
-    - 滚动到底部 + 加载更多历史消息
-    - 消息已读状态同步
--->
+<template>
+  <div class="page-container">
+    <h2>聊天</h2>
+    <div v-if="messages.length===0" class="empty-state">暂无消息</div>
+    <div v-for="m in messages" :key="m.id" class="card" :style="{ background: m.senderId === auth.currentUser?.id ? '#e0e7ff' : '#fff' }">
+      <p><strong>{{ m.senderId === auth.currentUser?.id ? '我' : '对方' }}</strong> <small>{{ m.createdAt }}</small></p>
+      <p>{{ m.content }}</p>
+    </div>
+    <div class="flex-row gap-sm" style="margin-top:12px">
+      <input v-model="text" placeholder="输入消息..." @keyup.enter="send" style="flex:1" />
+      <button class="btn-primary btn-sm" @click="send">发送</button>
+    </div>
+  </div>
+</template>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { chatAPI } from '@/api/conversations'
+const route = useRoute(); const auth = useAuthStore()
+const messages = ref([]); const text = ref('')
+async function send() { if (!text.value.trim()) return; await chatAPI.sendMessage(route.params.id, { content: text.value }); text.value = ''; await load() }
+async function load() { const r = await chatAPI.getMessages(route.params.id); messages.value = r.data || [] }
+onMounted(load)
+</script>

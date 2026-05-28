@@ -1,20 +1,33 @@
-<!--
-  注册页 — 路由 /register
-
-  职责：新用户注册表单
-
-  表单字段：
-    username（必填,4-20位字母/数字/下划线）
-    password（必填,6-32位）
-    studentId（必填,唯一）
-    realName（必填）
-    phone（选填）
-    email（选填）
-
-  流程：
-    提交 → stores/auth.register() → 成功跳 /login → 失败提示具体错误
-
-  待完成：
-    - 前端校验 + 后端 40904/40905 错误映射
-    - 注册成功后 toast "注册成功，请登录"
--->
+<template>
+  <div class="page-container">
+    <h2 style="margin-bottom:24px;text-align:center">注册账号</h2>
+    <form @submit.prevent="handleRegister">
+      <div class="form-group"><label>用户名 *</label><input v-model="form.username" required /></div>
+      <div class="form-group"><label>密码 *</label><input v-model="form.password" type="password" required /></div>
+      <div class="form-group"><label>学号 *</label><input v-model="form.studentId" required /></div>
+      <div class="form-group"><label>真实姓名 *</label><input v-model="form.realName" required /></div>
+      <div class="form-group"><label>手机号</label><input v-model="form.phone" /></div>
+      <div class="form-group"><label>邮箱</label><input v-model="form.email" /></div>
+      <p v-if="error" class="error-msg">{{ error }}</p>
+      <button type="submit" class="btn-primary" style="width:100%;padding:10px" :disabled="loading">{{ loading ? '注册中...' : '注册' }}</button>
+    </form>
+  </div>
+</template>
+<script setup>
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const router = useRouter()
+const auth = useAuthStore()
+const form = reactive({ username: '', password: '', studentId: '', realName: '', phone: '', email: '' })
+const error = ref('')
+const loading = ref(false)
+async function handleRegister() {
+  error.value = ''; loading.value = true
+  try {
+    await auth.register({ ...form })
+    router.push('/login')
+  } catch (e) { error.value = e.message || '注册失败' }
+  finally { loading.value = false }
+}
+</script>

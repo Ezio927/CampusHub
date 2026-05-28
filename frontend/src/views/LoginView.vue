@@ -1,16 +1,31 @@
-<!--
-  登录页 — 路由 /login
-
-  职责：用户名+密码登录表单
-
-  表单字段：username（4-20位）, password（6-32位）
-
-  流程：
-    提交 → stores/auth.login() → 成功跳 / → 失败提示"用户名或密码错误"
-    已有 token → 直接 redirect 到 /
-
-  待完成：
-    - 表单前端校验（空值、长度）
-    - 40100 错误提示
-    - 注册链接跳转 /register
--->
+<template>
+  <div class="page-container">
+    <h2 style="margin-bottom:24px;text-align:center">登录 CampusHub</h2>
+    <form @submit.prevent="handleLogin">
+      <div class="form-group"><label>用户名</label><input v-model="username" placeholder="请输入用户名" required /></div>
+      <div class="form-group"><label>密码</label><input v-model="password" type="password" placeholder="请输入密码" required /></div>
+      <p v-if="error" class="error-msg">{{ error }}</p>
+      <button type="submit" class="btn-primary" style="width:100%;padding:10px" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
+    </form>
+    <p style="text-align:center;margin-top:16px">还没有账号？<router-link to="/register">立即注册</router-link></p>
+  </div>
+</template>
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const router = useRouter()
+const auth = useAuthStore()
+const username = ref('')
+const password = ref('')
+const error = ref('')
+const loading = ref(false)
+async function handleLogin() {
+  error.value = ''; loading.value = true
+  try {
+    await auth.login(username.value, password.value)
+    router.push('/')
+  } catch (e) { error.value = e.message || '登录失败' }
+  finally { loading.value = false }
+}
+</script>
