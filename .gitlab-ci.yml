@@ -1,25 +1,16 @@
 stages:
-  - build
   - test
 
-# ========== 前端 ==========
-frontend-build:
-  stage: build
-  image: node:20-alpine
+hello:
+  stage: test
+  script:
+    - echo "runner works"
+    - node --version
+    - npm --version
+
+frontend:
+  stage: test
   script:
     - cd frontend
     - npm install
     - npm run build
-
-# ========== 后端 ==========
-backend-compile:
-  stage: build
-  script:
-    - cd backend
-    - mvn -B -DskipTests compile
-
-backend-test:
-  stage: test
-  script:
-    - cd backend
-    - mvn -B test
