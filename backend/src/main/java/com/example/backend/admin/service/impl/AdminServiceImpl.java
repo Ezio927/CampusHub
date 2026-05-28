@@ -12,6 +12,8 @@ import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.UserStatus;
+import com.example.backend.demand.dto.ArbitrationDto;
+import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.demand.entity.Demand;
 import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.entity.Review;
@@ -19,10 +21,15 @@ import com.example.backend.demand.repository.ArbitrationTicketRepository;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.repository.ReviewRepository;
+import com.example.backend.demand.service.ArbitrationService;
 import com.example.backend.notification.service.NotificationService;
+import com.example.backend.user.dto.CertificationDto;
+import com.example.backend.user.dto.CertificationReviewDto;
 import com.example.backend.user.dto.UserDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.CertificationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +46,8 @@ public class AdminServiceImpl implements AdminService {
     private final ArbitrationTicketRepository arbitrationTicketRepository;
     private final NotificationService notificationService;
     private final AdminOperationLogRepository adminOperationLogRepository;
+    private final CertificationService certificationService;
+    private final ArbitrationService arbitrationService;
 
     public AdminServiceImpl(UserRepository userRepository,
                             DemandRepository demandRepository,
@@ -47,6 +56,20 @@ public class AdminServiceImpl implements AdminService {
                             ArbitrationTicketRepository arbitrationTicketRepository,
                             NotificationService notificationService,
                             AdminOperationLogRepository adminOperationLogRepository) {
+        this(userRepository, demandRepository, orderRepository, reviewRepository, arbitrationTicketRepository,
+                notificationService, adminOperationLogRepository, null, null);
+    }
+
+    @Autowired
+    public AdminServiceImpl(UserRepository userRepository,
+                            DemandRepository demandRepository,
+                            OrderRepository orderRepository,
+                            ReviewRepository reviewRepository,
+                            ArbitrationTicketRepository arbitrationTicketRepository,
+                            NotificationService notificationService,
+                            AdminOperationLogRepository adminOperationLogRepository,
+                            CertificationService certificationService,
+                            ArbitrationService arbitrationService) {
         this.userRepository = userRepository;
         this.demandRepository = demandRepository;
         this.orderRepository = orderRepository;
@@ -54,6 +77,8 @@ public class AdminServiceImpl implements AdminService {
         this.arbitrationTicketRepository = arbitrationTicketRepository;
         this.notificationService = notificationService;
         this.adminOperationLogRepository = adminOperationLogRepository;
+        this.certificationService = certificationService;
+        this.arbitrationService = arbitrationService;
     }
 
     @Override
@@ -100,6 +125,32 @@ public class AdminServiceImpl implements AdminService {
         log(adminId, "UNBAN_USER", "user", userId, null);
     }
 
+    @Override
+    public CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req) {
+        if (certificationService == null) {
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "certification service is unavailable");
+        }
+        if (req == null || req.getApprove() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "approve cannot be blank");
+        }
+        CertificationDto reviewed = certificationService.review(
+                certificationId, req.getApprove(), req.getReason(), adminId);
+        log(adminId, "REVIEW_CERTIFICATION", "certification", certificationId,
+                req.getApprove() ? "approved" : "rejected: " + req.getReason());
+        return reviewed;
+    }
+
+    @Override
+    public ArbitrationDto resolveArbitration(Long ticketId, Long adminId, ArbitrationResolveDto req) {
+        if (arbitrationService == null) {
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "arbitration service is unavailable");
+        }
+        ArbitrationDto resolved = arbitrationService.resolve(ticketId, adminId, req);
+        String detail = req == null ? null : req.getAction() + ": " + req.getResolution();
+        log(adminId, "RESOLVE_ARBITRATION", "arbitration", ticketId, detail);
+        return resolved;
+    }
+
     private AdminUserDto toAdminUserDto(User user) {
         AdminUserDto dto = new AdminUserDto();
         dto.setId(user.getId());
@@ -113,13 +164,14 @@ public class AdminServiceImpl implements AdminService {
         return dto;
     }
 
-    private void log(Long adminId, String action, String targetType, Long targetId, String remark) {
+    // [Human-written] Centralizes the audit trail so every privileged action is recorded consistently.
+    private void log(Long adminId, String operation, String targetType, Long targetId, String detail) {
         AdminOperationLog log = new AdminOperationLog();
-        log.setOperatorId(adminId);
-        log.setAction(action);
+        log.setAdminId(adminId);
+        log.setOperation(operation);
         log.setTargetType(targetType);
         log.setTargetId(targetId);
-        log.setRemark(remark);
+        log.setDetail(detail);
         adminOperationLogRepository.save(log);
     }
 

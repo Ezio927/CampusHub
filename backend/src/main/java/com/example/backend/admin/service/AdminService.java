@@ -3,6 +3,10 @@ package com.example.backend.admin.service;
 import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.demand.dto.ArbitrationDto;
+import com.example.backend.demand.dto.ArbitrationResolveDto;
+import com.example.backend.user.dto.CertificationDto;
+import com.example.backend.user.dto.CertificationReviewDto;
 
 import java.util.List;
 
@@ -15,4 +19,8 @@ public interface AdminService {
     void banUser(Long userId, Long adminId, BanUserDto req);
 
     void unbanUser(Long userId, Long adminId);
+
+    CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req);
+
+    ArbitrationDto resolveArbitration(Long ticketId, Long adminId, ArbitrationResolveDto req);
 }

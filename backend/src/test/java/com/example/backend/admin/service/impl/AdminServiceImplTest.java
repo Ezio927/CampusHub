@@ -6,6 +6,7 @@ import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.admin.entity.AdminOperationLog;
 import com.example.backend.admin.repository.AdminOperationLogRepository;
 import com.example.backend.common.enums.ArbitrationStatus;
+import com.example.backend.common.enums.CertType;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.NotificationType;
@@ -17,14 +18,21 @@ import com.example.backend.demand.entity.ArbitrationTicket;
 import com.example.backend.demand.entity.Demand;
 import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.entity.Review;
+import com.example.backend.demand.dto.ArbitrationDto;
+import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.demand.repository.ArbitrationTicketRepository;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.repository.ReviewRepository;
+import com.example.backend.demand.service.impl.ArbitrationServiceImpl;
 import com.example.backend.notification.repository.NotificationRepository;
 import com.example.backend.notification.service.impl.NotificationServiceImpl;
+import com.example.backend.user.dto.CertificationReviewDto;
+import com.example.backend.user.dto.CertificationSubmitDto;
 import com.example.backend.user.entity.User;
+import com.example.backend.user.repository.CertificationRepository;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.impl.CertificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -110,5 +118,46 @@ class AdminServiceImplTest {
 
         List<AdminOperationLog> logs = adminOperationLogRepository.findAll();
         Assertions.assertEquals(2, logs.size());
+    }
+
+    @Test
+    void shouldAuditCertificationReviewAndArbitrationResolution() {
+        UserRepository userRepository = new UserRepository();
+        DemandRepository demandRepository = new DemandRepository();
+        OrderRepository orderRepository = new OrderRepository();
+        ReviewRepository reviewRepository = new ReviewRepository();
+        ArbitrationTicketRepository arbitrationTicketRepository = new ArbitrationTicketRepository();
+        NotificationRepository notificationRepository = new NotificationRepository();
+        NotificationServiceImpl notificationService = new NotificationServiceImpl(notificationRepository);
+        CertificationRepository certificationRepository = new CertificationRepository();
+        CertificationServiceImpl certificationService = new CertificationServiceImpl(
+                certificationRepository, userRepository, notificationService);
+        ArbitrationServiceImpl arbitrationService = new ArbitrationServiceImpl(
+                arbitrationTicketRepository, userRepository, notificationService);
+        AdminOperationLogRepository adminOperationLogRepository = new AdminOperationLogRepository();
+        AdminServiceImpl service = new AdminServiceImpl(userRepository, demandRepository, orderRepository,
+                reviewRepository, arbitrationTicketRepository, notificationService, adminOperationLogRepository,
+                certificationService, arbitrationService);
+
+        CertificationSubmitDto submit = new CertificationSubmitDto();
+        submit.setCertType(CertType.STUDENT_ID);
+        submit.setStudentId("2024001001");
+        Long certificationId = certificationService.submit(1L, submit).getId();
+
+        CertificationReviewDto review = new CertificationReviewDto();
+        review.setApprove(true);
+        service.reviewCertification(certificationId, 2L, review);
+
+        ArbitrationDto ticket = arbitrationService.createTicket(1L, 99L, null, "dispute", java.util.Collections.singletonList("e1"));
+        ArbitrationResolveDto resolve = new ArbitrationResolveDto();
+        resolve.setAction("DISMISS");
+        resolve.setResolution("invalid evidence");
+        service.resolveArbitration(ticket.getId(), 2L, resolve);
+
+        List<AdminOperationLog> logs = adminOperationLogRepository.findAll();
+        Assertions.assertEquals(2, logs.size());
+        Assertions.assertEquals("RESOLVE_ARBITRATION", logs.get(0).getOperation());
+        Assertions.assertEquals("REVIEW_CERTIFICATION", logs.get(1).getOperation());
+        Assertions.assertEquals(2L, logs.get(0).getAdminId());
     }
 }

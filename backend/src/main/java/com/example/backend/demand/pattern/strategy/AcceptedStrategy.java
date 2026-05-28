@@ -15,7 +15,7 @@ public class AcceptedStrategy implements IOrderStateStrategy {
 
     @Override
     public List<OrderStatus> nextStatuses() {
-        return Arrays.asList(OrderStatus.IN_PROGRESS, OrderStatus.CANCELLED);
+        return Arrays.asList(OrderStatus.IN_PROGRESS, OrderStatus.PENDING_CONFIRM, OrderStatus.CANCELLED);
     }
 
     @Override

@@ -1,11 +1,17 @@
-/**
- * 智能推荐服务接口
- *
- * 对外接口：
- *   List<DemandDto> recommendDemands(Long userId)
- *                        — 根据用户偏好推荐需求
- *   List<UserDto> recommendAcceptors(Long demandId)
- *                        — 为需求推荐合适的接单用户（组合策略加权排序）
- *
- * 依赖：CompositeDemandMatcher
- */
+package com.example.backend.recommend.service;
+
+import com.example.backend.demand.dto.DemandDto;
+import com.example.backend.user.dto.UserPublicDto;
+
+import java.util.List;
+
+public interface RecommendationService {
+
+    List<DemandDto> recommendDemands(Long userId);
+
+    List<DemandDto> recommendDemands(Long userId, int limit);
+
+    List<UserPublicDto> recommendAcceptors(Long demandId);
+
+    List<UserPublicDto> recommendAcceptors(Long demandId, int limit);
+}

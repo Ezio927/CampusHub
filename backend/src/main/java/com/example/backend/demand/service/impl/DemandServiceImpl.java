@@ -85,6 +85,16 @@ public class DemandServiceImpl implements DemandService {
     }
 
     @Override
+    public void updateStatus(Long demandId, DemandStatus status) {
+        if (status == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "status cannot be null");
+        }
+        Demand demand = requireDemand(demandId);
+        demand.setStatus(status);
+        demandRepository.save(demand);
+    }
+
+    @Override
     public DemandDto update(Long demandId, Long userId, DemandUpdateDto req) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);

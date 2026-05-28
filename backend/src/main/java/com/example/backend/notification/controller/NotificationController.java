@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -30,8 +31,8 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    public ApiResponse<Long> unreadCount() {
-        return ApiResponse.success(notificationService.countUnread(AuthContext.requireUserId()));
+    public ApiResponse<Map<String, Long>> unreadCount() {
+        return ApiResponse.success(Map.of("unreadCount", notificationService.countUnread(AuthContext.requireUserId())));
     }
 
     @PutMapping("/{id}/read")
