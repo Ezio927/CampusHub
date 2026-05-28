@@ -1,4 +1,0 @@
-.login-wrap { max-width: 400px; margin: 40px auto; }
-.login-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 32px; }
-.login-card { background: var(--card); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow-lg); border:1px solid var(--border); }
-.login-footer { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary); }

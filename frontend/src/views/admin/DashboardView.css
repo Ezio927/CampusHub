@@ -1,3 +1,0 @@
-.dash-grid { display: grid; grid-template-columns: repeat(2,1fr); gap:12px; margin-bottom:20px; }
-.dash-nav { display: flex; gap: 8px; flex-wrap: wrap; }
-@media(max-width:768px){ .dash-grid { grid-template-columns: 1fr; } }

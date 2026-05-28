@@ -1,5 +1,0 @@
-.orders-header { margin-bottom: 14px; }
-.role-select { width: auto; }
-.order-card { cursor: pointer; transition: all .2s; }
-.order-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
-.order-id { font-weight: 600; color: var(--primary); }

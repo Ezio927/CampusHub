@@ -1,7 +1,2 @@
-import client from './client'
-
-export const reviewAPI = {
-  submit(data) { return client.post('/reviews', data) },
-  listByUser(userId) { return client.get(`/reviews/user/${userId}`) },
-  listByOrder(orderId) { return client.get(`/reviews/order/${orderId}`) },
-}
+import c from './client'
+export const reviewAPI = { submit: d => c.post('/reviews',d), byUser: uid => c.get(`/reviews/user/${uid}`), byOrder: oid => c.get(`/reviews/order/${oid}`) }

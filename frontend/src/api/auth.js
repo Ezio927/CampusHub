@@ -1,7 +1,2 @@
-import client from './client'
-
-export const authAPI = {
-  register(data) { return client.post('/auth/register', data) },
-  login(data) { return client.post('/auth/login', data) },
-  logout() { return client.post('/auth/logout') },
-}
+import c from './client'
+export const authAPI = { login: d => c.post('/auth/login',d), register: d => c.post('/auth/register',d), logout: () => c.post('/auth/logout') }

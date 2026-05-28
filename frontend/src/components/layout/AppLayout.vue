@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="layout">
     <NavBar />
-    <main class="page-container"><slot /></main>
+    <main><slot /></main>
     <TabBar />
   </div>
 </template>
@@ -9,3 +9,7 @@
 import NavBar from './NavBar.vue'
 import TabBar from './TabBar.vue'
 </script>
+<style scoped>
+.layout { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+</style>

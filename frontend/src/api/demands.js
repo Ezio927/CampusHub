@@ -1,9 +1,2 @@
-import client from './client'
-
-export const demandAPI = {
-  create(data) { return client.post('/demands', data) },
-  search(params) { return client.get('/demands', { params }) },
-  getDetail(id) { return client.get(`/demands/${id}`) },
-  update(id, data) { return client.put(`/demands/${id}`, data) },
-  cancel(id) { return client.put(`/demands/${id}/cancel`) },
-}
+import c from './client'
+export const demandAPI = { create: d => c.post('/demands',d), search: p => c.get('/demands',{params:p}), detail: id => c.get(`/demands/${id}`), update: (id,d) => c.put(`/demands/${id}`,d), cancel: id => c.put(`/demands/${id}/cancel`) }

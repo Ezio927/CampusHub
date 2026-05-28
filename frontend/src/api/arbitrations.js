@@ -1,7 +1,2 @@
-import client from './client'
-
-export const arbAPI = {
-  create(data) { return client.post('/arbitrations', data) },
-  listPending() { return client.get('/arbitrations') },
-  resolve(id, data) { return client.put(`/arbitrations/${id}/resolve`, data) },
-}
+import c from './client'
+export const arbAPI = { create: d => c.post('/arbitrations',d), pending: () => c.get('/arbitrations'), resolve: (id,d) => c.put(`/arbitrations/${id}/resolve`,d) }

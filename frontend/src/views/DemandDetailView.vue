@@ -1,35 +1,45 @@
 <template>
-  <div v-if="demand">
-    <div class="card">
-      <div class="flex-between"><h3>{{ demand.title }}</h3><span class="badge" :style="{ background: catColor(demand.category) }">{{ catText(demand.category) }}</span></div>
-      <p style="margin:12px 0;white-space:pre-wrap">{{ demand.description }}</p>
-      <p><strong>报酬:</strong> {{ demand.rewardType === 'MONEY' ? '¥' + demand.rewardAmount : demand.rewardAmount + '积分' }}</p>
-      <p><strong>位置:</strong> {{ demand.locationTag || '不限' }}</p>
-      <p><strong>发布者:</strong> {{ demand.publisher?.username }} (信用分: {{ demand.publisher?.creditScore }})</p>
-      <p><strong>发布时间:</strong> {{ demand.createdAt }}</p>
-      <span v-if="demand.urgent" class="badge" style="background:var(--danger)">紧急</span>
+  <div class="page" v-if="d">
+    <div class="dc">
+      <div class="flex-between mb-md"><h1>{{ d.title }}</h1><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
+      <div class="grid-2 mb-md">
+        <div class="mi"><span class="lbl">报酬</span><span class="val" style="color:var(--danger)">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'积分' }}</span></div>
+        <div class="mi"><span class="lbl">位置</span><span class="val">{{ d.locationTag||'不限' }}</span></div>
+        <div class="mi"><span class="lbl">状态</span><span class="val"><span class="badge" :style="{background:statusBg(d.status)}">{{ statusTxt(d.status) }}</span></span></div>
+        <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ d.createdAt?.substring(0,10) }}</span></div>
+      </div>
+      <div class="desc">{{ d.description }}</div>
+      <div class="pub"><div class="av" :style="{background:avColor}">{{ d.publisher?.username?.[0]?.toUpperCase() }}</div><div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div></div>
     </div>
-    <div v-if="auth.isLoggedIn && demand.status === 'OPEN' && demand.publisherId !== auth.currentUser?.id" class="card">
-      <button class="btn-primary" style="width:100%" @click="acceptDemand">接单</button>
-    </div>
-    <div v-if="auth.isLoggedIn && demand.publisherId === auth.currentUser?.id && demand.status === 'OPEN'" class="card">
-      <button class="btn-outline btn-sm" @click="cancelDemand">取消需求</button>
-    </div>
+    <button v-if="auth.isLoggedIn&&d.status==='OPEN'&&d.publisherId!==auth.user?.id" class="btn-primary btn-block act-btn" @click="accept">立即接单</button>
   </div>
-  <div v-else class="empty-state">加载中...</div>
+  <div v-else class="empty">⏳ 加载中...</div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { demandAPI } from '@/api/demands'
 import { orderAPI } from '@/api/orders'
-const route = useRoute(); const router = useRouter(); const auth = useAuthStore()
-const demand = ref(null)
-function catText(c) { return { ERRAND:'跑腿', SKILL:'技能', STUDY:'学习', SECONDHAND:'二手' }[c] || c }
-function catColor(c) { return { ERRAND:'#f59e0b', SKILL:'#4f46e5', STUDY:'#22c55e', SECONDHAND:'#ef4444' }[c] || '#888' }
-async function acceptDemand() { try { await orderAPI.accept({ demandId: demand.value.id }); router.push('/orders') } catch(e) { alert(e.message) } }
-async function cancelDemand() { try { await demandAPI.cancel(demand.value.id); router.go(0) } catch(e) { alert(e.message) } }
-onMounted(async () => { const r = await demandAPI.getDetail(route.params.id); demand.value = r.data })
+const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
+const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
+const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
+function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHAND:'二手'}[c]||c}
+function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444'}[c]||'#888'}
+function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
+function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
+async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(e.message)}}
+onMounted(async()=>{const res=await demandAPI.detail(r.params.id);d.value=res.data})
 </script>
-<style scoped>@import './DemandDetailView.css';</style>
+<style scoped>
+.dc{background:#fff;border-radius:16px;padding:24px;margin-bottom:14px;border:1px solid var(--border)}
+h1{font-size:22px;font-weight:800;flex:1;margin-right:12px}
+.cat{display:inline-flex;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
+.mi{padding:12px;background:#f8fafc;border-radius:10px;display:flex;flex-direction:column;gap:4px}
+.lbl{font-size:12px;color:var(--text-muted)}
+.val{font-size:16px;font-weight:700}
+.desc{white-space:pre-wrap;line-height:1.8;color:var(--text-secondary);padding:16px;background:#f8fafc;border-radius:12px;margin:16px 0}
+.pub{display:flex;align-items:center;gap:12px;padding:16px;background:#f8fafc;border-radius:12px}
+.av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px}
+.act-btn{padding:14px;border-radius:12px;font-size:16px}
+</style>

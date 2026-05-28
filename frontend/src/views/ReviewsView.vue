@@ -1,19 +1,20 @@
 <template>
-  <div class="page-container">
-    <h2>用户评价</h2>
-    <div v-if="reviews.length===0" class="empty-state">暂无评价</div>
-    <div v-for="r in reviews" :key="r.id" class="card">
-      <div class="flex-between"><span>评分: {{ '★'.repeat(r.rating) }}{{ '☆'.repeat(5-r.rating) }}</span><small class="text-secondary">{{ r.createdAt }}</small></div>
-      <p v-if="r.content" style="margin-top:4px">{{ r.content }}</p>
+  <div class="page">
+    <h1 class="page-title">用户评价</h1>
+    <div v-if="list.length===0" class="empty">⭐<p class="mt-sm">暂无评价</p></div>
+    <div v-for="r in list" :key="r.id" class="card">
+      <div class="flex-between"><span class="stars">{{ '★'.repeat(r.rating) }}{{ '☆'.repeat(5-r.rating) }}</span><span class="text-sm text-muted">{{ r.createdAt?.substring(0,10) }}</span></div>
+      <p v-if="r.content" class="mt-sm">{{ r.content }}</p>
     </div>
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref,onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { reviewAPI } from '@/api/reviews'
-const route = useRoute()
-const reviews = ref([])
-onMounted(async () => { const r = await reviewAPI.listByUser(route.params.userId); reviews.value = r.data || [] })
+const r=useRoute();const list=ref([])
+onMounted(async()=>{const res=await reviewAPI.byUser(r.params.userId);list.value=res.data||[]})
 </script>
-<style scoped>@import './ReviewsView.css';</style>
+<style scoped>
+.stars{font-size:18px;letter-spacing:2px;color:#f59e0b}
+</style>

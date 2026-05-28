@@ -1,49 +1,56 @@
 <template>
-  <div class="page-container">
-    <div class="profile-header">
-      <div class="profile-avatar" :style="{background:avatarColor}">{{ auth.currentUser?.username?.[0]?.toUpperCase() }}</div>
-      <div class="profile-name">{{ auth.currentUser?.username }}</div>
-      <p class="text-secondary text-sm">{{ auth.currentUser?.studentId }}</p>
-      <p class="mt-sm">信用分 <span :style="{ color: scoreColor, fontWeight:'700',fontSize:'20px' }">{{ auth.currentUser?.creditScore }}</span> · {{ statusText }}</p>
+  <div class="page">
+    <div class="ph">
+      <div class="pav">{{ auth.user?.username?.[0]?.toUpperCase() }}</div>
+      <div class="pn">{{ auth.user?.username }}</div>
+      <div class="pi">学号 {{ auth.user?.studentId }}</div>
+      <div class="pc">⭐ {{ auth.user?.creditScore }} 信用分</div>
     </div>
-    <div class="profile-section">
-      <h4>编辑资料</h4>
-      <div class="form-group"><label>姓名</label><input v-model="edit.realName" :placeholder="auth.currentUser?.realName" /></div>
-      <div class="form-group"><label>手机</label><input v-model="edit.phone" :placeholder="auth.currentUser?.phone" /></div>
-      <div class="form-group"><label>邮箱</label><input v-model="edit.email" :placeholder="auth.currentUser?.email" /></div>
+    <div class="grid-2 mb-md">
+      <div class="sc"><div class="sv">{{ auth.user?.creditScore }}</div><div class="sl">信用分</div></div>
+      <div class="sc"><div class="sv">{{ st }}</div><div class="sl">账户状态</div></div>
+    </div>
+    <div class="card"><h3 class="mb-sm">✏️ 编辑资料</h3>
+      <div class="rr"><div class="form-group"><label>姓名</label><input v-model="e.realName" :placeholder="auth.user?.realName" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
+      <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
-    <div class="profile-section">
-      <h4>实名认证</h4>
+    <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
       <template v-if="!cert">
-        <div class="form-group"><label>认证类型</label><select v-model="certForm.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
-        <div class="form-group"><label>学号</label><input v-model="certForm.studentId" /></div>
-        <div class="form-group"><label>证件图片URL</label><input v-model="certForm.cardImageUrl" /></div>
+        <div class="form-group"><label>类型</label><select v-model="cf.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
+        <div class="form-group"><label>学号</label><input v-model="cf.studentId" /></div>
+        <div class="form-group"><label>图片URL</label><input v-model="cf.cardImageUrl" placeholder="证件图片链接" /></div>
         <button class="btn-primary btn-sm" @click="submitCert">提交认证</button>
       </template>
-      <p v-else class="text-bold">认证状态: <span :style="{color:cert.status==='APPROVED'?'var(--success)':'var(--warning)'}">{{ cert.status }}</span></p>
+      <p v-else>状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span></p>
     </div>
-    <button class="btn-danger logout-btn" @click="handleLogout">退出登录</button>
+    <button class="btn-block lb" @click="logout">退出登录</button>
   </div>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref,reactive,computed,onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
-const router = useRouter()
-const auth = useAuthStore()
-const edit = reactive({ realName: '', phone: '', email: '' })
-const cert = ref(null)
-const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
-const avatarColor = computed(() => { const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']; return colors[(auth.currentUser?.username?.charCodeAt(0)||0)%colors.length] })
-const scoreColor = computed(() => (auth.currentUser?.creditScore >= 80 ? 'var(--success)' : auth.currentUser?.creditScore >= 60 ? 'var(--warning)' : 'var(--danger)'))
-const statusText = computed(() => ({ ACTIVE: '正常', BANNED: '已封禁', PENDING_CERT: '待认证' }[auth.currentUser?.status] || auth.currentUser?.status))
-async function update() { const d = {}; if (edit.realName) d.realName = edit.realName; if (edit.phone) d.phone = edit.phone; if (edit.email) d.email = edit.email; try { await userAPI.updateProfile(d); await auth.fetchProfile() } catch (e) { alert(e.message) } }
-async function submitCert() { try { await certAPI.submit({ ...certForm }); await loadCert() } catch (e) { alert(e.message) } }
-async function loadCert() { try { const r = await certAPI.getMine(); cert.value = r.data } catch { cert.value = null } }
-function handleLogout() { auth.logout(); router.push('/login') }
-onMounted(async () => { await auth.fetchProfile(); await loadCert() })
+const ro=useRouter();const a=useAuthStore()
+const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
+const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
+const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[a.user?.status]||a.user?.status))
+async function update(){const d={};if(e.realName)d.realName=e.realName;if(e.phone)d.phone=e.phone;if(e.email)d.email=e.email;try{await userAPI.update(d)}catch(e){alert(e.message)}}
+async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){alert(e.message)}}
+async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data}catch{cert.value=null}}
+function logout(){a.logout();ro.push('/login')}
+onMounted(async()=>{await a.fetchUser();await loadCert()})
 </script>
-<style scoped>@import './ProfileView.css';</style>
+<style scoped>
+.ph{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:18px;padding:28px;color:#fff;text-align:center;margin-bottom:18px}
+.pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
+.pn{font-size:22px;font-weight:800}.pi{font-size:13px;opacity:.75;margin-top:4px}
+.pc{display:inline-flex;gap:6px;padding:6px 16px;background:rgba(255,255,255,.2);border-radius:20px;margin-top:10px;font-size:14px;font-weight:600}
+.sc{background:#fff;border-radius:14px;padding:16px;text-align:center;border:1px solid var(--border)}
+.sv{font-size:22px;font-weight:800;color:var(--primary)}.sl{font-size:12px;color:var(--text-muted);margin-top:2px}
+.rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lb{padding:14px;border-radius:12px;background:#fee2e2;color:var(--danger);font-weight:700;font-size:15px;border:1px solid #fecaca}
+.lb:hover{background:#fecaca}
+</style>
