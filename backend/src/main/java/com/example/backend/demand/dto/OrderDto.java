@@ -16,6 +16,7 @@ public class OrderDto {
     private LocalDateTime completedAt;
     private LocalDateTime cancelledAt;
     private String cancelReason;
+    private Integer creditPenalty;
     private LocalDateTime autoConfirmDeadline;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -110,6 +111,14 @@ public class OrderDto {
 
     public void setCancelReason(String cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public Integer getCreditPenalty() {
+        return creditPenalty;
+    }
+
+    public void setCreditPenalty(Integer creditPenalty) {
+        this.creditPenalty = creditPenalty;
     }
 
     public LocalDateTime getAutoConfirmDeadline() {

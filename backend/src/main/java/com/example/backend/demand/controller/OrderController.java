@@ -54,7 +54,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/cancel")
-    public ApiResponse<OrderDto> cancel(@PathVariable Long id, @RequestBody(required = false) OrderCancelDto request) {
+    public ApiResponse<OrderDto> cancel(@PathVariable Long id, @RequestBody OrderCancelDto request) {
         return ApiResponse.success(orderService.cancel(id, AuthContext.requireUserId(), request));
     }
 }

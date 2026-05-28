@@ -1,81 +1,123 @@
 package com.example.backend.demand.service.impl;
 
+import com.example.backend.chat.dto.CreateConversationDto;
+import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.DemandStatus;
-import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.demand.dto.AcceptOrderDto;
+import com.example.backend.demand.dto.DemandDto;
 import com.example.backend.demand.dto.OrderCancelDto;
 import com.example.backend.demand.dto.OrderDto;
-import com.example.backend.demand.entity.Demand;
 import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.entity.OrderStatusLog;
+import com.example.backend.demand.pattern.observer.OrderEventPublisher;
+import com.example.backend.demand.pattern.strategy.OrderAction;
+import com.example.backend.demand.pattern.strategy.OrderStateContext;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.repository.OrderStatusLogRepository;
+import com.example.backend.demand.service.DemandService;
 import com.example.backend.demand.service.OrderService;
-import com.example.backend.chat.dto.CreateConversationDto;
-import com.example.backend.chat.service.ConversationService;
+import com.example.backend.notification.service.NotificationService;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.CreditService;
-import com.example.backend.notification.service.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final int FREE_CANCEL_MINUTES = 10;
+    private static final int LATE_CANCEL_PENALTY = 10;
+
     private final OrderRepository orderRepository;
     private final OrderStatusLogRepository orderStatusLogRepository;
-    private final DemandRepository demandRepository;
+    private final OrderStateContext orderStateContext;
+    private final OrderEventPublisher orderEventPublisher;
+    private final DemandService demandService;
     private final UserRepository userRepository;
     private final CreditService creditService;
     private final ConversationService conversationService;
-    private final NotificationService notificationService;
 
-    public OrderServiceImpl(OrderRepository orderRepository,
-                            OrderStatusLogRepository orderStatusLogRepository,
-                            DemandRepository demandRepository,
-                            UserRepository userRepository,
-                            CreditService creditService,
-                            ConversationService conversationService,
-                            NotificationService notificationService) {
+    @Autowired
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            OrderStatusLogRepository orderStatusLogRepository,
+            OrderStateContext orderStateContext,
+            OrderEventPublisher orderEventPublisher,
+            DemandService demandService,
+            UserRepository userRepository,
+            CreditService creditService,
+            ConversationService conversationService) {
         this.orderRepository = orderRepository;
         this.orderStatusLogRepository = orderStatusLogRepository;
-        this.demandRepository = demandRepository;
+        this.orderStateContext = orderStateContext;
+        this.orderEventPublisher = orderEventPublisher;
+        this.demandService = demandService;
         this.userRepository = userRepository;
         this.creditService = creditService;
         this.conversationService = conversationService;
-        this.notificationService = notificationService;
+    }
+
+    // [Human-written] 兼容旧测试构造签名：把 DemandRepository 适配成最小 DemandService 能力。
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            OrderStatusLogRepository orderStatusLogRepository,
+            DemandRepository demandRepository,
+            UserRepository userRepository,
+            CreditService creditService,
+            ConversationService conversationService,
+            NotificationService notificationService) {
+        this(
+                orderRepository,
+                orderStatusLogRepository,
+                new OrderStateContext(),
+                new OrderEventPublisher(event -> {
+                }),
+                new DemandRepositoryDemandServiceAdapter(demandRepository),
+                userRepository,
+                creditService,
+                conversationService);
     }
 
     @Override
     public OrderDto acceptDemand(Long userId, AcceptOrderDto req) {
         User acceptor = requireActiveUser(userId);
-        if (!creditService.checkCredit(userId)) {
-            throw new BusinessException(ErrorCode.CREDIT_INSUFFICIENT);
-        }
         if (req == null || req.getDemandId() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "demandId cannot be blank");
         }
+        if (!creditService.checkCredit(userId)) {
+            throw new BusinessException(ErrorCode.CREDIT_INSUFFICIENT);
+        }
 
-        Demand demand = demandRepository.findById(req.getDemandId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.DEMAND_NOT_FOUND));
-        if (!demand.isOpen()) {
+        DemandDto demand = demandService.getDetail(req.getDemandId());
+        if (demand == null) {
+            throw new BusinessException(ErrorCode.DEMAND_NOT_FOUND);
+        }
+        if (demand.getPublisherId() == null || demand.getPublisherId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "cannot accept own demand");
+        }
+        if (demand.getStatus() != DemandStatus.OPEN) {
             throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
         }
         if (orderRepository.findByDemandId(demand.getId()).isPresent()) {
             throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
         }
 
-        demand.markAsAccepted();
-        demandRepository.save(demand);
+        demandService.updateStatus(demand.getId(), DemandStatus.ACCEPTED);
 
         Order order = new Order();
         order.setDemandId(demand.getId());
@@ -85,92 +127,136 @@ public class OrderServiceImpl implements OrderService {
         order.setAcceptedAt(LocalDateTime.now());
         order.setAutoConfirmDeadline(LocalDateTime.now().plusHours(24));
         orderRepository.save(order);
-        appendLog(order.getId(), null, order.getStatus(), userId, "accept demand");
+
+        appendLogAndPublish(order, null, userId, "accept demand");
+
         CreateConversationDto conversationReq = new CreateConversationDto();
         conversationReq.setTargetUserId(demand.getPublisherId());
         conversationReq.setDemandId(demand.getId());
         conversationService.getOrCreate(userId, conversationReq);
-        notificationService.createNotification(demand.getPublisherId(), NotificationType.ORDER_ACCEPTED,
-                "Demand accepted", "Your demand has been accepted.", order.getId());
+
         return OrderDto.from(order);
     }
 
     @Override
     public List<OrderDto> list(Long userId, String role, String status) {
-        OrderStatus orderStatus = status == null ? null : OrderStatus.valueOf(status.toUpperCase());
+        OrderStatus orderStatus = parseStatus(status);
         List<Order> orders;
-        if ("ACCEPTOR".equalsIgnoreCase(role)) {
+        if (role == null || role.isBlank()) {
+            orders = new ArrayList<Order>();
+            orders.addAll(orderRepository.findByPublisherIdAndStatus(userId, orderStatus));
+            orders.addAll(orderRepository.findByAcceptorIdAndStatus(userId, orderStatus));
+            Map<Long, Order> deduplicated = new LinkedHashMap<Long, Order>();
+            for (Order order : orders) {
+                deduplicated.put(order.getId(), order);
+            }
+            orders = new ArrayList<Order>(deduplicated.values());
+            orders.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        } else if ("ACCEPTOR".equalsIgnoreCase(role)) {
             orders = orderRepository.findByAcceptorIdAndStatus(userId, orderStatus);
-        } else {
+        } else if ("PUBLISHER".equalsIgnoreCase(role)) {
             orders = orderRepository.findByPublisherIdAndStatus(userId, orderStatus);
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "role must be PUBLISHER or ACCEPTOR");
         }
         return orders.stream().map(OrderDto::from).collect(Collectors.toList());
     }
 
     @Override
     public OrderDto getDetail(Long orderId, Long userId) {
-        Order order = requireVisibleOrder(orderId, userId);
-        return OrderDto.from(order);
+        return OrderDto.from(requireParticipantOrder(orderId, userId));
     }
 
     @Override
     public OrderDto deliver(Long orderId, Long userId) {
         Order order = requireParticipantOrder(orderId, userId);
-        if (order.getStatus() != OrderStatus.ACCEPTED) {
-            throw new BusinessException(ErrorCode.CONFLICT, "order is not accepted");
+        if (!order.isAcceptor(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "only acceptor can mark delivered");
         }
-        Demand demand = demandRepository.findById(order.getDemandId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.DEMAND_NOT_FOUND));
-        OrderStatus from = order.getStatus();
+        orderStateContext.assertCanOperate(order, OrderAction.MARK_DELIVERED);
+
+        OrderStatus fromStatus = order.getStatus();
         order.setStatus(OrderStatus.PENDING_CONFIRM);
-        order.setUpdatedAt(LocalDateTime.now());
-        demand.setStatus(DemandStatus.IN_PROGRESS);
-        demandRepository.save(demand);
+        order.setAutoConfirmDeadline(LocalDateTime.now().plusHours(24));
         orderRepository.save(order);
-        appendLog(order.getId(), from, order.getStatus(), userId, "deliver");
-        Long otherUserId = userId.equals(order.getPublisherId()) ? order.getAcceptorId() : order.getPublisherId();
-        notificationService.createNotification(otherUserId, NotificationType.SYSTEM_ANNOUNCEMENT,
-                "Order delivered", "The order has been marked as delivered.", order.getId());
+
+        appendLogAndPublish(order, fromStatus, userId, "deliver");
         return OrderDto.from(order);
     }
 
     @Override
     public OrderDto confirm(Long orderId, Long userId) {
         Order order = requireParticipantOrder(orderId, userId);
-        if (order.getStatus() != OrderStatus.PENDING_CONFIRM) {
-            throw new BusinessException(ErrorCode.CONFLICT, "order is not pending confirm");
+        orderStateContext.assertCanOperate(order, OrderAction.CONFIRM_COMPLETED);
+        if (!order.isPublisher(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "only publisher can confirm completion");
         }
-        Demand demand = demandRepository.findById(order.getDemandId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.DEMAND_NOT_FOUND));
-        OrderStatus from = order.getStatus();
+
+        OrderStatus fromStatus = order.getStatus();
         order.setStatus(OrderStatus.COMPLETED);
         order.setCompletedAt(LocalDateTime.now());
-        demand.setStatus(DemandStatus.COMPLETED);
-        demandRepository.save(demand);
         orderRepository.save(order);
-        appendLog(order.getId(), from, order.getStatus(), userId, "confirm");
-        Long otherUserId = userId.equals(order.getPublisherId()) ? order.getAcceptorId() : order.getPublisherId();
-        notificationService.createNotification(otherUserId, NotificationType.ORDER_COMPLETED,
-                "Order completed", "The order has been completed.", order.getId());
+
+        appendLogAndPublish(order, fromStatus, userId, "confirm");
         return OrderDto.from(order);
     }
 
     @Override
     public OrderDto cancel(Long orderId, Long userId, OrderCancelDto req) {
         Order order = requireParticipantOrder(orderId, userId);
-        if (!order.canCancel()) {
-            throw new BusinessException(ErrorCode.CONFLICT, "order cannot be cancelled");
+        orderStateContext.assertCanOperate(order, OrderAction.CANCEL);
+
+        int penalty = calculateCancelPenalty(order, LocalDateTime.now());
+        if (penalty > 0) {
+            creditService.deductCredit(userId, penalty, "cancel order penalty", order.getId());
         }
-        OrderStatus from = order.getStatus();
+
+        OrderStatus fromStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
         order.setCancelReason(req == null ? null : req.getReason());
         orderRepository.save(order);
-        appendLog(order.getId(), from, order.getStatus(), userId, "cancel");
-        Long otherUserId = userId.equals(order.getPublisherId()) ? order.getAcceptorId() : order.getPublisherId();
-        notificationService.createNotification(otherUserId, NotificationType.ORDER_CANCELLED,
-                "Order cancelled", "The order has been cancelled.", order.getId());
-        return OrderDto.from(order);
+
+        appendLogAndPublish(order, fromStatus, userId, order.getCancelReason());
+
+        OrderDto dto = OrderDto.from(order);
+        dto.setCreditPenalty(-penalty);
+        return dto;
+    }
+
+    @Scheduled(fixedDelay = 600_000)
+    public void autoConfirmExpired() {
+        LocalDateTime now = LocalDateTime.now();
+        for (Order order : orderRepository.findByStatusAndAutoConfirmDeadlineBefore(OrderStatus.PENDING_CONFIRM, now)) {
+            if (!order.isAutoConfirmExpired(now)) {
+                continue;
+            }
+            OrderStatus fromStatus = order.getStatus();
+            order.setStatus(OrderStatus.COMPLETED);
+            order.setCompletedAt(now);
+            orderRepository.save(order);
+            appendLogAndPublish(order, fromStatus, null, "auto confirm completed");
+        }
+    }
+
+    // [Human-written] 接单后 10 分钟内取消不扣分，超过 10 分钟扣 10 分。
+    int calculateCancelPenalty(Order order, LocalDateTime now) {
+        if (order.getAcceptedAt() == null) {
+            return LATE_CANCEL_PENALTY;
+        }
+        LocalDateTime freeCancelDeadline = order.getAcceptedAt().plusMinutes(FREE_CANCEL_MINUTES);
+        return now.isAfter(freeCancelDeadline) ? LATE_CANCEL_PENALTY : 0;
+    }
+
+    private void appendLogAndPublish(Order order, OrderStatus fromStatus, Long operatorId, String remark) {
+        OrderStatusLog log = new OrderStatusLog();
+        log.setOrderId(order.getId());
+        log.setFromStatus(fromStatus);
+        log.setToStatus(order.getStatus());
+        log.setOperatorId(operatorId);
+        log.setRemark(remark);
+        orderStatusLogRepository.save(log);
+        orderEventPublisher.publish(order, fromStatus, operatorId, remark);
     }
 
     private User requireActiveUser(Long userId) {
@@ -182,26 +268,64 @@ public class OrderServiceImpl implements OrderService {
         return user;
     }
 
-    private Order requireVisibleOrder(Long orderId, Long userId) {
+    private Order requireParticipantOrder(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
-        if (!userId.equals(order.getPublisherId()) && !userId.equals(order.getAcceptorId())) {
+        if (!order.isParticipant(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
         return order;
     }
 
-    private Order requireParticipantOrder(Long orderId, Long userId) {
-        return requireVisibleOrder(orderId, userId);
+    private OrderStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        try {
+            return OrderStatus.valueOf(status.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "invalid order status");
+        }
     }
 
-    private void appendLog(Long orderId, OrderStatus from, OrderStatus to, Long operatorId, String remark) {
-        OrderStatusLog log = new OrderStatusLog();
-        log.setOrderId(orderId);
-        log.setFromStatus(from);
-        log.setToStatus(to);
-        log.setOperatorId(operatorId);
-        log.setRemark(remark);
-        orderStatusLogRepository.save(log);
+    private static final class DemandRepositoryDemandServiceAdapter implements DemandService {
+        private final DemandRepository demandRepository;
+
+        private DemandRepositoryDemandServiceAdapter(DemandRepository demandRepository) {
+            this.demandRepository = demandRepository;
+        }
+
+        @Override
+        public DemandDto createDemand(Long userId, com.example.backend.demand.dto.DemandCreateDto req) {
+            throw new UnsupportedOperationException("createDemand is not supported in adapter");
+        }
+
+        @Override
+        public List<DemandDto> search(com.example.backend.demand.dto.DemandSearchCriteria criteria) {
+            throw new UnsupportedOperationException("search is not supported in adapter");
+        }
+
+        @Override
+        public DemandDto getDetail(Long demandId) {
+            return DemandDto.from(demandRepository.findById(demandId).orElse(null));
+        }
+
+        @Override
+        public void updateStatus(Long demandId, DemandStatus status) {
+            demandRepository.findById(demandId).ifPresent(demand -> {
+                demand.setStatus(status);
+                demandRepository.save(demand);
+            });
+        }
+
+        @Override
+        public DemandDto update(Long demandId, Long userId, com.example.backend.demand.dto.DemandUpdateDto req) {
+            throw new UnsupportedOperationException("update is not supported in adapter");
+        }
+
+        @Override
+        public void cancel(Long demandId, Long userId) {
+            throw new UnsupportedOperationException("cancel is not supported in adapter");
+        }
     }
 }
