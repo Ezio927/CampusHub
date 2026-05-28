@@ -5,7 +5,7 @@ stages:
 # ========== 前端 ==========
 frontend-build:
   stage: build
-  image: node:20
+  image: node:20-alpine
   script:
     - cd frontend
     - npm install
@@ -14,14 +14,12 @@ frontend-build:
 # ========== 后端 ==========
 backend-compile:
   stage: build
-  image: maven:3.9.9-eclipse-temurin-17
   script:
     - cd backend
     - mvn -B -DskipTests compile
 
 backend-test:
   stage: test
-  image: maven:3.9.9-eclipse-temurin-17
   script:
     - cd backend
     - mvn -B test
