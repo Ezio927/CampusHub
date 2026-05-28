@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 public class AdminOperationLog {
 
     private Long id;
-    private Long operatorId;
-    private String action;
+    private Long adminId;
+    private String operation;
     private String targetType;
     private Long targetId;
-    private String remark;
+    private String detail;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -20,20 +20,20 @@ public class AdminOperationLog {
         this.id = id;
     }
 
-    public Long getOperatorId() {
-        return operatorId;
+    public Long getAdminId() {
+        return adminId;
     }
 
-    public void setOperatorId(Long operatorId) {
-        this.operatorId = operatorId;
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 
-    public String getAction() {
-        return action;
+    public String getOperation() {
+        return operation;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 
     public String getTargetType() {
@@ -52,12 +52,36 @@ public class AdminOperationLog {
         this.targetId = targetId;
     }
 
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    public Long getOperatorId() {
+        return adminId;
+    }
+
+    public void setOperatorId(Long operatorId) {
+        this.adminId = operatorId;
+    }
+
+    public String getAction() {
+        return operation;
+    }
+
+    public void setAction(String action) {
+        this.operation = action;
+    }
+
     public String getRemark() {
-        return remark;
+        return detail;
     }
 
     public void setRemark(String remark) {
-        this.remark = remark;
+        this.detail = remark;
     }
 
     public LocalDateTime getCreatedAt() {

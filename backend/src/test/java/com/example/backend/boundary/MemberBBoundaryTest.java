@@ -431,6 +431,22 @@ class MemberBBoundaryTest {
             @Override
             public void unbanUser(Long userId, Long adminId) {
             }
+
+            @Override
+            public com.example.backend.user.dto.CertificationDto reviewCertification(
+                    Long certificationId,
+                    Long adminId,
+                    com.example.backend.user.dto.CertificationReviewDto req) {
+                return null;
+            }
+
+            @Override
+            public com.example.backend.demand.dto.ArbitrationDto resolveArbitration(
+                    Long ticketId,
+                    Long adminId,
+                    ArbitrationResolveDto req) {
+                return null;
+            }
         });
 
         AuthContext.setCurrentUser(new AuthContext.AuthUser(1L, "alice", UserRole.STUDENT));

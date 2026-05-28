@@ -1,12 +1,43 @@
-# 配置仅供参考！
 stages:
+  - compile
+  - test
   - build
 
-backend-build:
-  stage: build
-  image: maven:3.9.9-eclipse-temurin-17
+image: maven:3.9.9-eclipse-temurin-17
+
+cache:
+  key: backend-maven
+  paths:
+    - .m2/repository
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+backend-compile:
+  stage: compile
   script:
     - cd backend
-    - mvn clean package -DskipTests
+    - mvn -B -DskipTests compile
+  rules:
+    - when: always
+
+backend-test:
+  stage: test
+  script:
+    - cd backend
+    - mvn -B test
+  rules:
+    - when: always
+
+backend-package:
+  stage: build
+  script:
+    - cd backend
+    - mvn -B package -DskipTests
+  artifacts:
+    when: always
+    paths:
+      - backend/target/*.jar
+    expire_in: 1 week
   rules:
     - when: always

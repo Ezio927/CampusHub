@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,7 +36,7 @@ public class ConversationRepository {
     public Optional<Conversation> findByUser1IdAndUser2IdAndRelatedDemandId(Long user1Id, Long user2Id, Long relatedDemandId) {
         return storage.values().stream()
                 .filter(conversation -> conversation.getUser1Id().equals(user1Id) && conversation.getUser2Id().equals(user2Id))
-                .filter(conversation -> relatedDemandId == null || (conversation.getRelatedDemandId() != null && conversation.getRelatedDemandId().equals(relatedDemandId)))
+                .filter(conversation -> Objects.equals(conversation.getRelatedDemandId(), relatedDemandId))
                 .findFirst();
     }
 
