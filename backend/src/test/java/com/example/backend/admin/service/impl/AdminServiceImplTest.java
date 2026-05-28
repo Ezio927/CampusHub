@@ -86,7 +86,7 @@ class AdminServiceImplTest {
         arbitrationTicketRepository.save(ticket);
 
         DashboardDto dashboard = service.getDashboard();
-        Assertions.assertEquals(2L, dashboard.getTotalUsers());
+        Assertions.assertEquals(4L, dashboard.getTotalUsers());
         Assertions.assertEquals(1L, dashboard.getActiveDemands());
         Assertions.assertEquals(1L, dashboard.getCompletedOrders());
         Assertions.assertEquals(4.0, dashboard.getAverageRating(), 0.0001);

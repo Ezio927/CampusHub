@@ -4,7 +4,10 @@
     <div class="tabs"><div class="tab" :class="{on:role==='PUBLISHER'}" @click="role='PUBLISHER';load()">我发布的</div><div class="tab" :class="{on:role==='ACCEPTOR'}" @click="role='ACCEPTOR';load()">我接单的</div></div>
     <div v-if="list.length===0" class="empty">📋<p class="mt-sm">暂无订单</p></div>
     <div v-for="o in list" :key="o.id" class="oc" @click="goDetail(o.id)">
-      <div class="flex-between"><div><div class="text-bold">订单 #{{ o.id }}</div><div class="text-sm text-muted">需求ID: {{ o.demandId }}</div></div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
+      <div class="flex-between">
+        <div><div class="text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</div><div class="text-sm text-muted">{{ o.publisherName }} → {{ o.acceptorName }}</div></div>
+        <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'积分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
+      </div>
     </div>
   </div>
 </template>
@@ -25,4 +28,5 @@ onMounted(load)
 .tab.on{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .oc{background:#fff;border-radius:14px;padding:18px;margin-bottom:10px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
 .oc:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);transform:translateY(-1px)}
+.dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

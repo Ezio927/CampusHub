@@ -11,6 +11,11 @@ public class OrderDto {
     private Long demandId;
     private Long publisherId;
     private Long acceptorId;
+    private String demandTitle;
+    private String publisherName;
+    private String acceptorName;
+    private Integer rewardAmount;
+    private String rewardType;
     private OrderStatus status;
     private LocalDateTime acceptedAt;
     private LocalDateTime completedAt;
@@ -72,6 +77,17 @@ public class OrderDto {
     public void setAcceptorId(Long acceptorId) {
         this.acceptorId = acceptorId;
     }
+
+    public String getDemandTitle() { return demandTitle; }
+    public void setDemandTitle(String demandTitle) { this.demandTitle = demandTitle; }
+    public String getPublisherName() { return publisherName; }
+    public void setPublisherName(String publisherName) { this.publisherName = publisherName; }
+    public String getAcceptorName() { return acceptorName; }
+    public void setAcceptorName(String acceptorName) { this.acceptorName = acceptorName; }
+    public Integer getRewardAmount() { return rewardAmount; }
+    public void setRewardAmount(Integer rewardAmount) { this.rewardAmount = rewardAmount; }
+    public String getRewardType() { return rewardType; }
+    public void setRewardType(String rewardType) { this.rewardType = rewardType; }
 
     public OrderStatus getStatus() {
         return status;

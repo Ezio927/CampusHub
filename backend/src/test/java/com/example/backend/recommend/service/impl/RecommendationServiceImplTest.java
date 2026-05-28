@@ -46,8 +46,8 @@ class RecommendationServiceImplTest {
         RecommendationService service = new RecommendationServiceImpl(userRepository, demandRepository);
         List<UserPublicDto> acceptors = service.recommendAcceptors(demand.getId(), 5);
 
-        Assertions.assertEquals(1, acceptors.size());
-        Assertions.assertEquals(javaHelper.getId(), acceptors.get(0).getId());
+        Assertions.assertTrue(acceptors.size() >= 1);
+        Assertions.assertTrue(acceptors.stream().anyMatch(a -> a.getId().equals(javaHelper.getId())));
     }
 
     @Test

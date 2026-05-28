@@ -48,6 +48,34 @@ public class UserRepository {
         admin.setCreatedAt(LocalDateTime.now());
         admin.setUpdatedAt(admin.getCreatedAt());
         save(admin);
+
+        // 测试用临时用户 1
+        User u1 = new User();
+        u1.setId(idGenerator.getAndIncrement());
+        u1.setUsername("1");
+        u1.setPasswordHash(PasswordHasher.hash("1"));
+        u1.setStudentId("TEST0001");
+        u1.setRealName("测试用户1");
+        u1.setCreditScore(100);
+        u1.setRole(UserRole.STUDENT);
+        u1.setStatus(UserStatus.ACTIVE);
+        u1.setCreatedAt(LocalDateTime.now());
+        u1.setUpdatedAt(u1.getCreatedAt());
+        save(u1);
+
+        // 测试用临时用户 2
+        User u2 = new User();
+        u2.setId(idGenerator.getAndIncrement());
+        u2.setUsername("2");
+        u2.setPasswordHash(PasswordHasher.hash("2"));
+        u2.setStudentId("TEST0002");
+        u2.setRealName("测试用户2");
+        u2.setCreditScore(100);
+        u2.setRole(UserRole.STUDENT);
+        u2.setStatus(UserStatus.ACTIVE);
+        u2.setCreatedAt(LocalDateTime.now());
+        u2.setUpdatedAt(u2.getCreatedAt());
+        save(u2);
     }
 
     public synchronized User save(User user) {

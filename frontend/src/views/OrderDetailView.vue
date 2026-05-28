@@ -1,11 +1,11 @@
 <template>
   <div class="page" v-if="o"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div class="dc">
-      <div class="flex-between mb-md"><h1 class="text-lg text-bold">订单 #{{ o.id }}</h1><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
+      <div class="flex-between mb-md"><h1 class="text-lg text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</h1><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
       <div class="grid-2 mb-md">
-        <div class="mi"><span class="lbl">需求ID</span><span class="val">{{ o.demandId }}</span></div>
-        <div class="mi"><span class="lbl">发布者ID</span><span class="val">{{ o.publisherId }}</span></div>
-        <div class="mi"><span class="lbl">接单者ID</span><span class="val">{{ o.acceptorId }}</span></div>
+        <div class="mi"><span class="lbl">发布者</span><span class="val">{{ o.publisherName || 'ID:'+o.publisherId }}</span></div>
+        <div class="mi"><span class="lbl">接单者</span><span class="val">{{ o.acceptorName || 'ID:'+o.acceptorId }}</span></div>
+        <div class="mi"><span class="lbl">状态</span><span class="val">{{ st(o.status) }}</span></div>
         <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ o.createdAt?.substring(0,10) }}</span></div>
       </div>
     </div>
