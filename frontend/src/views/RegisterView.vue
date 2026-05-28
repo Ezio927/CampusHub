@@ -31,3 +31,4 @@ async function handleRegister() {
   finally { loading.value = false }
 }
 </script>
+<style scoped>@import './RegisterView.css';</style>

@@ -21,3 +21,4 @@ function statusColor(s) { return {PENDING_ACCEPT:'#3b82f6',ACCEPTED:'#06b6d4',IN
 async function load() { const r = await orderAPI.list({ role: role.value }); orders.value = r.data || [] }
 onMounted(load)
 </script>
+<style scoped>@import './MyOrdersView.css';</style>

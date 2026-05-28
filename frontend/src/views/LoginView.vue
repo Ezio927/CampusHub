@@ -1,13 +1,15 @@
 <template>
-  <div class="page-container">
-    <h2 style="margin-bottom:24px;text-align:center">登录 CampusHub</h2>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group"><label>用户名</label><input v-model="username" placeholder="请输入用户名" required /></div>
-      <div class="form-group"><label>密码</label><input v-model="password" type="password" placeholder="请输入密码" required /></div>
-      <p v-if="error" class="error-msg">{{ error }}</p>
-      <button type="submit" class="btn-primary" style="width:100%;padding:10px" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
-    </form>
-    <p style="text-align:center;margin-top:16px">还没有账号？<router-link to="/register">立即注册</router-link></p>
+  <div class="login-wrap">
+    <h1 class="login-title">登录 CampusHub</h1>
+    <div class="login-card">
+      <form @submit.prevent="handleLogin">
+        <div class="form-group"><label>用户名</label><input v-model="username" placeholder="请输入用户名" required /></div>
+        <div class="form-group"><label>密码</label><input v-model="password" type="password" placeholder="请输入密码" required /></div>
+        <p v-if="error" class="form-error">{{ error }}</p>
+        <button type="submit" class="btn-primary btn-block btn-lg" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
+      </form>
+    </div>
+    <p class="login-footer">还没有账号？<router-link to="/register">立即注册</router-link></p>
   </div>
 </template>
 <script setup>
@@ -29,3 +31,4 @@ async function handleLogin() {
   finally { loading.value = false }
 }
 </script>
+<style scoped>@import './LoginView.css';</style>

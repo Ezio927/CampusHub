@@ -32,3 +32,4 @@ async function acceptDemand() { try { await orderAPI.accept({ demandId: demand.v
 async function cancelDemand() { try { await demandAPI.cancel(demand.value.id); router.go(0) } catch(e) { alert(e.message) } }
 onMounted(async () => { const r = await demandAPI.getDetail(route.params.id); demand.value = r.data })
 </script>
+<style scoped>@import './DemandDetailView.css';</style>

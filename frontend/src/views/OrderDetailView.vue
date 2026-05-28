@@ -40,3 +40,4 @@ async function doAction(key) {
 }
 onMounted(async () => { const r = await orderAPI.getDetail(route.params.id); order.value = r.data })
 </script>
+<style scoped>@import './OrderDetailView.css';</style>

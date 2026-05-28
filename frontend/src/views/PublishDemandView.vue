@@ -28,3 +28,4 @@ async function publish() {
   finally { loading.value = false }
 }
 </script>
+<style scoped>@import './PublishDemandView.css';</style>

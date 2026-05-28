@@ -20,3 +20,4 @@ async function ban(id) { await adminAPI.banUser(id); search() }
 async function unban(id) { await adminAPI.unbanUser(id); search() }
 search()
 </script>
+<style scoped>@import './UserManageView.css';</style>

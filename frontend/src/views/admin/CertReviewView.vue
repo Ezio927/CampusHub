@@ -23,3 +23,4 @@ async function review(id, approve) {
 }
 load()
 </script>
+<style scoped>@import './CertReviewView.css';</style>

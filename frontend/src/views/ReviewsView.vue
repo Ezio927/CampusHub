@@ -16,3 +16,4 @@ const route = useRoute()
 const reviews = ref([])
 onMounted(async () => { const r = await reviewAPI.listByUser(route.params.userId); reviews.value = r.data || [] })
 </script>
+<style scoped>@import './ReviewsView.css';</style>

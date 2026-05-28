@@ -23,3 +23,4 @@ async function send() { if (!text.value.trim()) return; await chatAPI.sendMessag
 async function load() { const r = await chatAPI.getMessages(route.params.id); messages.value = r.data || [] }
 onMounted(load)
 </script>
+<style scoped>@import './ChatView.css';</style>

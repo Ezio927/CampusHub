@@ -1,0 +1,5 @@
+.chat-messages { margin-bottom: 12px; }
+.chat-bubble { margin-bottom: 8px; padding: 10px 14px; border-radius: var(--radius); max-width: 80%; }
+.chat-mine { background: var(--primary-light); margin-left: auto; }
+.chat-other { background: var(--card); border:1px solid var(--border); }
+.chat-input-wrap { display: flex; gap: 8px; margin-top: 12px; }

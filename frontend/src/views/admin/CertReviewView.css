@@ -1,0 +1,3 @@
+.cert-item { margin-bottom: 8px; }
+.cert-info { flex: 2; }
+.cert-actions { display: flex; gap: 6px; }

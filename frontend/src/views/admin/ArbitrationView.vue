@@ -25,3 +25,4 @@ async function resolve(id, action) {
 async function load() { const r = await arbAPI.listPending(); tickets.value = r.data || [] }
 onMounted(load)
 </script>
+<style scoped>@import './ArbitrationView.css';</style>
