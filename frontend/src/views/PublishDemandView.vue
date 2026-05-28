@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">发布需求</h1>
     <div class="pc"><form @submit.prevent="pub">
       <div class="form-group"><label>标题 *</label><input v-model="f.title" placeholder="简单描述你要什么帮助" required /></div>

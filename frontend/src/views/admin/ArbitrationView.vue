@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">⚖️ 仲裁处理</h1>
     <div v-if="list.length===0" class="empty">暂无待处理仲裁</div>
     <div v-for="t in list" :key="t.id" class="card">

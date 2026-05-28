@@ -1,5 +1,5 @@
 <template>
-  <div class="page" v-if="o">
+  <div class="page" v-if="o"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div class="dc">
       <div class="flex-between mb-md"><h1 class="text-lg text-bold">订单 #{{ o.id }}</h1><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
       <div class="grid-2 mb-md">

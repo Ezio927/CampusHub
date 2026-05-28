@@ -1,5 +1,5 @@
 <template>
-  <div class="page" v-if="d">
+  <div class="page" v-if="d"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div class="dc">
       <div class="flex-between mb-md"><h1>{{ d.title }}</h1><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
       <div class="grid-2 mb-md">

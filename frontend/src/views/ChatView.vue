@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div v-if="msgs.length===0" class="empty">💬<p class="mt-sm">暂无消息</p></div>
     <div v-for="m in msgs" :key="m.id" class="msg" :class="{mine:m.senderId===auth.user?.id}">
       <p><strong>{{ m.senderId===auth.user?.id?'我':'对方' }}</strong> <small class="text-muted">{{ m.createdAt?.substring(11,16) }}</small></p>

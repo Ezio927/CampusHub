@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">🪪 认证审核</h1>
     <div v-if="list.length===0" class="empty">暂无待审核认证</div>
     <div v-for="c in list" :key="c.id" class="card flex-between">
@@ -14,7 +14,7 @@
 <script setup>
 import {ref} from 'vue';import {certAPI} from '@/api/certifications'
 const list=ref([])
-async function load(){try{const r=await certAPI.mine();if(r.data)list.value=[r.data]}catch{list.value=[]}}
+async function load(){try{const r=await certAPI.pending();list.value=r.data||[]}catch{list.value=[]}}
 async function review(id,approve){const reason=approve?null:prompt('驳回原因');await certAPI.review(id,{approve,reason});load()}
 load()
 </script>

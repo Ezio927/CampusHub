@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">用户评价</h1>
     <div v-if="list.length===0" class="empty">⭐<p class="mt-sm">暂无评价</p></div>
     <div v-for="r in list" :key="r.id" class="card">
