@@ -18,14 +18,14 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 const r = useRouter()
-const a = useAuthStore()
+const auth = useAuthStore()
 const username = ref('')
 const password = ref('')
 const err = ref('')
 const ing = ref(false)
 async function login() {
   err.value = ''; ing.value = true
-  try { await a.login(username.value, password.value); r.push('/') }
+  try { await auth.login(username.value, password.value); r.push('/') }
   catch (e) { err.value = e.message || '登录失败' }
   finally { ing.value = false }
 }

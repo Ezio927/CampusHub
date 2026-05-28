@@ -25,7 +25,7 @@ button{cursor:pointer;border:none;border-radius:var(--radius-sm);padding:10px 20
 .form-group{margin-bottom:16px}.form-group label{display:block;margin-bottom:6px;font-weight:600;font-size:14px}
 .form-error{color:var(--danger);font-size:13px;padding:10px 14px;background:var(--danger-light);border-radius:var(--radius-sm)}
 .badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;color:#fff}
-.page{padding:20px 16px 100px;max-width:720px;margin:0 auto}
+.page{padding:24px 24px 40px;max-width:1100px;margin:0 auto}
 .page-title{font-size:22px;font-weight:700;margin-bottom:20px}
 .empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
 .flex{display:flex;align-items:center}.flex-between{display:flex;justify-content:space-between;align-items:center}.flex-wrap{flex-wrap:wrap}.flex-1{flex:1}
@@ -33,4 +33,3 @@ button{cursor:pointer;border:none;border-radius:var(--radius-sm);padding:10px 20
 .text-center{text-align:center}.text-secondary{color:var(--text-secondary)}.text-muted{color:var(--text-muted)}.text-sm{font-size:13px}.text-bold{font-weight:600}.text-lg{font-size:18px}
 .mt-sm{margin-top:8px}.mt-md{margin-top:16px}.mb-sm{margin-bottom:8px}.mb-md{margin-bottom:16px}
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(max-width:768px){.page{padding:12px 12px 80px}}

@@ -33,15 +33,15 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
-const ro=useRouter();const a=useAuthStore()
+const ro=useRouter();const auth=useAuthStore()
 const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
-const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[a.user?.status]||a.user?.status))
+const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
 async function update(){const d={};if(e.realName)d.realName=e.realName;if(e.phone)d.phone=e.phone;if(e.email)d.email=e.email;try{await userAPI.update(d)}catch(e){alert(e.message)}}
 async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){alert(e.message)}}
 async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data}catch{cert.value=null}}
-function logout(){a.logout();ro.push('/login')}
-onMounted(async()=>{await a.fetchUser();await loadCert()})
+function logout(){auth.logout();ro.push('/login')}
+onMounted(async()=>{await auth.fetchUser();await loadCert()})
 </script>
 <style scoped>
 .ph{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:18px;padding:28px;color:#fff;text-align:center;margin-bottom:18px}
