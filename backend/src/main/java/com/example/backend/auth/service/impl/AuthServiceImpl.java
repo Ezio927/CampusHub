@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     public UserDto register(RegisterRequest req) {
         if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())
                 || isBlank(req.getStudentId()) || isBlank(req.getRealName())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "username/password/studentId/realName cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码/学号/姓名不能为空");
         }
         if (userRepository.existsByUsername(req.getUsername())) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
@@ -59,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenResponse login(LoginRequest req) {
         if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "username/password cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码不能为空");
         }
 
         User user = userRepository.findByUsername(req.getUsername())
@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
         }
         if (!PasswordHasher.matches(req.getPassword(), user.getPasswordHash())) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "invalid username or password");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
 
         String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole());

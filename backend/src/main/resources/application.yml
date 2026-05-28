@@ -20,7 +20,7 @@ server:
 # --- JWT 配置 ---
 jwt:
   secret: ${JWT_SECRET:campushub-dev-secret-key-change-in-production}
-  expiration: 3600000   # 1 小时（毫秒）
+  expiration-minutes: 60   # 1 小时
 
 # --- Swagger / OpenAPI ---
 springdoc:

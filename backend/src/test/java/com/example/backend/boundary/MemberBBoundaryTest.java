@@ -494,7 +494,7 @@ class MemberBBoundaryTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/demands")
                         .param("category", "UNKNOWN")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code").value(ErrorCode.BAD_REQUEST.getCode()));
     }
 

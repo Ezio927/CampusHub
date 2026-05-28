@@ -88,7 +88,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private User requireUser(Long userId) {
         if (userId == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "userId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户ID不能为空");
         }
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

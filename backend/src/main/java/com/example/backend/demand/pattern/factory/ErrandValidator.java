@@ -11,7 +11,7 @@ public class ErrandValidator implements DemandValidator {
     @Override
     public void validate(DemandCreateDto param) {
         if (param == null || isBlank(param.getLocationTag())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "errand demand requires locationTag");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "跑腿需求必须填写位置");
         }
     }
 

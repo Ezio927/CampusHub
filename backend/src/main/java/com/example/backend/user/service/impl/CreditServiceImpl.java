@@ -45,7 +45,7 @@ public class CreditServiceImpl implements CreditService {
     @Override
     public CreditRecordDto addCredit(Long userId, int amount, String reason, Long relatedOrderId) {
         if (amount <= 0) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "credit increase amount must be greater than 0");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "加分值必须大于0");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -66,7 +66,7 @@ public class CreditServiceImpl implements CreditService {
     @Override
     public CreditRecordDto deductCredit(Long userId, int amount, String reason, Long relatedOrderId) {
         if (amount <= 0) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "credit deduction amount must be greater than 0");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "扣分值必须大于0");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

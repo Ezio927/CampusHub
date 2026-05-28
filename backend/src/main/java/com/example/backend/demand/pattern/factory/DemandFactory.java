@@ -27,11 +27,11 @@ public class DemandFactory {
 
     public Demand createDemand(DemandCreateDto param) {
         if (param == null || param.getCategory() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "category is required");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "需求分类不能为空");
         }
         DemandValidator validator = validatorMap.get(param.getCategory());
         if (validator == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "unsupported category");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "不支持的需求分类");
         }
         validator.validate(param);
 

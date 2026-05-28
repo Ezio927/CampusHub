@@ -48,10 +48,10 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationDto getOrCreate(Long userId, CreateConversationDto req) {
         if (req == null || req.getTargetUserId() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "targetUserId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "目标用户不能为空");
         }
         if (userId == null || userId.equals(req.getTargetUserId())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "conversation requires two different users");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "不能与自己创建会话");
         }
         userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         userRepository.findById(req.getTargetUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -81,7 +81,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public MessageDto sendMessage(Long conversationId, Long senderId, SendMessageDto req) {
         if (req == null || req.getContent() == null || req.getContent().trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "message content cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "消息内容不能为空");
         }
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));

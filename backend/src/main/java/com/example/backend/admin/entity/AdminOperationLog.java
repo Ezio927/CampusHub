@@ -60,30 +60,6 @@ public class AdminOperationLog {
         this.detail = detail;
     }
 
-    public Long getOperatorId() {
-        return adminId;
-    }
-
-    public void setOperatorId(Long operatorId) {
-        this.adminId = operatorId;
-    }
-
-    public String getAction() {
-        return operation;
-    }
-
-    public void setAction(String action) {
-        this.operation = action;
-    }
-
-    public String getRemark() {
-        return detail;
-    }
-
-    public void setRemark(String remark) {
-        this.detail = remark;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

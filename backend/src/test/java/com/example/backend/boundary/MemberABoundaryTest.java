@@ -198,7 +198,7 @@ class MemberABoundaryTest {
     void shouldBuildApiResponsesCorrectly() {
         ApiResponse<String> success = ApiResponse.success("hello");
         Assertions.assertEquals(20000, success.getCode());
-        Assertions.assertEquals("success", success.getMessage());
+        Assertions.assertEquals(ErrorCode.SUCCESS.getMessage(), success.getMessage());
         Assertions.assertEquals("hello", success.getData());
 
         ApiResponse<Void> empty = ApiResponse.success();
@@ -254,20 +254,20 @@ class MemberABoundaryTest {
     void shouldHandleIllegalArgumentException() {
         GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-        ResponseEntity<ApiResponse<Void>> entity = handler.handleIllegalArgumentException(new IllegalArgumentException("bad arg"));
+        ResponseEntity<ApiResponse<Void>> entity = handler.handleIllegalArgument(new IllegalArgumentException("bad arg"));
         ApiResponse<Void> body = entity.getBody();
         Assertions.assertNotNull(body);
         Assertions.assertEquals(ErrorCode.BAD_REQUEST.getCode(), body.getCode());
     }
 
     @Test
-    void shouldHandleGenericException() {
+    void shouldHandleNumberFormatException() {
         GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-        ResponseEntity<ApiResponse<Void>> entity = handler.handleException(new RuntimeException("boom"));
+        ResponseEntity<ApiResponse<Void>> entity = handler.handleNumberFormat(new NumberFormatException("bad number"));
         ApiResponse<Void> body = entity.getBody();
         Assertions.assertNotNull(body);
-        Assertions.assertEquals(ErrorCode.SERVER_ERROR.getCode(), body.getCode());
+        Assertions.assertEquals(ErrorCode.INVALID_PARAM.getCode(), body.getCode());
     }
 
     // ==========================================
@@ -707,7 +707,7 @@ class MemberABoundaryTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"alice\",\"password\":\"wrong\"}")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isUnauthorized())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.code")
                         .value(ErrorCode.UNAUTHORIZED.getCode()));
     }

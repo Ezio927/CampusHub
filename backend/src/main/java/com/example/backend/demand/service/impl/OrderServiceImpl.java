@@ -97,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto acceptDemand(Long userId, AcceptOrderDto req) {
         User acceptor = requireActiveUser(userId);
         if (req == null || req.getDemandId() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "demandId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "需求ID不能为空");
         }
         if (!creditService.checkCredit(userId)) {
             throw new BusinessException(ErrorCode.CREDIT_INSUFFICIENT);
@@ -108,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(ErrorCode.DEMAND_NOT_FOUND);
         }
         if (demand.getPublisherId() == null || demand.getPublisherId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "cannot accept own demand");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "不能接自己发布的需求");
         }
         if (demand.getStatus() != DemandStatus.OPEN) {
             throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
@@ -157,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
         } else if ("PUBLISHER".equalsIgnoreCase(role)) {
             orders = orderRepository.findByPublisherIdAndStatus(userId, orderStatus);
         } else {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "role must be PUBLISHER or ACCEPTOR");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "角色参数无效");
         }
         return orders.stream().map(OrderDto::from).collect(Collectors.toList());
     }
@@ -171,7 +171,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto deliver(Long orderId, Long userId) {
         Order order = requireParticipantOrder(orderId, userId);
         if (!order.isAcceptor(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "only acceptor can mark delivered");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "只有接单者才能标记送达");
         }
         orderStateContext.assertCanOperate(order, OrderAction.MARK_DELIVERED);
 
@@ -189,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = requireParticipantOrder(orderId, userId);
         orderStateContext.assertCanOperate(order, OrderAction.CONFIRM_COMPLETED);
         if (!order.isPublisher(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "only publisher can confirm completion");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "只有发布者才能确认完成");
         }
 
         OrderStatus fromStatus = order.getStatus();
@@ -284,7 +284,7 @@ public class OrderServiceImpl implements OrderService {
         try {
             return OrderStatus.valueOf(status.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "invalid order status");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "订单状态无效");
         }
     }
 

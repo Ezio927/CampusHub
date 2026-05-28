@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,7 +30,12 @@ public class AdminOperationLogRepository {
 
     public List<AdminOperationLog> findAll() {
         return storage.values().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toCollection(ArrayList::new));
+                .sorted((a, b) -> {
+                    int cmp = b.getCreatedAt().compareTo(a.getCreatedAt());
+                    return cmp != 0 ? cmp : Long.compare(b.getId(), a.getId());
+                })
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toCollection(ArrayList::new),
+                        Collections::unmodifiableList));
     }
 }

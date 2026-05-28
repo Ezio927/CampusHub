@@ -128,10 +128,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req) {
         if (certificationService == null) {
-            throw new BusinessException(ErrorCode.SERVER_ERROR, "certification service is unavailable");
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "认证服务不可用");
         }
         if (req == null || req.getApprove() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "approve cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "请选择通过或拒绝");
         }
         CertificationDto reviewed = certificationService.review(
                 certificationId, req.getApprove(), req.getReason(), adminId);
@@ -143,7 +143,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ArbitrationDto resolveArbitration(Long ticketId, Long adminId, ArbitrationResolveDto req) {
         if (arbitrationService == null) {
-            throw new BusinessException(ErrorCode.SERVER_ERROR, "arbitration service is unavailable");
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "仲裁服务不可用");
         }
         ArbitrationDto resolved = arbitrationService.resolve(ticketId, adminId, req);
         String detail = req == null ? null : req.getAction() + ": " + req.getResolution();
