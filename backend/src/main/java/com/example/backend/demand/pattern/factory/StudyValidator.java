@@ -11,7 +11,7 @@ public class StudyValidator implements DemandValidator {
     @Override
     public void validate(DemandCreateDto param) {
         if (param == null || param.getUrgentDeadline() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "study demand requires urgentDeadline");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "学习需求必须设置截止时间");
         }
     }
 }

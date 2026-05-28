@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserCreateDto req) {
         if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())
                 || isBlank(req.getStudentId()) || isBlank(req.getRealName())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "username/password/studentId/realName cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码/学号/姓名不能为空");
         }
         if (userRepository.existsByUsername(req.getUsername())) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateProfile(Long userId, UserUpdateDto req) {
         if (req == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "request body cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "请求体不能为空");
         }
         User user = findUser(userId);
         if (req.getRealName() != null) {
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     private User findUser(Long userId) {
         if (userId == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "userId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户ID不能为空");
         }
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

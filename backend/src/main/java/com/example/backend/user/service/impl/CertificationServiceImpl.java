@@ -41,10 +41,10 @@ public class CertificationServiceImpl implements CertificationService {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
         }
         if (req == null || req.getCertType() == null || isBlank(req.getStudentId())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "certType and studentId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "认证类型和学号不能为空");
         }
         if (req.getCertType() == CertType.STUDENT_CARD && isBlank(req.getCardImageUrl())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "student card certification requires cardImageUrl");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "校园卡认证需要上传图片");
         }
 
         certificationRepository.findByUserId(userId).ifPresent(existing -> {
@@ -86,13 +86,13 @@ public class CertificationServiceImpl implements CertificationService {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         if (reviewer.getRole() != UserRole.ADMIN) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "admin only");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "仅管理员可操作");
         }
 
         Certification certification = certificationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CERTIFICATION_NOT_FOUND));
         if (certification.getStatus() != CertStatus.PENDING) {
-            throw new BusinessException(ErrorCode.CONFLICT, "certification is not pending");
+            throw new BusinessException(ErrorCode.CONFLICT, "该认证已处理");
         }
 
         User applicant = userRepository.findById(certification.getUserId())
@@ -103,7 +103,7 @@ public class CertificationServiceImpl implements CertificationService {
             applicant.setStatus(UserStatus.ACTIVE);
         } else {
             if (isBlank(reason)) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "reject reason is required");
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "请填写拒绝原因");
             }
             certification.reject(reviewerId, reason);
             applicant.setStatus(UserStatus.PENDING_CERT);

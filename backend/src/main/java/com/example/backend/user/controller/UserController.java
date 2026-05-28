@@ -8,6 +8,10 @@ import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.dto.UserUpdateDto;
 import com.example.backend.user.service.CreditService;
 import com.example.backend.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@SecurityRequirement(name = "BearerAuth")
+@Tag(name = "用户", description = "个人信息查询、更新、信用记录")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,21 +35,26 @@ public class UserController {
         this.creditService = creditService;
     }
 
+    @Operation(summary = "查看我的个人信息")
     @GetMapping("/me")
     public ApiResponse<UserDto> getMe() {
         return ApiResponse.success(userService.getProfile(AuthContext.requireUserId()));
     }
 
+    @Operation(summary = "更新我的个人信息")
     @PutMapping("/me")
     public ApiResponse<UserDto> updateMe(@RequestBody UserUpdateDto request) {
         return ApiResponse.success(userService.updateProfile(AuthContext.requireUserId(), request));
     }
 
+    @Operation(summary = "查看用户公开信息（无需登录）")
     @GetMapping("/{id}")
-    public ApiResponse<UserPublicDto> getPublicInfo(@PathVariable Long id) {
+    public ApiResponse<UserPublicDto> getPublicInfo(
+            @Parameter(description = "用户ID") @PathVariable Long id) {
         return ApiResponse.success(userService.getPublicInfo(id));
     }
 
+    @Operation(summary = "查看我的信用记录")
     @GetMapping("/me/credit-records")
     public ApiResponse<List<CreditRecordDto>> getMyCreditRecords() {
         return ApiResponse.success(creditService.listRecords(AuthContext.requireUserId()));

@@ -32,7 +32,7 @@ public class User {
         if (amount <= 0) {
             return;
         }
-        this.creditScore = Math.max(0, getCreditScore() + amount);
+        this.creditScore = getCreditScore() + amount;
         this.updatedAt = LocalDateTime.now();
     }
 

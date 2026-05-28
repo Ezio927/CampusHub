@@ -11,7 +11,7 @@ public class SecondhandValidator implements DemandValidator {
     @Override
     public void validate(DemandCreateDto param) {
         if (param == null || param.getImageUrls() == null || param.getImageUrls().isEmpty()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "secondhand demand requires at least one image");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "二手需求必须上传至少一张图片");
         }
     }
 }

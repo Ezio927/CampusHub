@@ -40,15 +40,15 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewDto submitReview(Long userId, ReviewSubmitDto req) {
         if (req == null || req.getOrderId() == null || req.getRevieweeId() == null || req.getRating() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "missing review fields");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "评价信息不完整");
         }
         if (req.getRating() < 1 || req.getRating() > 5) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "rating must be between 1 and 5");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "评分必须在1到5之间");
         }
         Order order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         if (order.getStatus() != OrderStatus.COMPLETED && order.getStatus() != OrderStatus.PENDING_CONFIRM) {
-            throw new BusinessException(ErrorCode.CONFLICT, "order is not finished");
+            throw new BusinessException(ErrorCode.CONFLICT, "订单未完成，无法评价");
         }
         reviewRepository.findByOrderIdAndReviewerId(req.getOrderId(), userId).ifPresent(review -> {
             throw new BusinessException(ErrorCode.REVIEW_DUPLICATED);

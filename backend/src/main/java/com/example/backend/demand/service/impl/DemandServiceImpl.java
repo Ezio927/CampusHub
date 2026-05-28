@@ -87,7 +87,7 @@ public class DemandServiceImpl implements DemandService {
     @Override
     public void updateStatus(Long demandId, DemandStatus status) {
         if (status == null) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "status cannot be null");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "状态不能为空");
         }
         Demand demand = requireDemand(demandId);
         demand.setStatus(status);
@@ -99,7 +99,7 @@ public class DemandServiceImpl implements DemandService {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
         if (!demand.isOpen()) {
-            throw new BusinessException(ErrorCode.CONFLICT, "demand is not open");
+            throw new BusinessException(ErrorCode.CONFLICT, "需求状态不是开放中");
         }
 
         if (req != null) {
@@ -144,7 +144,7 @@ public class DemandServiceImpl implements DemandService {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
         if (!demand.isOpen()) {
-            throw new BusinessException(ErrorCode.CONFLICT, "demand is not open");
+            throw new BusinessException(ErrorCode.CONFLICT, "需求状态不是开放中");
         }
         demand.cancel();
         demandRepository.save(demand);
@@ -205,7 +205,7 @@ public class DemandServiceImpl implements DemandService {
 
     private Demand requireDemand(Long demandId) {
         if (demandId == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "demandId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "需求ID不能为空");
         }
         return demandRepository.findById(demandId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DEMAND_NOT_FOUND));

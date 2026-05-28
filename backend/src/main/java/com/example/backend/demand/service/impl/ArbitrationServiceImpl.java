@@ -53,7 +53,7 @@ public class ArbitrationServiceImpl implements ArbitrationService {
     @Override
     public ArbitrationDto createTicket(Long reporterId, ArbitrationCreateDto req) {
         if (req == null || req.getOrderId() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "orderId cannot be blank");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "订单ID不能为空");
         }
         return createTicket(reporterId, req.getOrderId(), req.getReviewId(), req.getReason(), req.getEvidenceUrls());
     }
@@ -76,7 +76,7 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         ArbitrationTicket ticket = arbitrationTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         if (ticket.getStatus() != ArbitrationStatus.PENDING && ticket.getStatus() != ArbitrationStatus.PROCESSING) {
-            throw new BusinessException(ErrorCode.CONFLICT, "arbitration is not pending");
+            throw new BusinessException(ErrorCode.CONFLICT, "仲裁工单已处理");
         }
         String action = req == null ? null : req.getAction();
         if ("DISMISS".equalsIgnoreCase(action)) {

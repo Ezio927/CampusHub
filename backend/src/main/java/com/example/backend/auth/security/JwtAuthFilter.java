@@ -26,9 +26,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/login")
+        String method = request.getMethod();
+
+        if (path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
-                || path.startsWith("/error");
+                || path.startsWith("/error")
+                || path.startsWith("/api-docs")
+                || path.startsWith("/docs")) {
+            return true;
+        }
+
+        // Public GET: user profile, demand search, demand detail
+        if ("GET".equalsIgnoreCase(method)) {
+            if (path.equals("/api/users") || (path.startsWith("/api/users/") && !path.startsWith("/api/users/me"))) return true;
+            if (path.equals("/api/demands") || path.startsWith("/api/demands/")) return true;
+        }
+
+        return false;
     }
 
     @Override

@@ -11,7 +11,7 @@ public class SkillValidator implements DemandValidator {
     @Override
     public void validate(DemandCreateDto param) {
         if (param == null || param.getTagIds() == null || param.getTagIds().isEmpty()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "skill demand requires at least one tag");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "技能需求必须选择至少一个标签");
         }
     }
 }

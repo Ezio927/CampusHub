@@ -1,25 +1,7 @@
 # ===========================================
-# 开发环境配置
+# 开发环境配置（纯内存运行，无需数据库）
 # 使用方式：不改 application.yml 的 profile，IDE 启动默认 dev
 # ===========================================
-
-spring:
-  datasource:
-    url: jdbc:h2:mem:campushub;DB_CLOSE_DELAY=-1;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true           # http://localhost:8080/h2-console
-      path: /h2-console
-  jpa:
-    hibernate:
-      ddl-auto: create-drop   # 每次重启重建表结构
-    show-sql: true
-  sql:
-    init:
-      mode: always            # 启动时执行 schema.sql + data.sql
 
 logging:
   level:
