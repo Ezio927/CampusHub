@@ -2,7 +2,7 @@
 
 ## 0. 为什么用 Docker
 
-四个人的电脑上装的 MySQL 版本各不相同（5.7 / 8.0 / 甚至没装），Redis 在 Windows 上安装尤其折腾。Docker 让所有人在**完全一致的环境**里跑数据库，消除"我电脑上能跑，拉到你这就报错"的问题。
+四个人的电脑上装的 MySQL 版本各不相同（5.7 / 8.0 / 甚至没装），Redis 在 Windows 上安装尤其折腾。Docker 让所有人在**完全一致的环境**里跑数据库，消除"我电脑上能跑"的问题。
 
 **本项目的 Docker 只包了 MySQL 和 Redis**。后端和前端仍然在宿主机上原生运行（IDEA + 终端），方便打断点调试。
 
@@ -16,7 +16,7 @@
 2. 安装时勾选 "Use WSL 2 instead of Hyper-V"（推荐）
 3. 安装完成后重启电脑
 4. 启动 Docker Desktop，等待右下角图标变绿
-5. 打开终端（PowerShell 或 Git Bash），验证：
+5. 打开终端验证：
 
 ```bash
 docker --version
@@ -40,16 +40,26 @@ SECIITask/
 ├── docker-compose.yml    # 容器编排配置
 ├── .env                  # 环境变量（密码等，不提交 git）
 ├── .env.example          # 环境变量模板（提交 git 供队友参考）
+├── backend/src/main/resources/
+│   ├── application.yml           # 主配置（默认 dev 用 H2）
+│   ├── application-dev.yml       # 开发环境（H2，免 Docker）
+│   ├── application-docker.yml    # Docker 环境（连接 MySQL）
+│   └── schema.sql                # MySQL 建表脚本（容器启动时自动执行）
 ```
 
 `.env` 里可以改密码和端口，默认值：
 
 ```env
+# --- MySQL（宿主机 3307 → 容器 3306）---
 DB_ROOT_PASSWORD=campushub123
 DB_NAME=campushub
-DB_PORT=3306
+DB_PORT=3307
+
+# --- Redis ---
 REDIS_PORT=6379
 ```
+
+> **关于端口**：宿主机用 3307 是为了避免和本机已有的 MySQL 冲突，Docker 内部容器还是 3306。
 
 ---
 
@@ -75,7 +85,7 @@ docker compose ps
 
 ```
 NAME                STATUS                    PORTS
-campushub-mysql     Up (healthy)   0.0.0.0:3306->3306/tcp
+campushub-mysql     Up (healthy)   0.0.0.0:3307->3306/tcp
 campushub-redis     Up (healthy)   0.0.0.0:6379->6379/tcp
 ```
 
@@ -84,8 +94,8 @@ campushub-redis     Up (healthy)   0.0.0.0:6379->6379/tcp
 ### 查看日志
 
 ```bash
-docker compose logs -f mysql       # MySQL 日志，-f 实时追踪
-docker compose logs -f redis       # Redis 日志
+docker compose logs -f mysql
+docker compose logs -f redis
 docker compose logs -f             # 两个一起看
 ```
 
@@ -113,26 +123,41 @@ docker compose restart mysql
 
 ---
 
-## 4. 连上数据库
+## 4. 启动后端（关键步骤）
 
-### 后端（Spring Boot）连接
+**默认 profile 是 `dev`（H2 内存库），连 Docker 必须切换 profile：**
 
-`application.properties` 里的 datasource 配成：
+### IDEA 启动
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/campushub?characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai
-spring.datasource.username=root
-spring.datasource.password=campushub123
+在 Run Configuration 的 Environment 里加：
+
+```
+spring.profiles.active=docker
 ```
 
-注意是 `localhost:3306`，因为后端跑在宿主机，MySQL 端口已经通过 Docker 映射出来了。
+### 命令行启动
+
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=docker
+```
+
+### 或者设环境变量
+
+```bash
+export SPRING_PROFILES_ACTIVE=docker
+```
+
+---
+
+## 5. 连上数据库
 
 ### 用数据库工具连接（Navicat / DataGrip / DBeaver）
 
 | 项 | 值 |
 |---|---|
 | Host | localhost |
-| Port | 3306 |
+| Port | 3307 |
 | User | root |
 | Password | campushub123 |
 | Database | campushub |
@@ -154,9 +179,9 @@ SELECT * FROM users;
 
 ---
 
-## 5. 初始化表结构
+## 6. 初始化表结构
 
-MySQL 容器首次启动时会自动执行 `backend/src/main/resources/schema.sql`（`docker-compose.yml` 里配了 volume 挂载）。往后如果改了 schema，需要重建：
+MySQL 容器首次启动时会自动执行 `backend/src/main/resources/schema.sql`（`docker-compose.yml` 里配了 volume 挂载到 `/docker-entrypoint-initdb.d/`）。往后如果改了 schema，需要重建：
 
 ```bash
 docker compose down -v
@@ -165,17 +190,17 @@ docker compose up -d
 
 ---
 
-## 6. 常见问题
+## 7. 常见问题
 
-### 端口冲突（3306 被占用）
+### 端口冲突（3307 被占用）
 
-如果本机已经装了 MySQL 占用了 3306，改 `.env`：
+改 `.env`：
 
 ```env
-DB_PORT=3307
+DB_PORT=3308
 ```
 
-然后 `docker compose down && docker compose up -d`，后端连接时用 `localhost:3307`。
+然后 `docker compose down && docker compose up -d`，同时改 `application-docker.yml` 里的 JDBC URL 端口。
 
 ### 容器启动失败
 
@@ -200,19 +225,26 @@ docker compose logs mysql | tail -20
 
 ### 改密码后怎么生效
 
-编辑 `.env` → `docker compose down && docker compose up -d`
+编辑 `.env` → `docker compose down -v && docker compose up -d`（必须 `-v`，因为密码已写入数据卷）
+
+### 后端启动后连不上 MySQL
+
+确认：
+1. `docker compose ps` 显示 MySQL 是 `healthy`
+2. 启动时指定了 `--spring.profiles.active=docker`（不是默认的 dev）
+3. `.env` 里的 `DB_PORT` 和 `application-docker.yml` 里的端口一致
 
 ---
 
-## 7. 完整开发环境启动顺序
+## 8. 完整开发环境启动顺序
 
 ```bash
 # 1. 启动数据库
 docker compose up -d
 
-# 2. 等 MySQL healthy（可以用 docker compose ps 确认）
+# 2. 等 MySQL healthy（docker compose ps 确认）
 
-# 3. IDEA 里启动 BackendApplication
+# 3. IDEA 里启动 BackendApplication（设 spring.profiles.active=docker）
 
 # 4. 前端终端
 cd frontend
@@ -229,7 +261,7 @@ docker compose down
 
 ---
 
-## 8. 快速参考卡片
+## 9. 快速参考卡片
 
 | 操作 | 命令 |
 |---|---|

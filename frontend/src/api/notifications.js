@@ -1,12 +1,2 @@
-/**
- * 通知接口 — 对应后端 NotificationController (/api/notifications)
- *
- * 对外接口：
- *   getList(page, size)  → GET  /api/notifications
- *   getUnreadCount()     → GET  /api/notifications/unread-count
- *   markRead(id)         → PUT  /api/notifications/{id}/read
- *   markAllRead()        → PUT  /api/notifications/read-all
- *
- * 待完成：
- *   - getUnreadCount 用于 NavBar 红点角标
- */
+import c from './client'
+export const notifAPI = { list: p => c.get('/notifications',{params:p}), unread: () => c.get('/notifications/unread-count'), read: id => c.put(`/notifications/${id}/read`), readAll: () => c.put('/notifications/read-all') }

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "实名认证", description = "提交认证、查看状态、审核认证")
 @RestController
@@ -43,6 +45,15 @@ public class CertificationController {
     @GetMapping("/me")
     public ApiResponse<CertificationDto> getMine() {
         return ApiResponse.success(certificationService.getMyCertification(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "查看待审核列表（管理员）")
+    @GetMapping("/pending")
+    public ApiResponse<List<CertificationDto>> listPending() {
+        if (!AuthContext.hasRole(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "仅管理员可操作");
+        }
+        return ApiResponse.success(certificationService.listPending());
     }
 
     @Operation(summary = "审核认证（管理员）")

@@ -1,21 +1,45 @@
-<!--
-  需求详情页 — 路由 /demands/:id
-
-  职责：展示需求完整信息 + 接单按钮入口
-
-  展示内容：
-    需求信息：标题、描述、板块、报酬、位置、发布时间
-    发布者信息：username、creditScore、平均评分（调 UserAvatar + CreditScore）
-    图片轮播（DemandImage[]）
-    标签列表
-
-  交互：
-    当前用户是发布者 → 编辑 / 取消按钮
-    当前用户是其他人   → "接单"按钮（需已实名 + 信用≥60）
-
-  待完成：
-    - 接单前二次确认弹窗
-    - 已接单/已完成状态下按钮置灰
-    - 40402 需求不存在处理
-    - "联系对方"入口 → 跳聊天页
--->
+<template>
+  <div class="page" v-if="d"><a href="#" class="back" @click.prevent="$router.back()">←</a>
+    <div class="dc">
+      <div class="flex-between mb-md"><h1>{{ d.title }}</h1><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
+      <div class="grid-2 mb-md">
+        <div class="mi"><span class="lbl">报酬</span><span class="val" style="color:var(--danger)">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'积分' }}</span></div>
+        <div class="mi"><span class="lbl">位置</span><span class="val">{{ d.locationTag||'不限' }}</span></div>
+        <div class="mi"><span class="lbl">状态</span><span class="val"><span class="badge" :style="{background:statusBg(d.status)}">{{ statusTxt(d.status) }}</span></span></div>
+        <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ d.createdAt?.substring(0,10) }}</span></div>
+      </div>
+      <div class="desc">{{ d.description }}</div>
+      <div class="pub"><div class="av" :style="{background:avColor}">{{ d.publisher?.username?.[0]?.toUpperCase() }}</div><div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div></div>
+    </div>
+    <button v-if="auth.isLoggedIn&&d.status==='OPEN'&&d.publisherId!==auth.user?.id" class="btn-primary btn-block act-btn" @click="accept">立即接单</button>
+  </div>
+  <div v-else class="empty">⏳ 加载中...</div>
+</template>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { demandAPI } from '@/api/demands'
+import { orderAPI } from '@/api/orders'
+const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
+const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
+const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
+function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHAND:'二手'}[c]||c}
+function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444'}[c]||'#888'}
+function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
+function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
+async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(e.message)}}
+onMounted(async()=>{const res=await demandAPI.detail(r.params.id);d.value=res.data})
+</script>
+<style scoped>
+.dc{background:#fff;border-radius:16px;padding:24px;margin-bottom:14px;border:1px solid var(--border)}
+h1{font-size:22px;font-weight:800;flex:1;margin-right:12px}
+.cat{display:inline-flex;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
+.mi{padding:12px;background:#f8fafc;border-radius:10px;display:flex;flex-direction:column;gap:4px}
+.lbl{font-size:12px;color:var(--text-muted)}
+.val{font-size:16px;font-weight:700}
+.desc{white-space:pre-wrap;line-height:1.8;color:var(--text-secondary);padding:16px;background:#f8fafc;border-radius:12px;margin:16px 0}
+.pub{display:flex;align-items:center;gap:12px;padding:16px;background:#f8fafc;border-radius:12px}
+.av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px}
+.act-btn{padding:14px;border-radius:12px;font-size:16px}
+</style>

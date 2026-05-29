@@ -1,13 +1,2 @@
-/**
- * 管理后台接口 — 对应后端 AdminController (/api/admin)
- *
- * 对外接口：
- *   getDashboard()          → GET /api/admin/dashboard
- *   getUsers(params)        → GET /api/admin/users → 用户管理列表
- *   banUser(id, reason)     → PUT /api/admin/users/{id}/ban
- *   unbanUser(id)           → PUT /api/admin/users/{id}/unban
- *
- * 待完成：
- *   - 路由守卫保证仅 role=ADMIN 可调用
- *   - getDashboard 返回 totalUsers, activeDemands, completedOrders 等面板数据
- */
+import c from './client'
+export const adminAPI = { dashboard: () => c.get('/admin/dashboard'), users: p => c.get('/admin/users',{params:p}), ban: (id,d) => c.put(`/admin/users/${id}/ban`,d||{}), unban: id => c.put(`/admin/users/${id}/unban`), reviewCert: (id,d) => c.put(`/admin/certifications/${id}/review`,d), resolveArb: (id,d) => c.put(`/admin/arbitrations/${id}/resolve`,d) }

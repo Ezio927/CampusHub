@@ -135,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
         conversationReq.setDemandId(demand.getId());
         conversationService.getOrCreate(userId, conversationReq);
 
-        return OrderDto.from(order);
+        return enrichDto(order);
     }
 
     @Override
@@ -159,12 +159,12 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "角色参数无效");
         }
-        return orders.stream().map(OrderDto::from).collect(Collectors.toList());
+        return orders.stream().map(this::enrichDto).collect(Collectors.toList());
     }
 
     @Override
     public OrderDto getDetail(Long orderId, Long userId) {
-        return OrderDto.from(requireParticipantOrder(orderId, userId));
+        return enrichDto(requireParticipantOrder(orderId, userId));
     }
 
     @Override
@@ -181,7 +181,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, fromStatus, userId, "deliver");
-        return OrderDto.from(order);
+        return enrichDto(order);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, fromStatus, userId, "confirm");
-        return OrderDto.from(order);
+        return enrichDto(order);
     }
 
     @Override
@@ -219,7 +219,7 @@ public class OrderServiceImpl implements OrderService {
 
         appendLogAndPublish(order, fromStatus, userId, order.getCancelReason());
 
-        OrderDto dto = OrderDto.from(order);
+        OrderDto dto = enrichDto(order);
         dto.setCreditPenalty(-penalty);
         return dto;
     }
@@ -286,6 +286,29 @@ public class OrderServiceImpl implements OrderService {
         } catch (IllegalArgumentException ex) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "订单状态无效");
         }
+    }
+
+    private OrderDto enrichDto(Order order) {
+        OrderDto dto = OrderDto.from(order);
+        if (order.getDemandId() != null) {
+            try {
+                var demand = demandService.getDetail(order.getDemandId());
+                if (demand != null) {
+                    dto.setDemandTitle(demand.getTitle());
+                    dto.setRewardAmount(demand.getRewardAmount());
+                    dto.setRewardType(demand.getRewardType() != null ? demand.getRewardType().name() : null);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (order.getPublisherId() != null) {
+            userRepository.findById(order.getPublisherId())
+                    .ifPresent(u -> dto.setPublisherName(u.getUsername()));
+        }
+        if (order.getAcceptorId() != null) {
+            userRepository.findById(order.getAcceptorId())
+                    .ifPresent(u -> dto.setAcceptorName(u.getUsername()));
+        }
+        return dto;
     }
 
     private static final class DemandRepositoryDemandServiceAdapter implements DemandService {

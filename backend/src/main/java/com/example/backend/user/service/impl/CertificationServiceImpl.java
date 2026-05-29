@@ -17,6 +17,8 @@ import com.example.backend.notification.service.NotificationService;
 import com.example.backend.common.enums.NotificationType;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CertificationServiceImpl implements CertificationService {
 
@@ -115,6 +117,13 @@ public class CertificationServiceImpl implements CertificationService {
                 approve ? "Certification approved" : "Certification rejected",
                 approve ? "Your certification has been approved." : "Your certification has been rejected.", certification.getId());
         return CertificationDto.from(certification);
+    }
+
+    @Override
+    public List<CertificationDto> listPending() {
+        return certificationRepository.findByStatus(CertStatus.PENDING).stream()
+                .map(CertificationDto::from)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private boolean isBlank(String value) {

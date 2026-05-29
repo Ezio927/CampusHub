@@ -1,19 +1,19 @@
-/**
- * 通知状态管理
- *
- * 职责：维护未读通知计数，供 NavBar 角标使用
- *
- * 对外接口：
- *   state:
- *     unreadCount   — 未读通知数量
- *     notifications — 通知分页列表
- *   actions:
- *     fetchUnreadCount()      — 请求 GET /api/notifications/unread-count
- *     fetchNotifications()    — 请求通知列表
- *     markRead(id)            — 单条已读
- *     markAllRead()           — 全部已读
- *
- * 待完成：
- *   - 订单状态变化后需重新拉取 unreadCount
- *   - 可选：轮询或 WebSocket 实时更新
- */
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { notifAPI } from '@/api/notifications'
+
+export const useNotifStore = defineStore('notifications', () => {
+  const unread = ref(0)
+  const list = ref([])
+
+  async function fetchUnread() {
+    try { const r = await notifAPI.unread(); unread.value = r.data?.unreadCount || 0 } catch {}
+  }
+
+  async function fetchList() { const r = await notifAPI.list({ page:0, size:20 }); list.value = r.data || [] }
+
+  async function markRead(id) { await notifAPI.read(id); await fetchUnread() }
+  async function markAllRead() { await notifAPI.readAll(); unread.value = 0 }
+
+  return { unread, list, fetchUnread, fetchList, markRead, markAllRead }
+})
