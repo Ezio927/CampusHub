@@ -18,9 +18,9 @@ backend:
   stage: test
   image: maven:3.9.9-eclipse-temurin-17
   cache:
-    key: maven-repo
+    key: maven-repo-v2
     paths:
       - .m2/repository
   script:
     - cd backend
-    - mvn -B test -DfailIfNoTests=false -Dmaven.repo.local=../.m2/repository
+    - mvn -B test -Dmaven.repo.local=../.m2/repository
