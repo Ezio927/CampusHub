@@ -6,7 +6,7 @@ spring:
   application:
     name: campushub
   profiles:
-    active: dev
+    active: docker
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss'Z'
     time-zone: Asia/Shanghai
