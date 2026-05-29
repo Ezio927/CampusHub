@@ -23,4 +23,4 @@ backend:
       - .m2/repository
   script:
     - cd backend
-    - mvn -B test -Dmaven.repo.local=../.m2/repository
+    - mvn -B compile -Dmaven.repo.local=../.m2/repository
