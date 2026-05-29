@@ -1,54 +1,49 @@
 package com.example.backend.user.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.backend.common.enums.CertStatus;
 import com.example.backend.user.entity.Certification;
+import com.example.backend.user.mapper.CertificationMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 public class CertificationRepository {
 
-    private final ConcurrentHashMap<Long, Certification> storage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, Long> userIndex = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1L);
+    private final CertificationMapper mapper;
 
-    public synchronized Certification save(Certification certification) {
-        if (certification.getId() == null) {
-            certification.setId(idGenerator.getAndIncrement());
+    public CertificationRepository(CertificationMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public Certification save(Certification c) {
+        if (c.getCreatedAt() == null) c.setCreatedAt(LocalDateTime.now());
+        if (c.getId() == null) {
+            mapper.insert(c);
+        } else {
+            mapper.updateById(c);
         }
-        if (certification.getCreatedAt() == null) {
-            certification.setCreatedAt(LocalDateTime.now());
-        }
-        storage.put(certification.getId(), certification);
-        userIndex.put(certification.getUserId(), certification.getId());
-        return certification;
+        return c;
     }
 
     public Optional<Certification> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return Optional.ofNullable(mapper.selectById(id));
     }
 
     public Optional<Certification> findByUserId(Long userId) {
-        Long certId = userIndex.get(userId);
-        return certId == null ? Optional.empty() : findById(certId);
+        return Optional.ofNullable(mapper.selectOne(
+                new LambdaQueryWrapper<Certification>().eq(Certification::getUserId, userId)));
     }
 
     public List<Certification> findByStatus(CertStatus status) {
-        return storage.values()
-                .stream()
-                .filter(certification -> certification.getStatus() == status)
-                .collect(Collectors.toList());
+        return mapper.selectList(
+                new LambdaQueryWrapper<Certification>().eq(Certification::getStatus, status));
     }
 
     public List<Certification> findAll() {
-        return Collections.unmodifiableList(new ArrayList<>(storage.values()));
+        return mapper.selectList(null);
     }
 }

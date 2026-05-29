@@ -1,68 +1,69 @@
 package com.example.backend.demand.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.demand.entity.Order;
+import com.example.backend.demand.mapper.OrderMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 public class OrderRepository {
 
-    private final ConcurrentHashMap<Long, Order> storage = new ConcurrentHashMap<Long, Order>();
-    private final AtomicLong idGenerator = new AtomicLong(1L);
+    private final OrderMapper mapper;
 
-    public synchronized Order save(Order order) {
-        if (order.getId() == null) {
-            order.setId(idGenerator.getAndIncrement());
+    public OrderRepository(OrderMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public Order save(Order o) {
+        if (o.getCreatedAt() == null) o.setCreatedAt(LocalDateTime.now());
+        o.setUpdatedAt(LocalDateTime.now());
+        if (o.getId() == null) {
+            mapper.insert(o);
+        } else {
+            mapper.updateById(o);
         }
-        if (order.getCreatedAt() == null) {
-            order.setCreatedAt(LocalDateTime.now());
-        }
-        order.setUpdatedAt(LocalDateTime.now());
-        storage.put(order.getId(), order);
-        return order;
+        return o;
     }
 
     public Optional<Order> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return Optional.ofNullable(mapper.selectById(id));
     }
 
     public Optional<Order> findByDemandId(Long demandId) {
-        return storage.values().stream().filter(order -> order.getDemandId().equals(demandId)).findFirst();
+        return Optional.ofNullable(mapper.selectOne(
+                new LambdaQueryWrapper<Order>().eq(Order::getDemandId, demandId)));
     }
 
     public List<Order> findByPublisherIdAndStatus(Long publisherId, OrderStatus status) {
-        return filterByUserAndStatus(publisherId, status, true);
+        LambdaQueryWrapper<Order> q = new LambdaQueryWrapper<Order>()
+                .eq(Order::getPublisherId, publisherId);
+        if (status != null) q.eq(Order::getStatus, status);
+        q.orderByDesc(Order::getCreatedAt);
+        return mapper.selectList(q);
     }
 
     public List<Order> findByAcceptorIdAndStatus(Long acceptorId, OrderStatus status) {
-        return filterByUserAndStatus(acceptorId, status, false);
+        LambdaQueryWrapper<Order> q = new LambdaQueryWrapper<Order>()
+                .eq(Order::getAcceptorId, acceptorId);
+        if (status != null) q.eq(Order::getStatus, status);
+        q.orderByDesc(Order::getCreatedAt);
+        return mapper.selectList(q);
     }
 
     public List<Order> findByStatusAndAutoConfirmDeadlineBefore(OrderStatus status, LocalDateTime deadline) {
-        return storage.values().stream()
-                .filter(order -> order.getStatus() == status)
-                .filter(order -> order.getAutoConfirmDeadline() != null && order.getAutoConfirmDeadline().isBefore(deadline))
-                .collect(Collectors.toCollection(ArrayList::new));
+        return mapper.selectList(
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getStatus, status)
+                        .isNotNull(Order::getAutoConfirmDeadline)
+                        .lt(Order::getAutoConfirmDeadline, deadline));
     }
 
     public List<Order> findAll() {
-        return Collections.unmodifiableList(new ArrayList<Order>(storage.values()));
-    }
-
-    private List<Order> filterByUserAndStatus(Long userId, OrderStatus status, boolean publisher) {
-        return storage.values().stream()
-                .filter(order -> publisher ? order.getPublisherId().equals(userId) : order.getAcceptorId().equals(userId))
-                .filter(order -> status == null || order.getStatus() == status)
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
+        return mapper.selectList(null);
     }
 }

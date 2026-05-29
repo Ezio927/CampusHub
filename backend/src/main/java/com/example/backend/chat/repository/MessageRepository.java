@@ -1,49 +1,49 @@
 package com.example.backend.chat.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.backend.chat.entity.Message;
+import com.example.backend.chat.mapper.MessageMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 public class MessageRepository {
 
-    private final ConcurrentHashMap<Long, Message> storage = new ConcurrentHashMap<Long, Message>();
-    private final AtomicLong idGenerator = new AtomicLong(1L);
+    private final MessageMapper mapper;
 
-    public synchronized Message save(Message message) {
-        if (message.getId() == null) {
-            message.setId(idGenerator.getAndIncrement());
+    public MessageRepository(MessageMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public Message save(Message m) {
+        if (m.getCreatedAt() == null) m.setCreatedAt(LocalDateTime.now());
+        if (m.getId() == null) {
+            mapper.insert(m);
+        } else {
+            mapper.updateById(m);
         }
-        if (message.getCreatedAt() == null) {
-            message.setCreatedAt(LocalDateTime.now());
-        }
-        storage.put(message.getId(), message);
-        return message;
+        return m;
     }
 
     public Optional<Message> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return Optional.ofNullable(mapper.selectById(id));
     }
 
     public List<Message> findByConversationIdOrderByCreatedAtDesc(Long conversationId) {
-        return storage.values().stream()
-                .filter(message -> message.getConversationId().equals(conversationId))
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toCollection(ArrayList::new));
+        return mapper.selectList(
+                new LambdaQueryWrapper<Message>()
+                        .eq(Message::getConversationId, conversationId)
+                        .orderByDesc(Message::getCreatedAt));
     }
 
     public long countByConversationIdAndSenderIdNotAndReadFalse(Long conversationId, Long senderId) {
-        return storage.values().stream()
-                .filter(message -> message.getConversationId().equals(conversationId))
-                .filter(message -> !message.getSenderId().equals(senderId))
-                .filter(message -> !Boolean.TRUE.equals(message.getRead()))
-                .count();
+        return mapper.selectCount(
+                new LambdaQueryWrapper<Message>()
+                        .eq(Message::getConversationId, conversationId)
+                        .ne(Message::getSenderId, senderId)
+                        .eq(Message::getRead, false));
     }
 }

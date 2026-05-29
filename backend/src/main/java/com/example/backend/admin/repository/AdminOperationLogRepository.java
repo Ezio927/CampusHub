@@ -1,41 +1,36 @@
 package com.example.backend.admin.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.backend.admin.entity.AdminOperationLog;
+import com.example.backend.admin.mapper.AdminOperationLogMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 @Repository
 public class AdminOperationLogRepository {
 
-    private final ConcurrentHashMap<Long, AdminOperationLog> storage = new ConcurrentHashMap<Long, AdminOperationLog>();
-    private final AtomicLong idGenerator = new AtomicLong(1L);
+    private final AdminOperationLogMapper mapper;
 
-    public synchronized AdminOperationLog save(AdminOperationLog log) {
+    public AdminOperationLogRepository(AdminOperationLogMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public AdminOperationLog save(AdminOperationLog log) {
+        if (log.getCreatedAt() == null) log.setCreatedAt(LocalDateTime.now());
         if (log.getId() == null) {
-            log.setId(idGenerator.getAndIncrement());
+            mapper.insert(log);
+        } else {
+            mapper.updateById(log);
         }
-        if (log.getCreatedAt() == null) {
-            log.setCreatedAt(LocalDateTime.now());
-        }
-        storage.put(log.getId(), log);
         return log;
     }
 
     public List<AdminOperationLog> findAll() {
-        return storage.values().stream()
-                .sorted((a, b) -> {
-                    int cmp = b.getCreatedAt().compareTo(a.getCreatedAt());
-                    return cmp != 0 ? cmp : Long.compare(b.getId(), a.getId());
-                })
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toCollection(ArrayList::new),
-                        Collections::unmodifiableList));
+        return mapper.selectList(
+                new LambdaQueryWrapper<AdminOperationLog>()
+                        .orderByDesc(AdminOperationLog::getCreatedAt)
+                        .orderByDesc(AdminOperationLog::getId));
     }
 }

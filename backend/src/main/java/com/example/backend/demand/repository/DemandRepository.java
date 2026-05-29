@@ -1,61 +1,60 @@
 package com.example.backend.demand.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.demand.entity.Demand;
+import com.example.backend.demand.mapper.DemandMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 public class DemandRepository {
 
-    private final ConcurrentHashMap<Long, Demand> storage = new ConcurrentHashMap<Long, Demand>();
-    private final AtomicLong idGenerator = new AtomicLong(1L);
+    private final DemandMapper mapper;
 
-    public synchronized Demand save(Demand demand) {
-        if (demand.getId() == null) {
-            demand.setId(idGenerator.getAndIncrement());
+    public DemandRepository(DemandMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public Demand save(Demand d) {
+        if (d.getCreatedAt() == null) d.setCreatedAt(LocalDateTime.now());
+        d.setUpdatedAt(LocalDateTime.now());
+        if (d.getId() == null) {
+            mapper.insert(d);
+        } else {
+            mapper.updateById(d);
         }
-        if (demand.getCreatedAt() == null) {
-            demand.setCreatedAt(LocalDateTime.now());
-        }
-        demand.setUpdatedAt(LocalDateTime.now());
-        storage.put(demand.getId(), demand);
-        return demand;
+        return d;
     }
 
     public Optional<Demand> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return Optional.ofNullable(mapper.selectById(id));
     }
 
     public List<Demand> findAll() {
-        return Collections.unmodifiableList(new ArrayList<Demand>(storage.values()));
+        return mapper.selectList(null);
     }
 
     public List<Demand> findByPublisherIdOrderByCreatedAtDesc(Long publisherId) {
-        return storage.values().stream()
-                .filter(demand -> demand.getPublisherId().equals(publisherId))
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
+        return mapper.selectList(
+                new LambdaQueryWrapper<Demand>()
+                        .eq(Demand::getPublisherId, publisherId)
+                        .orderByDesc(Demand::getCreatedAt));
     }
 
     public List<Demand> findByStatusAndCategory(DemandStatus status, DemandCategory category) {
-        return storage.values().stream()
-                .filter(demand -> status == null || demand.getStatus() == status)
-                .filter(demand -> category == null || demand.getCategory() == category)
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .collect(Collectors.toList());
+        LambdaQueryWrapper<Demand> q = new LambdaQueryWrapper<>();
+        if (status != null) q.eq(Demand::getStatus, status);
+        if (category != null) q.eq(Demand::getCategory, category);
+        q.orderByDesc(Demand::getCreatedAt);
+        return mapper.selectList(q);
     }
 
     public void deleteById(Long id) {
-        storage.remove(id);
+        mapper.deleteById(id);
     }
 }
