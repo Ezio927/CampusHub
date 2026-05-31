@@ -1,6 +1,7 @@
 package com.example.backend.notification.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.backend.common.enums.NotificationType;
@@ -17,6 +18,7 @@ public class Notification {
     private String title;
     private String content;
     private Long relatedId;
+    @TableField("`read`")
     private Boolean read = Boolean.FALSE;
     private LocalDateTime createdAt;
 

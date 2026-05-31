@@ -12,6 +12,7 @@ public class DemandSearchCriteria {
     private Boolean urgent;
     private String sortBy;
     private String sortDir;
+    private Long publisherId;
 
     public DemandCategory getCategory() {
         return category;
@@ -67,5 +68,13 @@ public class DemandSearchCriteria {
 
     public void setSortDir(String sortDir) {
         this.sortDir = sortDir;
+    }
+
+    public Long getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(Long publisherId) {
+        this.publisherId = publisherId;
     }
 }

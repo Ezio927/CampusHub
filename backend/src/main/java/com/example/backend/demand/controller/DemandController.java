@@ -52,7 +52,8 @@ public class DemandController {
             @Parameter(description = "是否紧急") @RequestParam(value = "isUrgent", required = false) Boolean urgent,
             @Parameter(description = "排序字段：rewardAmount/urgentDeadline/createdAt")
             @RequestParam(value = "sortBy", required = false) String sortBy,
-            @Parameter(description = "排序方向：asc/desc") @RequestParam(value = "sortDir", required = false) String sortDir) {
+            @Parameter(description = "排序方向：asc/desc") @RequestParam(value = "sortDir", required = false) String sortDir,
+            @Parameter(description = "仅查我发布的") @RequestParam(value = "my", required = false) Boolean my) {
         DemandSearchCriteria criteria = new DemandSearchCriteria();
         if (category != null) {
             criteria.setCategory(com.example.backend.common.enums.DemandCategory.valueOf(category.toUpperCase()));
@@ -65,6 +66,9 @@ public class DemandController {
         criteria.setUrgent(urgent);
         criteria.setSortBy(sortBy);
         criteria.setSortDir(sortDir);
+        if (Boolean.TRUE.equals(my)) {
+            criteria.setPublisherId(AuthContext.requireUserId());
+        }
         return ApiResponse.success(demandService.search(criteria));
     }
 

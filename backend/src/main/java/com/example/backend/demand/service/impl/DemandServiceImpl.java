@@ -69,7 +69,12 @@ public class DemandServiceImpl implements DemandService {
 
     @Override
     public List<DemandDto> search(DemandSearchCriteria criteria) {
-        List<Demand> demands = demandRepository.findAll();
+        List<Demand> demands;
+        if (criteria != null && criteria.getPublisherId() != null) {
+            demands = demandRepository.findByPublisherIdOrderByCreatedAtDesc(criteria.getPublisherId());
+        } else {
+            demands = demandRepository.findAll();
+        }
         if (criteria != null) {
             demands = demands.stream()
                     .filter(demand -> criteria.getCategory() == null || demand.getCategory() == criteria.getCategory())

@@ -1,6 +1,7 @@
 package com.example.backend.chat.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.backend.common.enums.MessageStatus;
@@ -21,6 +22,7 @@ public class Message {
     private MessageStatus status = MessageStatus.SENT;
     private Long quotedMessageId;
     private String quotedContent;
+    @TableField("`read`")
     private Boolean read = Boolean.FALSE;
     private LocalDateTime createdAt;
 
