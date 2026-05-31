@@ -34,6 +34,8 @@ import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
 import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/validators'
+import { useModal } from '@/composables/useModal'
+const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
 const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
@@ -46,10 +48,10 @@ async function update(){
     if(e.email)d.email=normalizeEmail(e.email)
     await userAPI.update(d)
     await auth.fetchUser()
-    alert('保存成功')
-  }catch(e){alert(e.message)}
+    modal.alert('保存成功')
+  }catch(e){modal.alert('操作失败', e.message)}
 }
-async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){alert(e.message)}}
+async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){modal.alert('提交失败', e.message)}}
 async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data}catch{cert.value=null}}
 function logout(){auth.logout();ro.push('/login')}
 onMounted(async()=>{await auth.fetchUser();await loadCert()})

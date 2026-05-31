@@ -13,8 +13,10 @@
 </template>
 <script setup>
 import {ref} from 'vue';import {certAPI} from '@/api/certifications'
+import { useModal } from '@/composables/useModal'
+const modal = useModal()
 const list=ref([])
 async function load(){try{const r=await certAPI.pending();list.value=r.data||[]}catch{list.value=[]}}
-async function review(id,approve){const reason=approve?null:prompt('驳回原因');await certAPI.review(id,{approve,reason});load()}
+async function review(id,approve){const reason=approve?null:await modal.prompt('驳回认证','请输入驳回原因','请填写驳回原因');if(reason===false)return;await certAPI.review(id,{approve,reason});load()}
 load()
 </script>

@@ -52,7 +52,9 @@ import { reactive,ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { demandAPI } from '@/api/demands'
 import { errorMessage } from '@/utils/errors'
+import { useModal } from '@/composables/useModal'
 const ro=useRouter()
+const modal = useModal()
 const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
 const tagInput=ref('')
 const imageInput=ref('')
@@ -75,7 +77,7 @@ async function pub(){
   if(f.category==='STUDY'&&!body.urgentDeadline){err.value='请选择截止时间';ing.value=false;return}
   try{
     const res=await demandAPI.create(body)
-    if(res.data?.riskWarnings?.length) alert(res.data.riskWarnings.join('\n'))
+    if(res.data?.riskWarnings?.length) await modal.alert('发布提醒', res.data.riskWarnings.join('\n'))
     ro.push('/')
   }catch(e){err.value=errorMessage(e,'发布失败')}finally{ing.value=false}
 }

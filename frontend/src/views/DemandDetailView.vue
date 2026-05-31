@@ -29,22 +29,24 @@ import { demandAPI } from '@/api/demands'
 import { orderAPI } from '@/api/orders'
 import { chatAPI } from '@/api/chat'
 import { errorMessage } from '@/utils/errors'
+import { useModal } from '@/composables/useModal'
 const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
+const modal = useModal()
 const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
 const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
 function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHAND:'二手'}[c]||c}
 function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444'}[c]||'#888'}
 function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
-async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(errorMessage(e,'接单失败'))}}
-async function deleteDemand(){if(!window.confirm('确定删除该需求？删除后不可恢复。'))return;try{await demandAPI.delete(d.value.id);ro.push('/orders')}catch(e){alert(errorMessage(e,'删除失败'))}}
+async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){modal.alert('接单失败', errorMessage(e))}}
+async function deleteDemand(){const ok=await modal.confirm('删除需求','确定删除该需求？删除后不可恢复。');if(!ok)return;try{await demandAPI.delete(d.value.id);ro.push('/orders')}catch(e){modal.alert('删除失败', errorMessage(e))}}
 async function messagePublisher(){
-  if(!d.value?.publisherId){alert('发布者信息缺失，暂时无法发起私信');return}
+  if(!d.value?.publisherId){modal.alert('发起私信失败','发布者信息缺失，暂时无法发起私信');return}
   try{
     const res=await chatAPI.create({targetUserId:d.value.publisherId,demandId:d.value.id})
     if(!res.data?.id) throw new Error('会话创建失败')
     ro.push('/chat/'+res.data.id)
-  }catch(e){alert(errorMessage(e,'发起私信失败'))}
+  }catch(e){modal.alert('发起私信失败', errorMessage(e))}
 }
 onMounted(async()=>{const res=await demandAPI.detail(r.params.id);d.value=res.data})
 </script>

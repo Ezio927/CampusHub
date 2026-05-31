@@ -108,9 +108,11 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { chatAPI } from '@/api/chat'
 import { errorMessage } from '@/utils/errors'
+import { useModal } from '@/composables/useModal'
 
 const route = useRoute()
 const auth = useAuthStore()
+const modal = useModal()
 const msgs = ref([])
 const txt = ref('')
 const conversation = ref(null)
@@ -153,7 +155,7 @@ async function send() {
     clearImage()
     await markReadToLast()
     await loadConversation()
-    if (res.data?.riskWarnings?.length) alert(res.data.riskWarnings.join('\n'))
+    if (res.data?.riskWarnings?.length) modal.alert('发送提醒', res.data.riskWarnings.join('\n'))
     await scrollBottom()
   } catch (e) {
     err.value = errorMessage(e, '发送失败')
@@ -236,17 +238,17 @@ async function recall(message) {
     appendOrReplace(res.data)
     await loadConversation()
   } catch (e) {
-    alert(errorMessage(e, '撤回失败'))
+    modal.alert('操作失败', errorMessage(e,'撤回失败'))
   }
 }
 
 async function blockPeer() {
-  if (!window.confirm('拉黑后，对方将不能继续给你发送私信。')) return
+  if (!await modal.confirm('拉黑对方', '拉黑后，对方将不能继续给你发送私信。')) return
   try {
     const res = await chatAPI.block(route.params.id)
     conversation.value = res.data
   } catch (e) {
-    alert(errorMessage(e, '拉黑失败'))
+    modal.alert('操作失败', errorMessage(e,'拉黑失败'))
   }
 }
 
@@ -255,7 +257,7 @@ async function unblockPeer() {
     const res = await chatAPI.unblock(route.params.id)
     conversation.value = res.data
   } catch (e) {
-    alert(errorMessage(e, '解除拉黑失败'))
+    modal.alert('操作失败', errorMessage(e,'解除拉黑失败'))
   }
 }
 
@@ -266,7 +268,7 @@ async function searchMessages() {
     const res = await chatAPI.search(route.params.id, keyword)
     searchResults.value = res.data || []
   } catch (e) {
-    alert(errorMessage(e, '搜索失败'))
+    modal.alert('操作失败', errorMessage(e,'搜索失败'))
   }
 }
 
@@ -300,9 +302,9 @@ async function submitReport() {
       evidenceUrls: reportForm.evidence.split(/[,，\n]/).map(item => item.trim()).filter(Boolean),
     })
     closeReport()
-    alert('举报已提交，管理员会进行审核')
+    modal.alert('举报已提交', '管理员会进行审核')
   } catch (e) {
-    alert(errorMessage(e, '提交失败'))
+    modal.alert('操作失败', errorMessage(e,'提交失败'))
   } finally {
     reporting.value = false
   }

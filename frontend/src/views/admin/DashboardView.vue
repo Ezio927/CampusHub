@@ -34,8 +34,10 @@
 <script setup>
 import {reactive,onMounted} from 'vue'
 import {adminAPI} from '@/api/admin'
+import { useModal } from '@/composables/useModal'
+const modal = useModal()
 const d=reactive({totalUsers:0,activeDemands:0,completedOrders:0,averageRating:0})
-onMounted(async()=>{try{const r=await adminAPI.dashboard();Object.assign(d,r.data)}catch(e){alert(e.message)}})
+onMounted(async()=>{try{const r=await adminAPI.dashboard();Object.assign(d,r.data)}catch(e){modal.alert('加载失败', e.message)}})
 </script>
 <style scoped>
 .sc{background:#fff;border-radius:14px;padding:24px;text-align:center;border:1px solid var(--border)}

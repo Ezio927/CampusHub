@@ -23,6 +23,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { adminAPI } from '@/api/admin'
+import { useModal } from '@/composables/useModal'
+const modal = useModal()
 
 const list = ref([])
 const labels = {
@@ -39,8 +41,9 @@ async function load() {
 }
 
 async function review(id, approve) {
-  const resolution = prompt('审核说明') || ''
-  await adminAPI.reviewMessageReport(id, { approve, resolution })
+  const resolution = await modal.prompt('审核举报', '请输入审核说明', '选填')
+  if (resolution === false) return
+  await adminAPI.reviewMessageReport(id, { approve, resolution: resolution || '' })
   await load()
 }
 
