@@ -53,6 +53,17 @@ public class SchemaMigrationRunner implements CommandLineRunner {
                     created_at TIMESTAMP
                 )
                 """);
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS credit_appeals (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    reason VARCHAR(500),
+                    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+                    reviewed_by BIGINT,
+                    reviewed_at TIMESTAMP,
+                    created_at TIMESTAMP
+                )
+                """);
     }
 
     private void executeIgnoreDuplicate(String sql) {

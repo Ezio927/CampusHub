@@ -106,6 +106,18 @@ CREATE TABLE IF NOT EXISTS message_reports (
     INDEX idx_message_reports_message (message_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS credit_appeals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    reason VARCHAR(500),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reviewed_by BIGINT,
+    reviewed_at DATETIME,
+    created_at DATETIME,
+    INDEX idx_credit_appeals_status (status),
+    INDEX idx_credit_appeals_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS demands (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     publisher_id BIGINT NOT NULL,

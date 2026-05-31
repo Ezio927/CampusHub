@@ -30,7 +30,7 @@ function st(s){return{PENDING_ACCEPT:'待接单',ACCEPTED:'已接单',IN_PROGRES
 function sb(s){return{PENDING_ACCEPT:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',PENDING_CONFIRM:'#eab308',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
 const acts=computed(()=>{if(!o.value)return[];const uid=a.user?.id;const s=o.value.status;const as=[];if(s==='ACCEPTED'&&o.value.acceptorId===uid)as.push({k:'deliver',l:'📦 标记已送达'});if(s==='PENDING_CONFIRM'&&o.value.publisherId===uid)as.push({k:'confirm',l:'✅ 确认完成'});if(['PENDING_ACCEPT','ACCEPTED','IN_PROGRESS','PENDING_CONFIRM'].includes(s))as.push({k:'cancel',l:'❌ 取消订单'});return as})
 const targetUserId=computed(()=>{if(!o.value)return null;const uid=a.user?.id;if(o.value.publisherId===uid)return o.value.acceptorId;if(o.value.acceptorId===uid)return o.value.publisherId;return null})
-async function doAct(key){try{if(key==='deliver')await orderAPI.deliver(o.value.id);else if(key==='confirm'){await orderAPI.confirm(o.value.id);ro.push('/reviews/'+o.value.acceptorId)}else if(key==='cancel'){const r=await modal.prompt('取消订单','请输入取消原因','选填');if(r!==null&&r!==false)await orderAPI.cancel(o.value.id,{reason:r||''})}ro.go(0)}catch(e){modal.alert('操作失败', errorMessage(e))}}
+async function doAct(key){try{if(key==='deliver')await orderAPI.deliver(o.value.id);else if(key==='confirm'){await orderAPI.confirm(o.value.id);ro.push('/reviews/'+o.value.acceptorId)}else if(key==='cancel'){const r=await modal.prompt('取消订单','请输入取消原因（必填）','请输入取消原因');if(!r||!r.trim()){await modal.alert('原因不能为空','请填写取消原因');return}else{await orderAPI.cancel(o.value.id,{reason:r.trim()})}}ro.go(0)}catch(e){modal.alert('操作失败', errorMessage(e))}}
 async function messagePeer(){
   if(!targetUserId.value){modal.alert('发起私信失败','对方用户信息缺失，暂时无法发起私信');return}
   try{

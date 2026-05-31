@@ -207,6 +207,10 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto cancel(Long orderId, Long userId, OrderCancelDto req) {
         Order order = requireParticipantOrder(orderId, userId);
         orderStateContext.assertCanOperate(order, OrderAction.CANCEL);
+        String reason = req == null || req.getReason() == null ? null : req.getReason().trim();
+        if (reason == null || reason.isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "取消原因不能为空");
+        }
 
         int penalty = calculateCancelPenalty(order, LocalDateTime.now());
         if (penalty > 0) {
@@ -216,10 +220,10 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus fromStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
-        order.setCancelReason(req == null ? null : req.getReason());
+        order.setCancelReason(reason);
         orderRepository.save(order);
 
-        appendLogAndPublish(order, fromStatus, userId, order.getCancelReason());
+        appendLogAndPublish(order, fromStatus, userId, reason);
         postOrderSystemMessage(order, cancelSystemMessage(order, fromStatus, userId), userId);
 
         OrderDto dto = enrichDto(order);

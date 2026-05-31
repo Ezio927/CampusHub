@@ -28,6 +28,11 @@
         <div class="nc-info"><div class="nc-title">私信举报</div><div class="nc-desc">审核用户提交的聊天举报</div></div>
         <span class="nc-arrow">→</span>
       </router-link>
+      <router-link to="/admin/credit-appeals" class="nc">
+        <div class="nc-icon" style="background:#eef2ff">⭐</div>
+        <div class="nc-info"><div class="nc-title">信用申诉</div><div class="nc-desc">处理用户信用分恢复申请</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
     </div>
   </div>
 </template>

@@ -5,6 +5,12 @@
       <div class="pn">{{ auth.user?.username }}</div>
       <div class="pi">学号 {{ auth.user?.studentId }}</div>
       <div class="pc">⭐ {{ auth.user?.creditScore }} 信用分</div>
+      <div v-if="appeal" class="appeal-status" :class="'appeal-'+appeal.status">
+        <span v-if="appeal.status==='PENDING'">⏳ 申诉审核中</span>
+        <span v-else-if="appeal.status==='APPROVED'">✅ 申诉已通过，信用分已恢复</span>
+        <span v-else-if="appeal.status==='REJECTED'">❌ 申诉已被驳回</span>
+      </div>
+      <button v-if="auth.user?.creditScore < 60 && (!appeal || appeal.status==='REJECTED')" class="btn-appeal" @click="submitAppeal">信用分低于60，申请恢复</button>
     </div>
     <div class="grid-2 mb-md">
       <div class="sc"><div class="sv">{{ auth.user?.creditScore }}</div><div class="sl">信用分</div></div>
@@ -69,7 +75,7 @@ import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/valid
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
-const e=reactive({realName:'',phone:'',email:''});const cert=ref(null);const creditList=ref([])
+const e=reactive({realName:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const appeal=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
 const certErr=ref('')
 const certSubmitting=ref(false)
@@ -110,14 +116,22 @@ function pickCertImage(event){
 }
 function clearCertImage(){cf.cardImageUrl=''}
 function logout(){auth.logout();ro.push('/login')}
+async function submitAppeal(){const reason=await modal.prompt('信用分申诉','请填写申诉理由（必填）','请说明情况，管理员将根据理由审核');if(!reason||!reason.trim()){await modal.alert('理由不能为空','请填写申诉理由');return}try{await userAPI.creditAppeal(reason.trim());modal.alert('已提交','申诉已提交，请等待管理员审核。');await auth.fetchUser();loadAppeal()}catch(e){modal.alert('提交失败', e.message)}}
 async function loadCredit(){try{const r=await userAPI.creditRecords();creditList.value=r.data||[]}catch{creditList.value=[]}}
-onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit()})
+async function loadAppeal(){try{const r=await userAPI.myAppeal();appeal.value=r.data}catch{appeal.value=null}}
+onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadAppeal()})
 </script>
 <style scoped>
 .ph{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:18px;padding:28px;color:#fff;text-align:center;margin-bottom:18px}
 .pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
 .pn{font-size:22px;font-weight:800}.pi{font-size:13px;opacity:.75;margin-top:4px}
 .pc{display:inline-flex;gap:6px;padding:6px 16px;background:rgba(255,255,255,.2);border-radius:20px;margin-top:10px;font-size:14px;font-weight:600}
+.btn-appeal{display:block;margin:10px auto 0;padding:8px 18px;border-radius:20px;background:rgba(255,255,255,.3);color:#fff;font-size:13px;font-weight:600}
+.btn-appeal:hover{background:rgba(255,255,255,.45)}
+.appeal-status{margin-top:8px;padding:6px 14px;border-radius:12px;font-size:12px;font-weight:600;text-align:center}
+.appeal-PENDING{background:rgba(251,191,36,.2);color:#fbbf24}
+.appeal-APPROVED{background:rgba(16,185,129,.2);color:#34d399}
+.appeal-REJECTED{background:rgba(239,68,68,.2);color:#f87171}
 .sc{background:#fff;border-radius:14px;padding:16px;text-align:center;border:1px solid var(--border)}
 .sv{font-size:22px;font-weight:800;color:var(--primary)}.sl{font-size:12px;color:var(--text-muted);margin-top:2px}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}

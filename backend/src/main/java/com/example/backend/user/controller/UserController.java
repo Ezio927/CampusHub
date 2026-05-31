@@ -12,14 +12,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.example.backend.user.dto.CreditAppealDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "用户", description = "个人信息查询、更新、信用记录")
@@ -58,5 +62,18 @@ public class UserController {
     @GetMapping("/me/credit-records")
     public ApiResponse<List<CreditRecordDto>> getMyCreditRecords() {
         return ApiResponse.success(creditService.listRecords(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "提交信用分申诉")
+    @PostMapping("/me/credit-appeal")
+    public ApiResponse<CreditAppealDto> submitCreditAppeal(@RequestBody Map<String, String> body) {
+        String reason = body != null ? body.getOrDefault("reason", "") : "";
+        return ApiResponse.success(creditService.submitAppeal(AuthContext.requireUserId(), reason));
+    }
+
+    @Operation(summary = "查看我最近的申诉")
+    @GetMapping("/me/credit-appeal")
+    public ApiResponse<CreditAppealDto> getMyCreditAppeal() {
+        return ApiResponse.success(creditService.getMyLatestAppeal(AuthContext.requireUserId()));
     }
 }

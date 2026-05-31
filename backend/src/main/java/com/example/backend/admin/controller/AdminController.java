@@ -16,6 +16,8 @@ import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.user.dto.CertificationDto;
 import com.example.backend.user.dto.CertificationReviewDto;
+import com.example.backend.user.dto.CreditAppealDto;
+import com.example.backend.user.service.CreditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,11 +40,14 @@ public class AdminController {
 
     private final AdminService adminService;
     private final MessageReportService messageReportService;
+    private final CreditService creditService;
 
     public AdminController(AdminService adminService,
-                           MessageReportService messageReportService) {
+                           MessageReportService messageReportService,
+                           CreditService creditService) {
         this.adminService = adminService;
         this.messageReportService = messageReportService;
+        this.creditService = creditService;
     }
 
     @Operation(summary = "数据看板")
@@ -112,6 +117,23 @@ public class AdminController {
             @RequestBody MessageReportReviewDto request) {
         requireAdmin();
         return ApiResponse.success(messageReportService.review(id, AuthContext.requireUserId(), request));
+    }
+
+    @Operation(summary = "待审核信用申诉列表")
+    @GetMapping("/credit-appeals")
+    public ApiResponse<List<CreditAppealDto>> listCreditAppeals() {
+        requireAdmin();
+        return ApiResponse.success(creditService.listPendingAppeals());
+    }
+
+    @Operation(summary = "审核信用申诉")
+    @PutMapping("/credit-appeals/{id}/review")
+    public ApiResponse<CreditAppealDto> reviewCreditAppeal(
+            @Parameter(description = "申诉ID") @PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body) {
+        requireAdmin();
+        Boolean approved = body != null ? body.getOrDefault("approved", false) : false;
+        return ApiResponse.success(creditService.reviewAppeal(id, AuthContext.requireUserId(), approved));
     }
 
     private void requireAdmin() {

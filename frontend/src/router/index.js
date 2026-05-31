@@ -17,6 +17,7 @@ const routes = [
   { path: '/admin/certifications', name: 'admin-certs', component: () => import('@/views/admin/CertReviewView.vue'), meta: { auth: true, admin: true } },
   { path: '/admin/arbitrations', name: 'admin-arbs', component: () => import('@/views/admin/ArbitrationView.vue'), meta: { auth: true, admin: true } },
   { path: '/admin/message-reports', name: 'admin-message-reports', component: () => import('@/views/admin/MessageReportView.vue'), meta: { auth: true, admin: true } },
+  { path: '/admin/credit-appeals', name: 'admin-credit-appeals', component: () => import('@/views/admin/CreditAppealView.vue'), meta: { auth: true, admin: true } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
