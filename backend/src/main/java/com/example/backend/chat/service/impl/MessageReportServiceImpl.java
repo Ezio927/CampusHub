@@ -15,6 +15,7 @@ import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.ReportStatus;
 import com.example.backend.common.enums.UserRole;
+import com.example.backend.common.enums.MessageType;
 import com.example.backend.notification.service.NotificationService;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
@@ -67,7 +68,14 @@ public class MessageReportServiceImpl implements MessageReportService {
         report.setCategory(req.getCategory());
         report.setReason(req.getReason());
         report.setEvidenceUrls(req.getEvidenceUrls());
-        report.setMessageSnapshot(message.getContent());
+        report.setMessageType(message.getMessageType());
+        if (message.getMessageType() == MessageType.IMAGE) {
+            report.setMessageSnapshot("[图片]");
+            report.setMessageImageUrl(message.getContent());
+        } else {
+            report.setMessageSnapshot(message.getContent());
+            report.setMessageImageUrl(null);
+        }
         report.setStatus(ReportStatus.PENDING);
         messageReportRepository.save(report);
         notifyAdmins(report);

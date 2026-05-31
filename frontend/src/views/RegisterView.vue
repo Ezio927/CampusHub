@@ -20,6 +20,7 @@ import {
   normalizeEmail,
   normalizePhone,
   normalizeRealName,
+  normalizeStudentId,
   normalizeUsername,
 } from '@/utils/validators'
 const r = useRouter()
@@ -36,7 +37,7 @@ async function reg() {
       realName: normalizeRealName(f.realName),
       phone: normalizePhone(f.phone),
       email: normalizeEmail(f.email),
-      studentId: f.studentId.trim(),
+      studentId: normalizeStudentId(f.studentId),
     })
     r.push('/login')
   }

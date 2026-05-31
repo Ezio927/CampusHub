@@ -28,6 +28,11 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("ALTER TABLE messages MODIFY content MEDIUMTEXT");
         executeIgnoreDuplicate("CREATE INDEX idx_messages_conversation_id ON messages(conversation_id, id)");
         executeIgnoreDuplicate("CREATE UNIQUE INDEX uk_messages_sender_client ON messages(sender_id, client_message_id)");
+        executeIgnoreDuplicate("ALTER TABLE certifications MODIFY card_image_url MEDIUMTEXT");
+        executeIgnoreDuplicate("ALTER TABLE certifications ALTER COLUMN card_image_url CLOB");
+        executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_type VARCHAR(20)");
+        executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url MEDIUMTEXT");
+        executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url CLOB");
         jdbcTemplate.execute("""
                 CREATE TABLE IF NOT EXISTS message_reports (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +44,8 @@ public class SchemaMigrationRunner implements CommandLineRunner {
                     reason TEXT,
                     evidence_urls TEXT,
                     message_snapshot TEXT,
+                    message_type VARCHAR(20),
+                    message_image_url TEXT,
                     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
                     reviewed_by BIGINT,
                     reviewed_at TIMESTAMP,

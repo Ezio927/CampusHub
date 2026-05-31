@@ -8,8 +8,8 @@ class UserProfileValidatorTest {
 
     @Test
     void usernameShouldAllowChineseEnglishUnderscoreAndHyphen() {
-        Assertions.assertEquals("张三_A-",
-                UserProfileValidator.requireValidUsername(" 张三_A- "));
+        Assertions.assertEquals("张三_A-09",
+                UserProfileValidator.requireValidUsername(" 张三_A-09 "));
         Assertions.assertThrows(BusinessException.class,
                 () -> UserProfileValidator.requireValidUsername("a"));
         Assertions.assertThrows(BusinessException.class,
@@ -48,5 +48,25 @@ class UserProfileValidatorTest {
                 () -> UserProfileValidator.normalizeOptionalEmail("name@example.com"));
         Assertions.assertThrows(BusinessException.class,
                 () -> UserProfileValidator.normalizeOptionalEmail("bad email@qq.com"));
+    }
+
+    @Test
+    void studentIdShouldMatchNjuUndergraduateAndGraduateRules() {
+        Assertions.assertEquals("201250001", UserProfileValidator.requireValidStudentId("201250001"));
+        Assertions.assertEquals("241090001", UserProfileValidator.requireValidStudentId("241090001"));
+        Assertions.assertEquals("245500123", UserProfileValidator.requireValidStudentId("245500123"));
+        Assertions.assertEquals("502024320001", UserProfileValidator.requireValidStudentId("502024320001"));
+        Assertions.assertEquals("MG21320001", UserProfileValidator.requireValidStudentId("mg21320001"));
+
+        Assertions.assertThrows(BusinessException.class,
+                () -> UserProfileValidator.requireValidStudentId("203250001"));
+        Assertions.assertThrows(BusinessException.class,
+                () -> UserProfileValidator.requireValidStudentId("201260001"));
+        Assertions.assertThrows(BusinessException.class,
+                () -> UserProfileValidator.requireValidStudentId("201250000"));
+        Assertions.assertThrows(BusinessException.class,
+                () -> UserProfileValidator.requireValidStudentId("502021320001"));
+        Assertions.assertThrows(BusinessException.class,
+                () -> UserProfileValidator.requireValidStudentId("MG22320001"));
     }
 }

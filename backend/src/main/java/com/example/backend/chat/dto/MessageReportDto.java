@@ -1,6 +1,7 @@
 package com.example.backend.chat.dto;
 
 import com.example.backend.chat.entity.MessageReport;
+import com.example.backend.common.enums.MessageType;
 import com.example.backend.common.enums.ReportCategory;
 import com.example.backend.common.enums.ReportStatus;
 
@@ -19,6 +20,8 @@ public class MessageReportDto {
     private String reason;
     private List<String> evidenceUrls = new ArrayList<String>();
     private String messageSnapshot;
+    private MessageType messageType;
+    private String messageImageUrl;
     private ReportStatus status;
     private Long reviewedBy;
     private LocalDateTime reviewedAt;
@@ -39,6 +42,8 @@ public class MessageReportDto {
         dto.setReason(report.getReason());
         dto.setEvidenceUrls(report.getEvidenceUrls());
         dto.setMessageSnapshot(report.getMessageSnapshot());
+        dto.setMessageType(report.getMessageType());
+        dto.setMessageImageUrl(report.getMessageImageUrl());
         dto.setStatus(report.getStatus());
         dto.setReviewedBy(report.getReviewedBy());
         dto.setReviewedAt(report.getReviewedAt());
@@ -67,6 +72,10 @@ public class MessageReportDto {
     }
     public String getMessageSnapshot() { return messageSnapshot; }
     public void setMessageSnapshot(String messageSnapshot) { this.messageSnapshot = messageSnapshot; }
+    public MessageType getMessageType() { return messageType; }
+    public void setMessageType(MessageType messageType) { this.messageType = messageType; }
+    public String getMessageImageUrl() { return messageImageUrl; }
+    public void setMessageImageUrl(String messageImageUrl) { this.messageImageUrl = messageImageUrl; }
     public ReportStatus getStatus() { return status; }
     public void setStatus(ReportStatus status) { this.status = status; }
     public Long getReviewedBy() { return reviewedBy; }

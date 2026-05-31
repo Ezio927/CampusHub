@@ -18,6 +18,7 @@ import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.common.moderation.ContentModerationService;
 import com.example.backend.common.moderation.ModerationResult;
+import com.example.backend.common.validation.ImageDataUrlValidator;
 import com.example.backend.demand.entity.Demand;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.notification.service.NotificationService;
@@ -35,7 +36,6 @@ import java.util.stream.Collectors;
 public class ConversationServiceImpl implements ConversationService {
 
     private static final int MAX_TEXT_LENGTH = 500;
-    private static final int MAX_IMAGE_DATA_URL_LENGTH = 1000000;
     private static final int RECALL_LIMIT_MINUTES = 2;
 
     private final ConversationRepository conversationRepository;
@@ -240,9 +240,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (conversation.getBlockedByUserId() != null && !conversation.getBlockedByUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.CONFLICT, "当前会话已被对方拉黑");
         }
-        conversation.setStatus(ConversationStatus.BLOCKED);
-        conversation.setBlockedByUserId(userId);
-        conversationRepository.save(conversation);
+        conversationRepository.updateBlockState(conversation, ConversationStatus.BLOCKED, userId);
         return toDto(conversation, userId);
     }
 
@@ -253,9 +251,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (conversation.getBlockedByUserId() != null && !conversation.getBlockedByUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN, "只能由拉黑方解除拉黑");
         }
-        conversation.setStatus(ConversationStatus.NORMAL);
-        conversation.setBlockedByUserId(null);
-        conversationRepository.save(conversation);
+        conversationRepository.updateBlockState(conversation, ConversationStatus.NORMAL, null);
         return toDto(conversation, userId);
     }
 
@@ -295,7 +291,7 @@ public class ConversationServiceImpl implements ConversationService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "不能发送系统消息");
         }
         if (type == MessageType.IMAGE) {
-            validateImageDataUrl(content.trim());
+            ImageDataUrlValidator.requireValidImageDataUrl(content.trim(), "图片");
             return new ModerationResult();
         }
         String trimmed = content.trim();
@@ -303,21 +299,6 @@ public class ConversationServiceImpl implements ConversationService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "消息内容不能超过500个字符");
         }
         return contentModerationService.assertMessageAllowed(trimmed);
-    }
-
-    private void validateImageDataUrl(String content) {
-        if (content.length() > MAX_IMAGE_DATA_URL_LENGTH) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "图片过大，请发送700KB以内的图片");
-        }
-        String lower = content.toLowerCase();
-        boolean valid = lower.startsWith("data:image/png;base64,")
-                || lower.startsWith("data:image/jpeg;base64,")
-                || lower.startsWith("data:image/jpg;base64,")
-                || lower.startsWith("data:image/gif;base64,")
-                || lower.startsWith("data:image/webp;base64,");
-        if (!valid) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "图片格式仅支持 png、jpg、gif、webp");
-        }
     }
 
     private ConversationDto toDto(Conversation conversation, Long userId) {
@@ -419,7 +400,9 @@ public class ConversationServiceImpl implements ConversationService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "只能引用当前会话内的消息");
         }
         message.setQuotedMessageId(quoted.getId());
-        message.setQuotedContent(truncate(quoted.getContent(), 200));
+        message.setQuotedContent(quoted.getMessageType() == MessageType.IMAGE
+                ? "[图片]"
+                : truncate(quoted.getContent(), 200));
     }
 
     private Long resolveReadMessageId(Long conversationId, Long requestedMessageId) {

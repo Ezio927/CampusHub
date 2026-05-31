@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         String realName = UserProfileValidator.requireValidRealName(req.getRealName());
         String phone = UserProfileValidator.normalizeOptionalPhone(req.getPhone());
         String email = UserProfileValidator.normalizeOptionalEmail(req.getEmail());
-        String studentId = req.getStudentId().trim();
+        String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
         contentModerationService.assertUsernameAllowed(username);
 
         if (userRepository.existsByUsername(username)) {

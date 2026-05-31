@@ -1,8 +1,10 @@
 package com.example.backend.chat.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.backend.chat.entity.Conversation;
 import com.example.backend.chat.mapper.ConversationMapper;
+import com.example.backend.common.enums.ConversationStatus;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -72,6 +74,15 @@ public class ConversationRepository {
             return Optional.empty();
         }
         return Optional.of(conversations.get(0));
+    }
+
+    public void updateBlockState(Conversation conversation, ConversationStatus status, Long blockedByUserId) {
+        conversation.setStatus(status);
+        conversation.setBlockedByUserId(blockedByUserId);
+        mapper.update(null, new LambdaUpdateWrapper<Conversation>()
+                .eq(Conversation::getId, conversation.getId())
+                .set(Conversation::getStatus, status)
+                .set(Conversation::getBlockedByUserId, blockedByUserId));
     }
 
     public List<Conversation> findByUserIdOrderByLastMessageAtDesc(Long userId) {

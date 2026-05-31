@@ -16,15 +16,38 @@
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
     <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
-      <template v-if="!cert">
+      <div v-if="cert" class="cert-state">
+        状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':cert.status==='REJECTED'?'var(--danger)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span>
+        <p v-if="cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
+      </div>
+      <template v-if="canSubmitCert">
         <div class="form-group"><label>类型</label><select v-model="cf.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
-        <div class="form-group"><label>学号</label><input v-model="cf.studentId" /></div>
-        <div class="form-group"><label>图片URL</label><input v-model="cf.cardImageUrl" placeholder="证件图片链接" /></div>
-        <button class="btn-primary btn-sm" @click="submitCert">提交认证</button>
+        <div class="form-group"><label>学号</label><input :value="auth.user?.studentId" readonly /></div>
+        <div class="form-group">
+          <label>认证图片</label>
+          <div class="upload-row">
+            <label class="btn-outline btn-sm file-btn">
+              选择图片
+              <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickCertImage" />
+            </label>
+            <button v-if="cf.cardImageUrl" type="button" class="btn-outline btn-sm" @click="clearCertImage">移除</button>
+          </div>
+          <button v-if="cf.cardImageUrl" type="button" class="cert-preview" @click="certImageViewer=cf.cardImageUrl">
+            <img :src="cf.cardImageUrl" alt="认证图片预览" />
+          </button>
+        </div>
+        <p v-if="certErr" class="form-error">{{ certErr }}</p>
+        <button class="btn-primary btn-sm" :disabled="certSubmitting" @click="submitCert">{{ certSubmitting ? '提交中...' : '提交认证' }}</button>
       </template>
-      <p v-else>状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span></p>
+      <button v-else-if="cert?.cardImageUrl" type="button" class="cert-preview compact-preview" @click="certImageViewer=cert.cardImageUrl">
+        <img :src="cert.cardImageUrl" alt="认证图片" />
+      </button>
     </div>
     <button class="btn-block lb" @click="logout">退出登录</button>
+    <div v-if="certImageViewer" class="image-viewer" @click.self="certImageViewer=''">
+      <button type="button" class="viewer-close" @click="certImageViewer=''">关闭</button>
+      <img :src="certImageViewer" alt="认证图片" />
+    </div>
   </div>
 </template>
 <script setup>
@@ -39,7 +62,11 @@ const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
 const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
+const certErr=ref('')
+const certSubmitting=ref(false)
+const certImageViewer=ref('')
 const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
+const canSubmitCert=computed(()=>!cert.value||cert.value.status==='REJECTED')
 async function update(){
   const d={}
   try{
@@ -51,8 +78,28 @@ async function update(){
     modal.alert('保存成功')
   }catch(e){modal.alert('操作失败', e.message)}
 }
-async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){modal.alert('提交失败', e.message)}}
-async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data}catch{cert.value=null}}
+async function submitCert(){
+  certErr.value=''
+  certSubmitting.value=true
+  try{
+    if(!cf.cardImageUrl){certErr.value='请先上传认证图片';return}
+    await certAPI.submit({...cf,studentId:auth.user?.studentId||''})
+    clearCertImage()
+    await loadCert()
+  }catch(e){modal.alert('提交失败', e.message)}finally{certSubmitting.value=false}
+}
+async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data;cf.studentId=auth.user?.studentId||''}catch{cert.value=null;cf.studentId=auth.user?.studentId||''}}
+function pickCertImage(event){
+  const file=event.target.files?.[0]
+  event.target.value=''
+  if(!file)return
+  if(!file.type.startsWith('image/')){certErr.value='请选择图片文件';return}
+  if(file.size>700000){certErr.value='图片需小于700KB';return}
+  const reader=new FileReader()
+  reader.onload=()=>{cf.cardImageUrl=String(reader.result||'');certErr.value=''}
+  reader.readAsDataURL(file)
+}
+function clearCertImage(){cf.cardImageUrl=''}
 function logout(){auth.logout();ro.push('/login')}
 onMounted(async()=>{await auth.fetchUser();await loadCert()})
 </script>
@@ -64,6 +111,16 @@ onMounted(async()=>{await auth.fetchUser();await loadCert()})
 .sc{background:#fff;border-radius:14px;padding:16px;text-align:center;border:1px solid var(--border)}
 .sv{font-size:22px;font-weight:800;color:var(--primary)}.sl{font-size:12px;color:var(--text-muted);margin-top:2px}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cert-state{margin-bottom:12px}
+.upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.file-btn{position:relative;overflow:hidden}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff}
+.compact-preview{width:220px;height:150px}
+.cert-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
+.image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:8px;background:#fff}
+.viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text)}
 .lb{padding:14px;border-radius:12px;background:#fee2e2;color:var(--danger);font-weight:700;font-size:15px;border:1px solid #fecaca}
 .lb:hover{background:#fecaca}
 </style>

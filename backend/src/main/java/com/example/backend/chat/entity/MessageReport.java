@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.backend.common.enums.ReportCategory;
 import com.example.backend.common.enums.ReportStatus;
+import com.example.backend.common.enums.MessageType;
 import com.example.backend.common.mybatis.StringListTypeHandler;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,8 @@ public class MessageReport {
     private List<String> evidenceUrls = new ArrayList<String>();
 
     private String messageSnapshot;
+    private MessageType messageType;
+    private String messageImageUrl;
     private ReportStatus status = ReportStatus.PENDING;
     private Long reviewedBy;
     private LocalDateTime reviewedAt;
@@ -54,6 +57,10 @@ public class MessageReport {
     }
     public String getMessageSnapshot() { return messageSnapshot; }
     public void setMessageSnapshot(String messageSnapshot) { this.messageSnapshot = messageSnapshot; }
+    public MessageType getMessageType() { return messageType; }
+    public void setMessageType(MessageType messageType) { this.messageType = messageType; }
+    public String getMessageImageUrl() { return messageImageUrl; }
+    public void setMessageImageUrl(String messageImageUrl) { this.messageImageUrl = messageImageUrl; }
     public ReportStatus getStatus() { return status; }
     public void setStatus(ReportStatus status) { this.status = status; }
     public Long getReviewedBy() { return reviewedBy; }

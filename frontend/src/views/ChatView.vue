@@ -39,9 +39,9 @@
       >
         <div class="msg-bubble">
           <div v-if="m.quotedContent" class="quote-in-msg">{{ m.quotedContent }}</div>
-          <a v-if="m.messageType==='IMAGE' && m.status!=='RECALLED'" :href="m.content" target="_blank" class="image-link">
+          <button v-if="m.messageType==='IMAGE' && m.status!=='RECALLED'" type="button" class="image-link" @click="openImageViewer(m.content)">
             <img :src="m.content" alt="私信图片" />
-          </a>
+          </button>
           <p v-else>{{ m.content }}</p>
           <div class="msg-meta">
             <small>{{ formatTime(m.createdAt) }}</small>
@@ -60,7 +60,12 @@
         <strong>举报消息</strong>
         <button type="button" class="link-btn" @click="closeReport">关闭</button>
       </div>
-      <div class="report-target">{{ reportTarget.messageType === 'IMAGE' ? '[图片]' : reportTarget.content }}</div>
+      <div class="report-target">
+        <button v-if="reportTarget.messageType === 'IMAGE'" type="button" class="report-image" @click="openImageViewer(reportTarget.content)">
+          <img :src="reportTarget.content" alt="举报图片" />
+        </button>
+        <template v-else>{{ reportTarget.content }}</template>
+      </div>
       <select v-model="reportForm.category" class="mt-sm">
         <option value="SEXUAL">色情擦边玩笑</option>
         <option value="ABUSE">骂人（轻度/重度）</option>
@@ -99,6 +104,11 @@
       </div>
       <p v-if="err" class="form-error">{{ err }}</p>
     </form>
+
+    <div v-if="imageViewer" class="image-viewer" @click.self="closeImageViewer">
+      <button type="button" class="viewer-close" @click="closeImageViewer">关闭</button>
+      <img :src="imageViewer" alt="私信图片" />
+    </div>
   </div>
 </template>
 
@@ -123,10 +133,11 @@ const reportTarget = ref(null)
 const reporting = ref(false)
 const err = ref('')
 const imagePreview = ref('')
+const imageViewer = ref('')
 const searchKeyword = ref('')
 const searchResults = ref([])
 const reportForm = reactive({ category: 'ABUSE', reason: '', evidence: '' })
-const emojis = ['😀','😂','🥲','👍','🙏','🎉','❤️','😅','👌','🔥','🌟','📌']
+const emojis = ['😀','😂','😊','👍','🙏','🎉','❤️','😅','👌','🔥','🌟','📌']
 let syncTimer = null
 
 const inputDisabled = computed(() => conversation.value?.blockedByTarget || conversation.value?.blockedByMe)
@@ -333,6 +344,14 @@ function clearImage() {
   imagePreview.value = ''
 }
 
+function openImageViewer(src) {
+  imageViewer.value = src || ''
+}
+
+function closeImageViewer() {
+  imageViewer.value = ''
+}
+
 function createClientMessageId() {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID()
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -431,7 +450,14 @@ onUnmounted(() => {
 .mine .msg-bubble { background: var(--primary); color: #fff; }
 .recalled .msg-bubble { color: var(--text-muted); font-style: italic; }
 .msg-bubble p { white-space: pre-wrap; word-break: break-word; }
-.image-link { display: block; line-height: 0; }
+.image-link {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  line-height: 0;
+}
 .image-link img {
   display: block;
   max-width: 220px;
@@ -481,6 +507,22 @@ onUnmounted(() => {
   background: #f8fafc;
   color: var(--text-secondary);
   word-break: break-word;
+}
+.report-image {
+  display: block;
+  width: 140px;
+  height: 104px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.report-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .quote-preview, .image-preview {
   display: flex;
@@ -538,6 +580,29 @@ onUnmounted(() => {
   inset: 0;
   opacity: 0;
   cursor: pointer;
+}
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+  background: rgba(15,23,42,.82);
+}
+.image-viewer img {
+  max-width: min(960px, 96vw);
+  max-height: 86vh;
+  border-radius: 8px;
+  background: #fff;
+}
+.viewer-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #fff;
+  color: var(--text);
 }
 @media (max-width: 640px) {
   .chat-head { align-items: flex-start; }
