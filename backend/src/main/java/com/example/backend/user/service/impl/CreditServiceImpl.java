@@ -59,7 +59,7 @@ public class CreditServiceImpl implements CreditService {
         record.setRelatedOrderId(relatedOrderId);
         creditRecordRepository.save(record);
         notificationService.createNotification(userId, NotificationType.CREDIT_CHANGED,
-                "Credit increased", record.getReason(), relatedOrderId);
+                "信用分增加 +" + amount, record.getReason(), relatedOrderId);
         return CreditRecordDto.from(record);
     }
 
@@ -80,7 +80,7 @@ public class CreditServiceImpl implements CreditService {
         record.setRelatedOrderId(relatedOrderId);
         creditRecordRepository.save(record);
         notificationService.createNotification(userId, NotificationType.CREDIT_CHANGED,
-                "Credit deducted", record.getReason(), relatedOrderId);
+                "信用分扣除 " + amount, record.getReason(), relatedOrderId);
         return CreditRecordDto.from(record);
     }
 

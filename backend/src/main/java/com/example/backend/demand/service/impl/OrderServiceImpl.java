@@ -210,7 +210,7 @@ public class OrderServiceImpl implements OrderService {
 
         int penalty = calculateCancelPenalty(order, LocalDateTime.now());
         if (penalty > 0) {
-            creditService.deductCredit(userId, penalty, "cancel order penalty", order.getId());
+            creditService.deductCredit(userId, penalty, "取消订单", order.getId());
         }
 
         OrderStatus fromStatus = order.getStatus();

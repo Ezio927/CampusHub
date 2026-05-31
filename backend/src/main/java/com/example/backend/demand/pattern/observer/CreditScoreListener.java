@@ -17,7 +17,8 @@ public class CreditScoreListener {
     @EventListener
     public void onOrderStatusChanged(OrderStatusChangedEvent event) {
         if (event.getToStatus() == OrderStatus.COMPLETED) {
-            creditService.addCredit(event.getAcceptorId(), 5, "Order completed", event.getOrderId());
+            creditService.addCredit(event.getPublisherId(), 5, "订单完成", event.getOrderId());
+            creditService.addCredit(event.getAcceptorId(), 5, "订单完成", event.getOrderId());
         }
     }
 }

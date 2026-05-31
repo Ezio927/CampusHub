@@ -43,6 +43,15 @@
         <img :src="cert.cardImageUrl" alt="认证图片" />
       </button>
     </div>
+    <div class="card" v-if="creditList.length"><h3 class="mb-sm">📋 信用记录</h3>
+      <div v-for="r in creditList" :key="r.id" class="cr">
+        <div class="flex-between">
+          <span class="text-sm">{{ r.reason }}</span>
+          <span class="text-bold" :style="{color:r.changeAmount>0?'var(--success)':'var(--danger)'}">{{ r.changeAmount>0?'+'+r.changeAmount:r.changeAmount }}</span>
+        </div>
+        <div class="text-xs text-muted">{{ r.createdAt?.substring(0,16)?.replace('T',' ') }}</div>
+      </div>
+    </div>
     <button class="btn-block lb" @click="logout">退出登录</button>
     <div v-if="certImageViewer" class="image-viewer" @click.self="certImageViewer=''">
       <button type="button" class="viewer-close" @click="certImageViewer=''">关闭</button>
@@ -60,7 +69,7 @@ import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/valid
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
-const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
+const e=reactive({realName:'',phone:'',email:''});const cert=ref(null);const creditList=ref([])
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
 const certErr=ref('')
 const certSubmitting=ref(false)
@@ -101,7 +110,8 @@ function pickCertImage(event){
 }
 function clearCertImage(){cf.cardImageUrl=''}
 function logout(){auth.logout();ro.push('/login')}
-onMounted(async()=>{await auth.fetchUser();await loadCert()})
+async function loadCredit(){try{const r=await userAPI.creditRecords();creditList.value=r.data||[]}catch{creditList.value=[]}}
+onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit()})
 </script>
 <style scoped>
 .ph{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:18px;padding:28px;color:#fff;text-align:center;margin-bottom:18px}
@@ -123,4 +133,6 @@ onMounted(async()=>{await auth.fetchUser();await loadCert()})
 .viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text)}
 .lb{padding:14px;border-radius:12px;background:#fee2e2;color:var(--danger);font-weight:700;font-size:15px;border:1px solid #fecaca}
 .lb:hover{background:#fecaca}
+.cr{padding:10px 0;border-bottom:1px solid var(--border)}
+.cr:last-child{border-bottom:none}
 </style>
