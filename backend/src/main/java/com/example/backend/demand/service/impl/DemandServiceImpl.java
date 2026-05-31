@@ -167,6 +167,17 @@ public class DemandServiceImpl implements DemandService {
         demandRepository.save(demand);
     }
 
+    @Override
+    public void delete(Long demandId, Long userId) {
+        Demand demand = requireDemand(demandId);
+        ensureOwner(userId, demand);
+        if (!demand.isOpen()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "需求已被接单，不能删除");
+        }
+        demandImageRepository.deleteByDemandId(demandId);
+        demandRepository.deleteById(demandId);
+    }
+
     private void validateUpdatedDemand(Demand demand) {
         DemandCreateDto validate = new DemandCreateDto();
         validate.setTitle(demand.getTitle());

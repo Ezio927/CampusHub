@@ -23,4 +23,6 @@ public interface DemandService {
     DemandDto update(Long demandId, Long userId, DemandUpdateDto req);
 
     void cancel(Long demandId, Long userId);
+
+    void delete(Long demandId, Long userId);
 }

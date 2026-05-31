@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -92,6 +93,14 @@ public class DemandController {
     public ApiResponse<Void> cancel(
             @Parameter(description = "需求ID") @PathVariable Long id) {
         demandService.cancel(id, AuthContext.requireUserId());
+        return ApiResponse.success();
+    }
+
+    @Operation(summary = "删除需求（仅OPEN状态可删）")
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(
+            @Parameter(description = "需求ID") @PathVariable Long id) {
+        demandService.delete(id, AuthContext.requireUserId());
         return ApiResponse.success();
     }
 }

@@ -15,6 +15,9 @@
       <button class="btn-outline btn-block act-btn" @click="messagePublisher">联系发布者</button>
       <button v-if="d.status==='OPEN'" class="btn-primary btn-block act-btn" @click="accept">立即接单</button>
     </div>
+    <div v-if="d.publisherId===auth.user?.id&&d.status==='OPEN'" class="act-list">
+      <button class="btn-del btn-block act-btn" @click="deleteDemand">删除需求</button>
+    </div>
   </div>
   <div v-else class="empty">⏳ 加载中...</div>
 </template>
@@ -34,6 +37,7 @@ function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECOND
 function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
 async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(errorMessage(e,'接单失败'))}}
+async function deleteDemand(){if(!window.confirm('确定删除该需求？删除后不可恢复。'))return;try{await demandAPI.delete(d.value.id);ro.push('/orders')}catch(e){alert(errorMessage(e,'删除失败'))}}
 async function messagePublisher(){
   if(!d.value?.publisherId){alert('发布者信息缺失，暂时无法发起私信');return}
   try{
@@ -56,4 +60,6 @@ h1{font-size:22px;font-weight:800;flex:1;margin-right:12px}
 .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px}
 .act-list{display:flex;flex-direction:column;gap:8px}
 .act-btn{padding:14px;border-radius:12px;font-size:16px}
+.btn-del{background:#dc2626;color:#fff}
+.btn-del:hover{background:#b91c1c}
 </style>

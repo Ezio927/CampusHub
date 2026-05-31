@@ -350,5 +350,10 @@ public class OrderServiceImpl implements OrderService {
         public void cancel(Long demandId, Long userId) {
             throw new UnsupportedOperationException("cancel is not supported in adapter");
         }
+
+        @Override
+        public void delete(Long demandId, Long userId) {
+            throw new UnsupportedOperationException("delete is not supported in adapter");
+        }
     }
 }
