@@ -30,12 +30,6 @@ public class DataInitializer implements CommandLineRunner {
             createUser("2", "2", "TEST0002", "测试用户2", UserRole.STUDENT, UserStatus.ACTIVE);
         }
 
-        if (tagRepository.count() == 0) {
-            createTag("location");
-            createTag("skill");
-            createTag("study");
-            createTag("secondhand");
-        }
     }
 
     private void createUser(String username, String password, String studentId, String realName, UserRole role, UserStatus status) {

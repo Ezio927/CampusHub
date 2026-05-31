@@ -5,7 +5,7 @@
       <div class="form-group"><label>标题 *</label><input v-model="f.title" placeholder="简单描述你要什么帮助" required /></div>
       <div class="form-group"><label>详细描述 *</label><textarea v-model="f.description" rows="4" placeholder="详细说明需求内容、要求等" required></textarea></div>
       <div class="rr">
-        <div class="form-group"><label>分类 *</label><select v-model="f.category" required><option value="">选择分类</option><option value="ERRAND">跑腿</option><option value="SKILL">技能</option><option value="STUDY">学习</option><option value="SECONDHAND">二手</option></select></div>
+        <div class="form-group"><label>分类 *</label><select v-model="f.category" required><option value="">选择分类</option><option value="ERRAND">跑腿代办</option><option value="SKILL">技能求助</option><option value="STUDY">学习互助</option><option value="SECONDHAND">二手交易</option><option value="OTHER">其他</option></select></div>
         <div class="form-group">
           <label>报酬金额 *</label>
           <input
@@ -35,7 +35,18 @@
 
       <!-- 二手：必填图片 -->
       <div v-if="f.category==='SECONDHAND'" class="form-group">
-        <label>图片链接 *</label><input v-model="imageInput" placeholder="用逗号分隔多个图片链接" required />
+        <label>实物图片 *</label>
+        <div class="img-list">
+          <div v-for="(url,i) in f.imageUrls" :key="i" class="img-item">
+            <img :src="url" alt="实物图" />
+            <button type="button" class="img-remove" @click="removeImg(i)">×</button>
+          </div>
+          <label class="img-add" v-if="f.imageUrls.length < 6">
+            ＋
+            <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickImg" />
+          </label>
+        </div>
+        <p class="hint">最多6张，每张不超过3MB</p>
       </div>
 
       <!-- 非跑腿的分类可以选填位置 -->
@@ -51,20 +62,33 @@
 import { reactive,ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { demandAPI } from '@/api/demands'
+import { uploadImage } from '@/api/upload'
 import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
 const ro=useRouter()
 const modal = useModal()
 const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
 const tagInput=ref('')
-const imageInput=ref('')
 const err=ref('');const ing=ref(false)
 
-// 切换分类时清空之前的条件字段
-watch(()=>f.category,()=>{f.locationTag='';f.urgentDeadline=null;f.tagIds=[];f.imageUrls=[];tagInput.value='';imageInput.value=''})
+watch(()=>f.category,()=>{f.locationTag='';f.urgentDeadline=null;f.tagIds=[];f.imageUrls=[];tagInput.value=''})
 
-function parseImages(){return imageInput.value.split(',').map(s=>s.trim()).filter(Boolean)}
 function sanitizeReward(){f.rewardAmount=String(f.rewardAmount||'').replace(/\D/g,'')}
+function removeImg(i){f.imageUrls.splice(i,1)}
+async function pickImg(event){
+  const file=event.target.files?.[0]
+  event.target.value=''
+  if(!file)return
+  if(!file.type.startsWith('image/')){err.value='请选择图片文件';return}
+  if(file.size>3*1024*1024){err.value='图片需小于3MB';return}
+  if(f.imageUrls.length>=6){err.value='最多6张';return}
+  try{
+    err.value='上传中...'
+    const res=await uploadImage(file)
+    f.imageUrls.push(res.data.url)
+    err.value=''
+  }catch(e){err.value='上传失败：'+(e.message||'请重试')}
+}
 
 async function pub(){
   err.value='';ing.value=true
@@ -72,8 +96,8 @@ async function pub(){
   const rewardAmount=Number.parseInt(f.rewardAmount||'0',10)
   if(Number.isNaN(rewardAmount)||rewardAmount<0){err.value='报酬金额必须是非负整数';ing.value=false;return}
   const body={...f,rewardAmount}
-  if(f.category==='SKILL') body.tagIds = [2] // 标签ID: 1=location 2=skill 3=study 4=secondhand
-  if(f.category==='SECONDHAND') body.imageUrls = parseImages()
+  if(f.category==='SKILL') body.tagIds = [2]
+  if(f.category==='SECONDHAND'&&!body.imageUrls.length){err.value='请至少上传一张实物图片';ing.value=false;return}
   if(f.category==='STUDY'&&!body.urgentDeadline){err.value='请选择截止时间';ing.value=false;return}
   try{
     const res=await demandAPI.create(body)
@@ -87,4 +111,11 @@ async function pub(){
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .hint{font-size:12px;color:var(--text-muted);margin-top:4px}
 .pbn{padding:14px;border-radius:12px;font-size:16px;font-weight:700;margin-top:8px}
+.img-list{display:flex;flex-wrap:wrap;gap:8px}
+.img-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.img-item img{width:100%;height:100%;object-fit:cover}
+.img-remove{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:20px;text-align:center;padding:0}
+.img-add{width:80px;height:80px;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text-muted);cursor:pointer;position:relative;overflow:hidden}
+.img-add:hover{border-color:var(--primary);color:var(--primary)}
+.img-add input{position:absolute;inset:0;opacity:0;cursor:pointer}
 </style>

@@ -18,11 +18,13 @@ public class DemandFactory {
     public DemandFactory(ErrandValidator errandValidator,
                          SkillValidator skillValidator,
                          StudyValidator studyValidator,
-                         SecondhandValidator secondhandValidator) {
+                         SecondhandValidator secondhandValidator,
+                         OtherValidator otherValidator) {
         validatorMap.put(DemandCategory.ERRAND, errandValidator);
         validatorMap.put(DemandCategory.SKILL, skillValidator);
         validatorMap.put(DemandCategory.STUDY, studyValidator);
         validatorMap.put(DemandCategory.SECONDHAND, secondhandValidator);
+        validatorMap.put(DemandCategory.OTHER, otherValidator);
     }
 
     public Demand createDemand(DemandCreateDto param) {

@@ -46,7 +46,7 @@ function st(s){return{PENDING_ACCEPT:'待接单',ACCEPTED:'已接单',IN_PROGRES
 function sb(s){return{PENDING_ACCEPT:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',PENDING_CONFIRM:'#eab308',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
 function dst(s){return{OPEN:'待接单',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function dsb(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
-function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHAND:'二手'}[c]||c}
+function catTxt(c){return{ERRAND:'跑腿代办',SKILL:'技能求助',STUDY:'学习互助',SECONDHAND:'二手交易',OTHER:'其他'}[c]||c}
 function goOrder(id){ro.push('/orders/'+id)}
 function goDemand(id){ro.push('/demands/'+id)}
 async function load(){

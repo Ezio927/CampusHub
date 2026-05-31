@@ -24,7 +24,8 @@ class DemandFactoryValidatorsTest {
                 new ErrandValidator(),
                 new SkillValidator(),
                 new StudyValidator(),
-                new SecondhandValidator()
+                new SecondhandValidator(),
+                new OtherValidator()
         );
     }
 
@@ -112,6 +113,14 @@ class DemandFactoryValidatorsTest {
 
         Demand demand = demandFactory.createDemand(dto);
         Assertions.assertFalse(demand.getUrgent());
+    }
+
+    @Test
+    void otherValidatorShouldAcceptWithoutExtraFields() {
+        DemandCreateDto dto = buildDto("misc task", DemandCategory.OTHER);
+        Demand demand = demandFactory.createDemand(dto);
+        Assertions.assertNotNull(demand);
+        Assertions.assertEquals(DemandCategory.OTHER, demand.getCategory());
     }
 
     @Test

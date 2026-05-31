@@ -7,10 +7,11 @@
     <div class="flex gap-sm mb-md flex-wrap">
       <select v-model="store.filters.category" @change="store.fetch()" class="sel">
         <option value="">全部分类</option>
-        <option value="ERRAND">跑腿</option>
-        <option value="SKILL">技能</option>
-        <option value="STUDY">学习</option>
-        <option value="SECONDHAND">二手</option>
+        <option value="ERRAND">跑腿代办</option>
+        <option value="SKILL">技能求助</option>
+        <option value="STUDY">学习互助</option>
+        <option value="SECONDHAND">二手交易</option>
+        <option value="OTHER">其他</option>
       </select>
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
     </div>
@@ -36,8 +37,8 @@ const auth = useAuthStore()
 const router = useRouter()
 let t
 function debounce() { clearTimeout(t); t = setTimeout(() => store.fetch(), 300) }
-function catTxt(c) { return { ERRAND:'跑腿', SKILL:'技能', STUDY:'学习', SECONDHAND:'二手' }[c] || c }
-function catBg(c) { return { ERRAND:'#f59e0b', SKILL:'#6366f1', STUDY:'#10b981', SECONDHAND:'#ef4444' }[c] || '#888' }
+function catTxt(c) { return { ERRAND:'跑腿代办', SKILL:'技能求助', STUDY:'学习互助', SECONDHAND:'二手交易', OTHER:'其他' }[c] || c }
+function catBg(c) { return { ERRAND:'#f59e0b', SKILL:'#6366f1', STUDY:'#10b981', SECONDHAND:'#ef4444', OTHER:'#8b5cf6' }[c] || '#888' }
 function goDetail(id) { router.push('/demands/' + id) }
 onMounted(() => store.fetch())
 </script>

@@ -34,8 +34,8 @@ const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref
 const modal = useModal()
 const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
 const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
-function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHAND:'二手'}[c]||c}
-function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444'}[c]||'#888'}
+function catTxt(c){return{ERRAND:'跑腿代办',SKILL:'技能求助',STUDY:'学习互助',SECONDHAND:'二手交易',OTHER:'其他'}[c]||c}
+function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444',OTHER:'#8b5cf6'}[c]||'#888'}
 function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
 async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){modal.alert('接单失败', errorMessage(e))}}
