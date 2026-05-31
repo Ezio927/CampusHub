@@ -33,11 +33,22 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
+import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/validators'
 const ro=useRouter();const auth=useAuthStore()
 const e=reactive({realName:'',phone:'',email:''});const cert=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
 const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
-async function update(){const d={};if(e.realName)d.realName=e.realName;if(e.phone)d.phone=e.phone;if(e.email)d.email=e.email;try{await userAPI.update(d)}catch(e){alert(e.message)}}
+async function update(){
+  const d={}
+  try{
+    if(e.realName)d.realName=normalizeRealName(e.realName)
+    if(e.phone)d.phone=normalizePhone(e.phone)
+    if(e.email)d.email=normalizeEmail(e.email)
+    await userAPI.update(d)
+    await auth.fetchUser()
+    alert('保存成功')
+  }catch(e){alert(e.message)}
+}
 async function submitCert(){try{await certAPI.submit({...cf});await loadCert()}catch(e){alert(e.message)}}
 async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data}catch{cert.value=null}}
 function logout(){auth.logout();ro.push('/login')}

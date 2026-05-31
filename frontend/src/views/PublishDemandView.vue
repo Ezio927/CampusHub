@@ -6,7 +6,18 @@
       <div class="form-group"><label>详细描述 *</label><textarea v-model="f.description" rows="4" placeholder="详细说明需求内容、要求等" required></textarea></div>
       <div class="rr">
         <div class="form-group"><label>分类 *</label><select v-model="f.category" required><option value="">选择分类</option><option value="ERRAND">跑腿</option><option value="SKILL">技能</option><option value="STUDY">学习</option><option value="SECONDHAND">二手</option></select></div>
-        <div class="form-group"><label>报酬金额 *</label><input v-model.number="f.rewardAmount" type="number" placeholder="0" required /></div>
+        <div class="form-group">
+          <label>报酬金额 *</label>
+          <input
+            v-model="f.rewardAmount"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder="0"
+            required
+            @input="sanitizeReward"
+          />
+        </div>
       </div>
       <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="POINT">积分</option></select></div>
 
@@ -40,8 +51,9 @@
 import { reactive,ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { demandAPI } from '@/api/demands'
+import { errorMessage } from '@/utils/errors'
 const ro=useRouter()
-const f=reactive({title:'',description:'',category:'',rewardAmount:0,rewardType:'MONEY',locationTag:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
+const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
 const tagInput=ref('')
 const imageInput=ref('')
 const err=ref('');const ing=ref(false)
@@ -49,16 +61,23 @@ const err=ref('');const ing=ref(false)
 // 切换分类时清空之前的条件字段
 watch(()=>f.category,()=>{f.locationTag='';f.urgentDeadline=null;f.tagIds=[];f.imageUrls=[];tagInput.value='';imageInput.value=''})
 
-function parseTags(){return tagInput.value.split(',').map(s=>s.trim()).filter(Boolean)}
 function parseImages(){return imageInput.value.split(',').map(s=>s.trim()).filter(Boolean)}
+function sanitizeReward(){f.rewardAmount=String(f.rewardAmount||'').replace(/\D/g,'')}
 
 async function pub(){
   err.value='';ing.value=true
-  const body={...f,rewardAmount:Number(f.rewardAmount)||0}
+  sanitizeReward()
+  const rewardAmount=Number.parseInt(f.rewardAmount||'0',10)
+  if(Number.isNaN(rewardAmount)||rewardAmount<0){err.value='报酬金额必须是非负整数';ing.value=false;return}
+  const body={...f,rewardAmount}
   if(f.category==='SKILL') body.tagIds = [2] // 标签ID: 1=location 2=skill 3=study 4=secondhand
   if(f.category==='SECONDHAND') body.imageUrls = parseImages()
   if(f.category==='STUDY'&&!body.urgentDeadline){err.value='请选择截止时间';ing.value=false;return}
-  try{await demandAPI.create(body);ro.push('/')}catch(e){err.value=e.message||'发布失败'}finally{ing.value=false}
+  try{
+    const res=await demandAPI.create(body)
+    if(res.data?.riskWarnings?.length) alert(res.data.riskWarnings.join('\n'))
+    ro.push('/')
+  }catch(e){err.value=errorMessage(e,'发布失败')}finally{ing.value=false}
 }
 </script>
 <style scoped>

@@ -114,6 +114,17 @@ class DemandFactoryValidatorsTest {
         Assertions.assertFalse(demand.getUrgent());
     }
 
+    @Test
+    void shouldRejectNegativeRewardAmount() {
+        DemandCreateDto dto = buildDto("test", DemandCategory.ERRAND);
+        dto.setLocationTag("gate");
+        dto.setRewardAmount(-1);
+
+        BusinessException ex = Assertions.assertThrows(BusinessException.class,
+                () -> demandFactory.createDemand(dto));
+        Assertions.assertEquals(ErrorCode.INVALID_PARAM.getCode(), ex.getCode());
+    }
+
     private DemandCreateDto buildDto(String title, DemandCategory category) {
         DemandCreateDto dto = new DemandCreateDto();
         dto.setTitle(title);

@@ -1,0 +1,127 @@
+<template>
+  <div class="page">
+    <h1 class="page-title">私信</h1>
+    <div v-if="list.length===0" class="empty">
+      <p class="mt-sm">暂无私信</p>
+    </div>
+    <button v-for="c in list" :key="c.id" class="conv" @click="open(c.id)">
+      <div class="avatar">{{ c.targetUser?.username?.[0]?.toUpperCase() || '?' }}</div>
+      <div class="conv-main">
+        <div class="flex-between">
+          <span class="conv-name">{{ c.targetUser?.username || '用户 #' + c.id }}</span>
+          <span class="text-sm text-muted">{{ formatTime(c.lastMessageAt) }}</span>
+        </div>
+        <div class="conv-context" v-if="c.relatedDemandTitle">{{ c.relatedDemandTitle }}</div>
+        <div class="conv-state" v-if="c.blockedByTarget">对方已拉黑你</div>
+        <div class="conv-state" v-else-if="c.blockedByMe">你已拉黑对方</div>
+        <div class="conv-msg">{{ c.lastMessageContent || '还没有消息，开始沟通吧' }}</div>
+      </div>
+      <span v-if="c.unreadCount" class="unread">{{ c.unreadCount }}</span>
+    </button>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { chatAPI } from '@/api/chat'
+
+const router = useRouter()
+const list = ref([])
+
+async function load() {
+  const res = await chatAPI.list()
+  list.value = res.data || []
+}
+
+function open(id) {
+  router.push('/chat/' + id)
+}
+
+function formatTime(value) {
+  if (!value) return ''
+  return value.substring(0, 16).replace('T', ' ')
+}
+
+onMounted(load)
+</script>
+
+<style scoped>
+.conv {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: left;
+}
+.conv:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.conv-main {
+  flex: 1;
+  min-width: 0;
+}
+.conv-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.conv-context {
+  display: inline-flex;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.conv-state {
+  margin-top: 4px;
+  color: var(--danger);
+  font-size: 12px;
+}
+.conv-msg {
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.unread {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

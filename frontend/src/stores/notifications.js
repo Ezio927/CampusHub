@@ -7,7 +7,12 @@ export const useNotifStore = defineStore('notifications', () => {
   const list = ref([])
 
   async function fetchUnread() {
-    try { const r = await notifAPI.unread(); unread.value = r.data?.unreadCount || 0 } catch {}
+    try {
+      const r = await notifAPI.unread()
+      unread.value = r.data?.unreadCount || 0
+    } catch {
+      unread.value = 0
+    }
   }
 
   async function fetchList() { const r = await notifAPI.list({ page:0, size:20 }); list.value = r.data || [] }

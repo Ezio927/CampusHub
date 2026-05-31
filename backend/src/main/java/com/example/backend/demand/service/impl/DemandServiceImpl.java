@@ -1,11 +1,12 @@
 package com.example.backend.demand.service.impl;
 
-import com.example.backend.auth.security.AuthContext;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.UserStatus;
+import com.example.backend.common.moderation.ContentModerationService;
+import com.example.backend.common.moderation.ModerationResult;
 import com.example.backend.demand.dto.DemandCreateDto;
 import com.example.backend.demand.dto.DemandDto;
 import com.example.backend.demand.dto.DemandSearchCriteria;
@@ -37,27 +38,33 @@ public class DemandServiceImpl implements DemandService {
     private final DemandImageRepository demandImageRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final ContentModerationService contentModerationService;
 
     public DemandServiceImpl(DemandFactory demandFactory,
                              DemandRepository demandRepository,
                              DemandImageRepository demandImageRepository,
                              TagRepository tagRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ContentModerationService contentModerationService) {
         this.demandFactory = demandFactory;
         this.demandRepository = demandRepository;
         this.demandImageRepository = demandImageRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
+        this.contentModerationService = contentModerationService;
     }
 
     @Override
     public DemandDto createDemand(Long userId, DemandCreateDto req) {
         User publisher = requireActiveUser(userId);
+        List<String> warnings = validateDemandTextAndReward(req);
         Demand demand = demandFactory.createDemand(req);
         demand.setPublisherId(publisher.getId());
         demandRepository.save(demand);
         saveImages(demand.getId(), req == null ? null : req.getImageUrls());
-        return toDto(demand);
+        DemandDto dto = toDto(demand);
+        dto.setRiskWarnings(warnings);
+        return dto;
     }
 
     @Override
@@ -133,7 +140,12 @@ public class DemandServiceImpl implements DemandService {
             if (req.getTagIds() != null) {
                 updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());
             }
+            List<String> warnings = validateDemandEntityTextAndReward(demand);
             validateUpdatedDemand(demand);
+            demandRepository.save(demand);
+            DemandDto dto = toDto(demand);
+            dto.setRiskWarnings(warnings);
+            return dto;
         }
         demandRepository.save(demand);
         return toDto(demand);
@@ -163,6 +175,35 @@ public class DemandServiceImpl implements DemandService {
         validate.setTagIds(getTagIdsForDemand(demand.getCategory()));
         validate.setImageUrls(getImageUrlsForDemand(demand.getId()));
         demandFactory.createDemand(validate);
+    }
+
+    private List<String> validateDemandTextAndReward(DemandCreateDto req) {
+        if (req == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "请求不能为空");
+        }
+        return validateDemandFields(req.getTitle(), req.getDescription(), req.getRewardAmount());
+    }
+
+    private List<String> validateDemandEntityTextAndReward(Demand demand) {
+        return validateDemandFields(demand.getTitle(), demand.getDescription(), demand.getRewardAmount());
+    }
+
+    private List<String> validateDemandFields(String title, String description, Integer rewardAmount) {
+        if (isBlank(title)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "标题不能为空");
+        }
+        if (isBlank(description)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "详细描述不能为空");
+        }
+        if (rewardAmount == null || rewardAmount < 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "报酬金额不能为负数");
+        }
+        List<String> warnings = new ArrayList<String>();
+        ModerationResult titleResult = contentModerationService.assertDemandContentAllowed("标题", title);
+        ModerationResult descriptionResult = contentModerationService.assertDemandContentAllowed("详细描述", description);
+        warnings.addAll(titleResult.getWarnings());
+        warnings.addAll(descriptionResult.getWarnings());
+        return warnings.stream().distinct().collect(Collectors.toList());
     }
 
     private void updateImagesAndTags(Long demandId, List<Long> tagIds, List<String> imageUrls) {

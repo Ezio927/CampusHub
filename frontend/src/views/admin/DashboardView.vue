@@ -23,6 +23,11 @@
         <div class="nc-info"><div class="nc-title">仲裁处理</div><div class="nc-desc">处理纠纷与申诉工单</div></div>
         <span class="nc-arrow">→</span>
       </router-link>
+      <router-link to="/admin/message-reports" class="nc">
+        <div class="nc-icon" style="background:#fef2f2">!</div>
+        <div class="nc-info"><div class="nc-title">私信举报</div><div class="nc-desc">审核用户提交的聊天举报</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
     </div>
   </div>
 </template>

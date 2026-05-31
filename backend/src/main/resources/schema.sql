@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS credit_records (
 
 CREATE TABLE IF NOT EXISTS conversations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    conversation_key VARCHAR(80) UNIQUE,
     user1_id BIGINT NOT NULL,
     user2_id BIGINT NOT NULL,
     related_demand_id BIGINT,
@@ -56,20 +57,51 @@ CREATE TABLE IF NOT EXISTS conversations (
     last_message_at DATETIME,
     created_at DATETIME,
     unread_count BIGINT DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'NORMAL',
+    blocked_by_user_id BIGINT,
+    user1_last_read_message_id BIGINT DEFAULT 0,
+    user2_last_read_message_id BIGINT DEFAULT 0,
     INDEX idx_conversations_user1 (user1_id),
-    INDEX idx_conversations_user2 (user2_id)
+    INDEX idx_conversations_user2 (user2_id),
+    INDEX idx_conversations_key (conversation_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id BIGINT NOT NULL,
     sender_id BIGINT NOT NULL,
-    content TEXT,
+    client_message_id VARCHAR(80),
+    content MEDIUMTEXT,
     message_type VARCHAR(20) NOT NULL DEFAULT 'TEXT',
+    status VARCHAR(20) NOT NULL DEFAULT 'SENT',
+    quoted_message_id BIGINT,
+    quoted_content VARCHAR(500),
     `read` TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME,
     INDEX idx_messages_conversation (conversation_id),
-    INDEX idx_messages_sender (sender_id)
+    INDEX idx_messages_sender (sender_id),
+    INDEX idx_messages_conversation_id (conversation_id, id),
+    UNIQUE KEY uk_messages_sender_client (sender_id, client_message_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS message_reports (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    message_id BIGINT NOT NULL,
+    conversation_id BIGINT NOT NULL,
+    reporter_id BIGINT NOT NULL,
+    target_user_id BIGINT NOT NULL,
+    category VARCHAR(30) NOT NULL,
+    reason TEXT,
+    evidence_urls TEXT,
+    message_snapshot TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reviewed_by BIGINT,
+    reviewed_at DATETIME,
+    resolution TEXT,
+    created_at DATETIME,
+    INDEX idx_message_reports_status (status),
+    INDEX idx_message_reports_reporter (reporter_id),
+    INDEX idx_message_reports_message (message_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS demands (

@@ -28,6 +28,7 @@ public class DemandDto {
     private String locationTag;
     private List<Tag> tags = new ArrayList<Tag>();
     private List<DemandImage> images = new ArrayList<DemandImage>();
+    private List<String> riskWarnings = new ArrayList<String>();
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -162,6 +163,14 @@ public class DemandDto {
 
     public void setImages(List<DemandImage> images) {
         this.images = images == null ? new ArrayList<DemandImage>() : images;
+    }
+
+    public List<String> getRiskWarnings() {
+        return riskWarnings;
+    }
+
+    public void setRiskWarnings(List<String> riskWarnings) {
+        this.riskWarnings = riskWarnings == null ? new ArrayList<String>() : riskWarnings;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -11,7 +11,10 @@
       <div class="desc">{{ d.description }}</div>
       <div class="pub"><div class="av" :style="{background:avColor}">{{ d.publisher?.username?.[0]?.toUpperCase() }}</div><div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div></div>
     </div>
-    <button v-if="auth.isLoggedIn&&d.status==='OPEN'&&d.publisherId!==auth.user?.id" class="btn-primary btn-block act-btn" @click="accept">立即接单</button>
+    <div v-if="auth.isLoggedIn&&d.publisherId!==auth.user?.id" class="act-list">
+      <button class="btn-outline btn-block act-btn" @click="messagePublisher">联系发布者</button>
+      <button v-if="d.status==='OPEN'" class="btn-primary btn-block act-btn" @click="accept">立即接单</button>
+    </div>
   </div>
   <div v-else class="empty">⏳ 加载中...</div>
 </template>
@@ -21,6 +24,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { demandAPI } from '@/api/demands'
 import { orderAPI } from '@/api/orders'
+import { chatAPI } from '@/api/chat'
+import { errorMessage } from '@/utils/errors'
 const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
 const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
 const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
@@ -28,7 +33,15 @@ function catTxt(c){return{ERRAND:'跑腿',SKILL:'技能',STUDY:'学习',SECONDHA
 function catBg(c){return{ERRAND:'#f59e0b',SKILL:'#6366f1',STUDY:'#10b981',SECONDHAND:'#ef4444'}[c]||'#888'}
 function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
-async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(e.message)}}
+async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){alert(errorMessage(e,'接单失败'))}}
+async function messagePublisher(){
+  if(!d.value?.publisherId){alert('发布者信息缺失，暂时无法发起私信');return}
+  try{
+    const res=await chatAPI.create({targetUserId:d.value.publisherId,demandId:d.value.id})
+    if(!res.data?.id) throw new Error('会话创建失败')
+    ro.push('/chat/'+res.data.id)
+  }catch(e){alert(errorMessage(e,'发起私信失败'))}
+}
 onMounted(async()=>{const res=await demandAPI.detail(r.params.id);d.value=res.data})
 </script>
 <style scoped>
@@ -41,5 +54,6 @@ h1{font-size:22px;font-weight:800;flex:1;margin-right:12px}
 .desc{white-space:pre-wrap;line-height:1.8;color:var(--text-secondary);padding:16px;background:#f8fafc;border-radius:12px;margin:16px 0}
 .pub{display:flex;align-items:center;gap:12px;padding:16px;background:#f8fafc;border-radius:12px}
 .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px}
+.act-list{display:flex;flex-direction:column;gap:8px}
 .act-btn{padding:14px;border-radius:12px;font-size:16px}
 </style>
