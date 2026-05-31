@@ -197,14 +197,14 @@ public class DemandServiceImpl implements DemandService {
         if (req == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请求不能为空");
         }
-        return validateDemandFields(req.getTitle(), req.getDescription(), req.getRewardAmount());
+        return validateDemandFields(req.getTitle(), req.getDescription(), req.getRewardAmount(), req.getLocationTag());
     }
 
     private List<String> validateDemandEntityTextAndReward(Demand demand) {
-        return validateDemandFields(demand.getTitle(), demand.getDescription(), demand.getRewardAmount());
+        return validateDemandFields(demand.getTitle(), demand.getDescription(), demand.getRewardAmount(), demand.getLocationTag());
     }
 
-    private List<String> validateDemandFields(String title, String description, Integer rewardAmount) {
+    private List<String> validateDemandFields(String title, String description, Integer rewardAmount, String locationTag) {
         if (isBlank(title)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "标题不能为空");
         }
@@ -219,6 +219,10 @@ public class DemandServiceImpl implements DemandService {
         ModerationResult descriptionResult = contentModerationService.assertDemandContentAllowed("详细描述", description);
         warnings.addAll(titleResult.getWarnings());
         warnings.addAll(descriptionResult.getWarnings());
+        if (!isBlank(locationTag)) {
+            ModerationResult locationResult = contentModerationService.assertDemandContentAllowed("位置", locationTag);
+            warnings.addAll(locationResult.getWarnings());
+        }
         return warnings.stream().distinct().collect(Collectors.toList());
     }
 

@@ -1,6 +1,7 @@
 package com.example.backend.demand.service.impl;
 
 import com.example.backend.chat.dto.CreateConversationDto;
+import com.example.backend.chat.dto.ConversationDto;
 import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
@@ -113,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
         if (demand.getStatus() != DemandStatus.OPEN) {
             throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
         }
-        if (orderRepository.findByDemandId(demand.getId()).isPresent()) {
+        if (orderRepository.findActiveByDemandId(demand.getId()).isPresent()) {
             throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
         }
 
@@ -129,11 +130,8 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, null, userId, "accept demand");
-
-        CreateConversationDto conversationReq = new CreateConversationDto();
-        conversationReq.setTargetUserId(demand.getPublisherId());
-        conversationReq.setDemandId(demand.getId());
-        conversationService.getOrCreate(userId, conversationReq);
+        postOrderSystemMessage(order, "平台消息：" + userDisplayName(acceptor.getId())
+                + " 已接取需求「" + demandTitle(demand.getId()) + "」。", userId);
 
         return enrichDto(order);
     }
@@ -181,6 +179,8 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, fromStatus, userId, "deliver");
+        postOrderSystemMessage(order, "平台消息：" + userDisplayName(order.getAcceptorId())
+                + " 已标记需求「" + demandTitle(order.getDemandId()) + "」已完成，等待发布者确认。", userId);
         return enrichDto(order);
     }
 
@@ -198,6 +198,8 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, fromStatus, userId, "confirm");
+        postOrderSystemMessage(order, "平台消息：发布者已确认需求「"
+                + demandTitle(order.getDemandId()) + "」完成。", userId);
         return enrichDto(order);
     }
 
@@ -218,6 +220,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         appendLogAndPublish(order, fromStatus, userId, order.getCancelReason());
+        postOrderSystemMessage(order, cancelSystemMessage(order, fromStatus, userId), userId);
 
         OrderDto dto = enrichDto(order);
         dto.setCreditPenalty(-penalty);
@@ -259,6 +262,59 @@ public class OrderServiceImpl implements OrderService {
         orderEventPublisher.publish(order, fromStatus, operatorId, remark);
     }
 
+    private void postOrderSystemMessage(Order order, String content, Long actorId) {
+        if (order == null || order.getPublisherId() == null || order.getAcceptorId() == null || content == null) {
+            return;
+        }
+        CreateConversationDto conversationReq = new CreateConversationDto();
+        conversationReq.setTargetUserId(order.getPublisherId());
+        conversationReq.setDemandId(order.getDemandId());
+        ConversationDto conversation = conversationService.getOrCreate(order.getAcceptorId(), conversationReq);
+        conversationService.appendSystemMessage(conversation.getId(), content, actorId);
+    }
+
+    private String cancelSystemMessage(Order order, OrderStatus fromStatus, Long operatorId) {
+        String title = demandTitle(order.getDemandId());
+        String reason = isBlank(order.getCancelReason()) ? "" : " 原因：" + order.getCancelReason().trim();
+        if (isAcceptorCancelBeforeDelivery(order, fromStatus, operatorId)) {
+            return "平台消息：" + userDisplayName(order.getAcceptorId())
+                    + " 已取消接单，需求「" + title + "」已重新开放。" + reason;
+        }
+        if (order.isPublisher(operatorId)) {
+            return "平台消息：发布者已取消需求「" + title + "」。" + reason;
+        }
+        return "平台消息：" + userDisplayName(operatorId) + " 已取消订单「" + title + "」。" + reason;
+    }
+
+    private boolean isAcceptorCancelBeforeDelivery(Order order, OrderStatus fromStatus, Long operatorId) {
+        return order != null
+                && order.isAcceptor(operatorId)
+                && (fromStatus == OrderStatus.ACCEPTED || fromStatus == OrderStatus.IN_PROGRESS);
+    }
+
+    private String userDisplayName(Long userId) {
+        if (userId == null) {
+            return "用户";
+        }
+        return userRepository.findById(userId)
+                .map(User::getUsername)
+                .orElse("用户" + userId);
+    }
+
+    private String demandTitle(Long demandId) {
+        if (demandId == null) {
+            return "需求";
+        }
+        try {
+            DemandDto demand = demandService.getDetail(demandId);
+            if (demand != null && !isBlank(demand.getTitle())) {
+                return demand.getTitle();
+            }
+        } catch (RuntimeException ignored) {
+        }
+        return "需求 #" + demandId;
+    }
+
     private User requireActiveUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -286,6 +342,10 @@ public class OrderServiceImpl implements OrderService {
         } catch (IllegalArgumentException ex) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "订单状态无效");
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     private OrderDto enrichDto(Order order) {

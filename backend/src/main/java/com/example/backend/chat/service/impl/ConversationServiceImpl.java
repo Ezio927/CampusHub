@@ -176,6 +176,40 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public MessageDto appendSystemMessage(Long conversationId, String content, Long actorId) {
+        Conversation conversation = requireConversation(conversationId);
+        if (content == null || content.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "系统消息不能为空");
+        }
+        String trimmed = truncate(content.trim(), MAX_TEXT_LENGTH);
+        Long previousLastMessageId = messageRepository.findLastByConversationId(conversationId)
+                .map(Message::getId)
+                .orElse(0L);
+
+        Message message = new Message();
+        message.setConversationId(conversationId);
+        message.setSenderId(0L);
+        message.setContent(trimmed);
+        message.setMessageType(MessageType.SYSTEM);
+        message.setStatus(MessageStatus.SENT);
+        message.setRead(Boolean.FALSE);
+        messageRepository.save(message);
+
+        if (actorId != null && isParticipant(conversation, actorId)
+                && lastReadMessageId(conversation, actorId) >= previousLastMessageId) {
+            setLastReadMessageId(conversation, actorId, message.getId());
+        }
+        conversation.setLastMessageContent(lastMessagePreview(message));
+        conversation.setLastMessageAt(message.getCreatedAt());
+        Long unreadUserId = actorId != null && isParticipant(conversation, actorId)
+                ? otherUserId(conversation, actorId)
+                : conversation.getUser1Id();
+        conversation.setUnreadCount(countUnreadForUser(conversation, unreadUserId));
+        conversationRepository.save(conversation);
+        return toMessageDto(message, conversation, actorId);
+    }
+
+    @Override
     public List<MessageDto> getMessages(Long conversationId, Long userId, int page, int size, Long afterId) {
         Conversation conversation = requireConversation(conversationId);
         ensureParticipant(conversation, userId);
@@ -374,9 +408,14 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     private void ensureParticipant(Conversation conversation, Long userId) {
-        if (userId == null || (!conversation.getUser1Id().equals(userId) && !conversation.getUser2Id().equals(userId))) {
+        if (!isParticipant(conversation, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+    }
+
+    private boolean isParticipant(Conversation conversation, Long userId) {
+        return userId != null
+                && (conversation.getUser1Id().equals(userId) || conversation.getUser2Id().equals(userId));
     }
 
     private void ensureConversationAllowsSend(Conversation conversation, Long senderId) {

@@ -35,8 +35,31 @@ public class OrderRepository {
     }
 
     public Optional<Order> findByDemandId(Long demandId) {
-        return Optional.ofNullable(mapper.selectOne(
-                new LambdaQueryWrapper<Order>().eq(Order::getDemandId, demandId)));
+        List<Order> orders = mapper.selectList(
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getDemandId, demandId)
+                        .orderByDesc(Order::getCreatedAt)
+                        .orderByDesc(Order::getId));
+        if (orders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(orders.get(0));
+    }
+
+    public Optional<Order> findActiveByDemandId(Long demandId) {
+        List<Order> orders = mapper.selectList(
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getDemandId, demandId)
+                        .in(Order::getStatus,
+                                OrderStatus.ACCEPTED,
+                                OrderStatus.IN_PROGRESS,
+                                OrderStatus.PENDING_CONFIRM)
+                        .orderByDesc(Order::getCreatedAt)
+                        .orderByDesc(Order::getId));
+        if (orders.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(orders.get(0));
     }
 
     public List<Order> findByPublisherIdAndStatus(Long publisherId, OrderStatus status) {

@@ -35,7 +35,7 @@
         :id="'msg-'+m.id"
         :key="m.id"
         class="msg-row"
-        :class="{ mine: m.senderId===auth.user?.id, recalled: m.status==='RECALLED' }"
+        :class="{ mine: m.senderId===auth.user?.id, recalled: m.status==='RECALLED', system: m.messageType==='SYSTEM' }"
       >
         <div class="msg-bubble">
           <div v-if="m.quotedContent" class="quote-in-msg">{{ m.quotedContent }}</div>
@@ -46,9 +46,9 @@
           <div class="msg-meta">
             <small>{{ formatTime(m.createdAt) }}</small>
             <small v-if="m.senderId===auth.user?.id && m.status!=='RECALLED'">{{ m.read ? '已读' : '已发送' }}</small>
-            <button v-if="m.status!=='RECALLED'" type="button" @click="quote(m)">引用</button>
+            <button v-if="m.status!=='RECALLED' && m.messageType!=='SYSTEM'" type="button" @click="quote(m)">引用</button>
             <button v-if="canRecall(m)" type="button" @click="recall(m)">撤回</button>
-            <button v-if="m.status!=='RECALLED'" type="button" @click="openReport(m)">举报</button>
+            <button v-if="m.status!=='RECALLED' && m.messageType!=='SYSTEM'" type="button" @click="openReport(m)">举报</button>
           </div>
         </div>
       </div>
@@ -440,6 +440,7 @@ onUnmounted(() => {
   scroll-margin: 80px;
 }
 .msg-row.mine { justify-content: flex-end; }
+.msg-row.system { justify-content: center; }
 .msg-bubble {
   max-width: min(76%, 520px);
   padding: 10px 12px;
@@ -448,6 +449,13 @@ onUnmounted(() => {
   color: var(--text);
 }
 .mine .msg-bubble { background: var(--primary); color: #fff; }
+.system .msg-bubble {
+  max-width: min(88%, 560px);
+  background: #f8fafc;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  text-align: center;
+}
 .recalled .msg-bubble { color: var(--text-muted); font-style: italic; }
 .msg-bubble p { white-space: pre-wrap; word-break: break-word; }
 .image-link {

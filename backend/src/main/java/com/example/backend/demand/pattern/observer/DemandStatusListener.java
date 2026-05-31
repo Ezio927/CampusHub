@@ -17,19 +17,25 @@ public class DemandStatusListener {
 
     @EventListener
     public void onOrderStatusChanged(OrderStatusChangedEvent event) {
-        DemandStatus demandStatus = mapStatus(event.getToStatus());
+        DemandStatus demandStatus = mapStatus(event);
         if (demandStatus != null) {
             demandService.updateStatus(event.getDemandId(), demandStatus);
         }
     }
 
-    private DemandStatus mapStatus(OrderStatus orderStatus) {
-        return switch (orderStatus) {
+    private DemandStatus mapStatus(OrderStatusChangedEvent event) {
+        return switch (event.getToStatus()) {
             case ACCEPTED -> DemandStatus.ACCEPTED;
             case IN_PROGRESS, PENDING_CONFIRM -> DemandStatus.IN_PROGRESS;
             case COMPLETED -> DemandStatus.COMPLETED;
-            case CANCELLED -> DemandStatus.CANCELLED;
+            case CANCELLED -> isAcceptorCancelBeforeDelivery(event) ? DemandStatus.OPEN : DemandStatus.CANCELLED;
             default -> null;
         };
+    }
+
+    private boolean isAcceptorCancelBeforeDelivery(OrderStatusChangedEvent event) {
+        return event.getOperatorId() != null
+                && event.getOperatorId().equals(event.getAcceptorId())
+                && (event.getFromStatus() == OrderStatus.ACCEPTED || event.getFromStatus() == OrderStatus.IN_PROGRESS);
     }
 }

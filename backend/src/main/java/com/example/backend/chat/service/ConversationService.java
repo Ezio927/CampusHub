@@ -18,6 +18,8 @@ public interface ConversationService {
 
     MessageDto sendMessage(Long conversationId, Long senderId, SendMessageDto req);
 
+    MessageDto appendSystemMessage(Long conversationId, String content, Long actorId);
+
     List<MessageDto> getMessages(Long conversationId, Long userId, int page, int size, Long afterId);
 
     List<MessageDto> searchMessages(Long conversationId, Long userId, String keyword);
