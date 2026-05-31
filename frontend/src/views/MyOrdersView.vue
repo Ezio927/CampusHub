@@ -52,8 +52,8 @@ function goDemand(id){ro.push('/demands/'+id)}
 async function load(){
   if(role.value==='PUBLISHER'){
     const [dr, or] = await Promise.allSettled([demandAPI.my(), orderAPI.list({role:'PUBLISHER'})])
-    demands.value = dr.status==='fulfilled' ? (dr.value.data||[]).filter(d => d.status==='OPEN') : []
-    orders.value = or.status==='fulfilled' ? (or.value.data||[]) : []
+    demands.value = dr.status==='fulfilled' ? (dr.value.data?.content||[]).filter(d => d.status==='OPEN') : []
+    orders.value = or.status==='fulfilled' ? (or.value.data?.content||or.value.data||[]) : []
   } else {
     const r = await orderAPI.list({role:'ACCEPTOR'})
     orders.value = r.data||[]

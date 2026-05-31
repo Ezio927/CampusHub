@@ -388,7 +388,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
-        public List<DemandDto> search(com.example.backend.demand.dto.DemandSearchCriteria criteria) {
+        public com.example.backend.common.PageResult<DemandDto> search(com.example.backend.demand.dto.DemandSearchCriteria criteria, int page, int size) {
             throw new UnsupportedOperationException("search is not supported in adapter");
         }
 

@@ -117,6 +117,7 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { chatAPI } from '@/api/chat'
+import { uploadImage } from '@/api/upload'
 import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
 
@@ -133,6 +134,7 @@ const reportTarget = ref(null)
 const reporting = ref(false)
 const err = ref('')
 const imagePreview = ref('')
+const imageFile = ref(null)
 const imageViewer = ref('')
 const searchKeyword = ref('')
 const searchResults = ref([])
@@ -154,8 +156,13 @@ async function send() {
   err.value = ''
   try {
     const isImage = Boolean(imagePreview.value)
+    let content = txt.value.trim()
+    if (isImage) {
+      const uploadRes = await uploadImage(imageFile.value)
+      content = uploadRes.data.url
+    }
     const res = await chatAPI.send(route.params.id, {
-      content: isImage ? imagePreview.value : txt.value.trim(),
+      content,
       messageType: isImage ? 'IMAGE' : 'TEXT',
       quotedMessageId: quoted.value?.id || null,
       clientMessageId: createClientMessageId(),
@@ -331,7 +338,8 @@ function pickImage(event) {
   event.target.value = ''
   if (!file) return
   if (!file.type.startsWith('image/')) { err.value = '请选择图片文件'; return }
-  if (file.size > 700000) { err.value = '图片需小于700KB'; return }
+  if (file.size > 3 * 1024 * 1024) { err.value = '图片需小于3MB'; return }
+  imageFile.value = file
   const reader = new FileReader()
   reader.onload = () => {
     imagePreview.value = String(reader.result || '')
@@ -342,6 +350,7 @@ function pickImage(event) {
 
 function clearImage() {
   imagePreview.value = ''
+  imageFile.value = null
 }
 
 function openImageViewer(src) {

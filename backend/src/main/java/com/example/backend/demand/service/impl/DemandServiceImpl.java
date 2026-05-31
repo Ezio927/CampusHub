@@ -2,6 +2,7 @@ package com.example.backend.demand.service.impl;
 
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.PageResult;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.UserStatus;
@@ -68,7 +69,8 @@ public class DemandServiceImpl implements DemandService {
     }
 
     @Override
-    public List<DemandDto> search(DemandSearchCriteria criteria) {
+    public PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size) {
+        int safeSize = Math.min(Math.max(1, size), 100);
         List<Demand> demands;
         if (criteria != null && criteria.getPublisherId() != null) {
             demands = demandRepository.findByPublisherIdOrderByCreatedAtDesc(criteria.getPublisherId());
@@ -87,7 +89,13 @@ public class DemandServiceImpl implements DemandService {
                     .collect(Collectors.toList());
             demands = sortDemands(demands, criteria.getSortBy(), criteria.getSortDir());
         }
-        return demands.stream().map(this::toDto).collect(Collectors.toList());
+        int from = Math.max(0, page) * safeSize;
+        int to = Math.min(demands.size(), from + safeSize);
+        if (from >= demands.size()) {
+            return PageResult.of(List.of(), page, safeSize, demands.size());
+        }
+        List<DemandDto> content = demands.subList(from, to).stream().map(this::toDto).collect(Collectors.toList());
+        return PageResult.of(content, page, safeSize, demands.size());
     }
 
     @Override
@@ -142,7 +150,7 @@ public class DemandServiceImpl implements DemandService {
             if (req.getLocationTag() != null) {
                 demand.setLocationTag(req.getLocationTag());
             }
-            if (req.getTagIds() != null) {
+            if (req.getImageUrls() != null || req.getTagIds() != null) {
                 updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());
             }
             List<String> warnings = validateDemandEntityTextAndReward(demand);
@@ -227,8 +235,10 @@ public class DemandServiceImpl implements DemandService {
     }
 
     private void updateImagesAndTags(Long demandId, List<Long> tagIds, List<String> imageUrls) {
-        demandImageRepository.deleteByDemandId(demandId);
-        saveImages(demandId, imageUrls);
+        if (imageUrls != null) {
+            demandImageRepository.deleteByDemandId(demandId);
+            saveImages(demandId, imageUrls);
+        }
     }
 
     private List<Long> getTagIdsForDemand(DemandCategory category) {

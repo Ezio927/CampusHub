@@ -14,6 +14,7 @@
         <option value="OTHER">其他</option>
       </select>
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
+      <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
     <div v-if="store.list.length===0" class="empty">📭<p class="mt-sm">暂无需求</p></div>
     <div v-for="d in store.list" :key="d.id" class="dc" @click="goDetail(d.id)">
@@ -45,6 +46,8 @@ onMounted(() => store.fetch())
 <style scoped>
 .sel{width:auto;min-width:100px;border-radius:10px;padding:10px 14px;font-weight:500}
 .kw{flex:1;min-width:140px;border-radius:10px;padding:10px 14px}
+.open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+.open-only input{width:auto}
 .dc{background:#fff;border-radius:14px;padding:20px;margin-bottom:12px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
 .dc:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}

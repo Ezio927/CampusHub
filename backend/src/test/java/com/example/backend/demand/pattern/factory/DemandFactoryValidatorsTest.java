@@ -51,16 +51,12 @@ class DemandFactoryValidatorsTest {
     }
 
     @Test
-    void skillValidatorShouldRequireTags() {
+    void skillValidatorShouldCreateWithoutTags() {
         DemandCreateDto dto = buildDto("java help", DemandCategory.SKILL);
         dto.setLocationTag("library");
-        Assertions.assertEquals(ErrorCode.BAD_REQUEST.getCode(),
-                Assertions.assertThrows(BusinessException.class,
-                        () -> demandFactory.createDemand(dto)).getCode());
-
-        dto.setTagIds(List.of(1L));
         Demand demand = demandFactory.createDemand(dto);
         Assertions.assertNotNull(demand);
+        Assertions.assertEquals(DemandCategory.SKILL, demand.getCategory());
     }
 
     @Test

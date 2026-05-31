@@ -2,6 +2,7 @@ package com.example.backend.demand.controller;
 
 import com.example.backend.auth.security.AuthContext;
 import com.example.backend.common.ApiResponse;
+import com.example.backend.common.PageResult;
 import com.example.backend.demand.dto.DemandCreateDto;
 import com.example.backend.demand.dto.DemandDto;
 import com.example.backend.demand.dto.DemandSearchCriteria;
@@ -43,7 +44,7 @@ public class DemandController {
 
     @Operation(summary = "搜索需求")
     @GetMapping
-    public ApiResponse<List<DemandDto>> search(
+    public ApiResponse<PageResult<DemandDto>> search(
             @Parameter(description = "需求分类：ERRAND/SKILL/STUDY/SECONDHAND")
             @RequestParam(value = "category", required = false) String category,
             @Parameter(description = "需求状态：OPEN/ACCEPTED/IN_PROGRESS/COMPLETED/CANCELLED")
@@ -54,7 +55,9 @@ public class DemandController {
             @Parameter(description = "排序字段：rewardAmount/urgentDeadline/createdAt")
             @RequestParam(value = "sortBy", required = false) String sortBy,
             @Parameter(description = "排序方向：asc/desc") @RequestParam(value = "sortDir", required = false) String sortDir,
-            @Parameter(description = "仅查我发布的") @RequestParam(value = "my", required = false) Boolean my) {
+            @Parameter(description = "仅查我发布的") @RequestParam(value = "my", required = false) Boolean my,
+            @Parameter(description = "页码") @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "每页数量") @RequestParam(value = "size", defaultValue = "20") int size) {
         DemandSearchCriteria criteria = new DemandSearchCriteria();
         if (category != null) {
             criteria.setCategory(com.example.backend.common.enums.DemandCategory.valueOf(category.toUpperCase()));
@@ -70,7 +73,7 @@ public class DemandController {
         if (Boolean.TRUE.equals(my)) {
             criteria.setPublisherId(AuthContext.requireUserId());
         }
-        return ApiResponse.success(demandService.search(criteria));
+        return ApiResponse.success(demandService.search(criteria, page, size));
     }
 
     @Operation(summary = "查看需求详情")

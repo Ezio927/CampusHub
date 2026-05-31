@@ -9,6 +9,13 @@
         <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ d.createdAt?.substring(0,10) }}</span></div>
       </div>
       <div class="desc">{{ d.description }}</div>
+      <div v-if="d.images?.length" class="detail-imgs">
+        <img v-for="img in d.images" :key="img.id" :src="img.imageUrl" alt="需求图片" @click="imgViewer=img.imageUrl" />
+      </div>
+      <div v-if="imgViewer" class="image-viewer" @click.self="imgViewer=''">
+        <button type="button" class="viewer-close" @click="imgViewer=''">关闭</button>
+        <img :src="imgViewer" alt="查看大图" />
+      </div>
       <div class="pub"><div class="av" :style="{background:avColor}">{{ d.publisher?.username?.[0]?.toUpperCase() }}</div><div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div></div>
     </div>
     <div v-if="auth.isLoggedIn&&d.publisherId!==auth.user?.id" class="act-list">
@@ -32,6 +39,7 @@ import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
 const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
 const modal = useModal()
+const imgViewer = ref('')
 const cols=['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316']
 const avColor=computed(()=>cols[(d.value?.publisher?.username?.charCodeAt(0)||0)%cols.length])
 function catTxt(c){return{ERRAND:'跑腿代办',SKILL:'技能求助',STUDY:'学习互助',SECONDHAND:'二手交易',OTHER:'其他'}[c]||c}
@@ -64,4 +72,10 @@ h1{font-size:22px;font-weight:800;flex:1;margin-right:12px}
 .act-btn{padding:14px;border-radius:12px;font-size:16px}
 .btn-del{background:#dc2626;color:#fff}
 .btn-del:hover{background:#b91c1c}
+.detail-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.detail-imgs img{width:100px;height:100px;border-radius:8px;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+.detail-imgs img:hover{opacity:.85}
+.image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
+.image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:8px;background:#fff}
+.viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text);padding:8px 16px;border-radius:8px;font-weight:600}
 </style>

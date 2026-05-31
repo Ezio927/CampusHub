@@ -96,7 +96,6 @@ async function pub(){
   const rewardAmount=Number.parseInt(f.rewardAmount||'0',10)
   if(Number.isNaN(rewardAmount)||rewardAmount<0){err.value='报酬金额必须是非负整数';ing.value=false;return}
   const body={...f,rewardAmount}
-  if(f.category==='SKILL') body.tagIds = [2]
   if(f.category==='SECONDHAND'&&!body.imageUrls.length){err.value='请至少上传一张实物图片';ing.value=false;return}
   if(f.category==='STUDY'&&!body.urgentDeadline){err.value='请选择截止时间';ing.value=false;return}
   try{
