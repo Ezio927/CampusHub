@@ -12,7 +12,8 @@
         <span v-else-if="appeal.status==='REJECTED'">❌ 申诉已被驳回</span>
       </div>
       <button v-if="auth.user?.creditScore < 60 && (!appeal || appeal.status==='REJECTED')" class="btn-appeal" @click="submitAppeal">信用分低于60，申请恢复</button>
-      <button type="button" class="btn-checkin" @click="checkIn">每日签到 +3 额度分</button>
+      <button v-if="checkedInToday" type="button" class="btn-checkin btn-checked-in" disabled>✅ 今日已签到</button>
+      <button v-else type="button" class="btn-checkin" @click="checkIn">每日签到 +3 额度分</button>
     </div>
     <div class="grid-2 mb-md">
       <div class="sc"><div class="sv">{{ auth.user?.creditScore }}</div><div class="sl">信用分</div></div>
@@ -127,6 +128,7 @@ const certSubmitting=ref(false)
 const certImageViewer=ref('')
 const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
 const canSubmitCert=computed(()=>!cert.value||cert.value.status==='REJECTED')
+const checkedInToday=computed(()=>{const today=new Date().toISOString().substring(0,10);return quotaList.value.some(r=>r.type==='DAILY_CHECK_IN'&&r.createdAt?.substring(0,10)===today)})
 async function update(){
   const d={}
   try{
@@ -179,6 +181,8 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .btn-appeal:hover{background:rgba(255,255,255,.45)}
 .btn-checkin{display:block;margin:10px auto 0;padding:8px 18px;border-radius:20px;background:#fff;color:var(--primary);font-size:13px;font-weight:700;box-shadow:0 8px 20px rgba(15,23,42,.14)}
 .btn-checkin:hover{transform:translateY(-1px)}
+.btn-checked-in{background:rgba(255,255,255,.35);color:#fff;cursor:default;box-shadow:none}
+.btn-checked-in:hover{transform:none}
 .appeal-status{margin-top:8px;padding:6px 14px;border-radius:12px;font-size:12px;font-weight:600;text-align:center}
 .appeal-PENDING{background:rgba(251,191,36,.2);color:#fbbf24}
 .appeal-APPROVED{background:rgba(16,185,129,.2);color:#34d399}
