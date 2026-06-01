@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -187,7 +188,7 @@ public class DemandServiceImpl implements DemandService {
     @Scheduled(fixedDelay = 600_000)
     @Transactional
     public void autoExpireUrgent() {
-        LocalDateTime now = java.time.LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         List<Demand> expired = demandRepository.findOpenUrgentWithDeadlineBefore(now);
         for (Demand demand : expired) {
             demand.setStatus(DemandStatus.EXPIRED);
