@@ -61,7 +61,7 @@
     <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
       <div v-if="cert" class="cert-state">
         状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':cert.status==='REJECTED'?'var(--danger)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span>
-        <p v-if="cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
+        <p v-if="cert.status==='REJECTED' && cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
       </div>
       <template v-if="canSubmitCert">
         <div class="form-group"><label>类型</label><select v-model="cf.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
