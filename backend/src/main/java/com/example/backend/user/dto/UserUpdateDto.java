@@ -2,7 +2,7 @@ package com.example.backend.user.dto;
 
 public class UserUpdateDto {
 
-    private String realName;
+    private String username;
     private String phone;
     private String email;
     private String avatarUrl;
@@ -10,12 +10,12 @@ public class UserUpdateDto {
     public UserUpdateDto() {
     }
 
-    public String getRealName() {
-        return realName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setRealName(String realName) {
-        this.realName = realName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPhone() {

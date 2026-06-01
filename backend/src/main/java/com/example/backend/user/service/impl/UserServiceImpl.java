@@ -87,8 +87,15 @@ public class UserServiceImpl implements UserService {
         User user = findUser(userId);
         boolean hadPhone = !isBlank(user.getPhone());
         boolean hadEmail = !isBlank(user.getEmail());
-        if (req.getRealName() != null) {
-            user.setRealName(UserProfileValidator.requireValidRealName(req.getRealName()));
+        if (req.getUsername() != null) {
+            String username = UserProfileValidator.requireValidUsername(req.getUsername());
+            contentModerationService.assertUsernameAllowed(username);
+
+            if (!username.equals(user.getUsername()) && userRepository.existsByUsername(username)) {
+                throw new BusinessException(ErrorCode.USERNAME_EXISTS);
+            }
+
+            user.setUsername(username);
         }
         if (req.getPhone() != null) {
             user.setPhone(UserProfileValidator.normalizeOptionalPhone(req.getPhone()));

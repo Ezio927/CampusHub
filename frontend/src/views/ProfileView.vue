@@ -54,7 +54,7 @@
       </div>
     </div>
     <div class="card"><h3 class="mb-sm">✏️ 编辑资料</h3>
-      <div class="rr"><div class="form-group"><label>姓名</label><input v-model="e.realName" :placeholder="auth.user?.realName" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
+      <div class="rr"><div class="form-group"><label>用户名</label><input v-model="e.username" :placeholder="auth.user?.username" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
       <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
@@ -117,11 +117,11 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
-import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/validators'
+import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
-const e=reactive({realName:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
+const e=reactive({username:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
 const certErr=ref('')
 const certSubmitting=ref(false)
@@ -132,7 +132,7 @@ const checkedInToday=computed(()=>{const today=new Date().toISOString().substrin
 async function update(){
   const d={}
   try{
-    if(e.realName)d.realName=normalizeRealName(e.realName)
+    if(e.username)d.username=normalizeUsername(e.username)
     if(e.phone)d.phone=normalizePhone(e.phone)
     if(e.email)d.email=normalizeEmail(e.email)
     await userAPI.update(d)
