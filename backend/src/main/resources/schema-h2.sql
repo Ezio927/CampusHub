@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
     real_name VARCHAR(50),
     avatar_url VARCHAR(255),
     credit_score INT NOT NULL DEFAULT 100,
+    quota_available INT NOT NULL DEFAULT 0,
+    quota_frozen INT NOT NULL DEFAULT 0,
     role VARCHAR(20) NOT NULL DEFAULT 'STUDENT',
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING_CERT',
     created_at TIMESTAMP,
@@ -34,9 +36,27 @@ CREATE TABLE IF NOT EXISTS certifications (
 CREATE TABLE IF NOT EXISTS credit_records (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    type VARCHAR(30),
     change_amount INT NOT NULL,
+    before_score INT,
+    after_score INT,
     reason VARCHAR(255),
     related_order_id BIGINT,
+    operator_id BIGINT,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS quota_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(40) NOT NULL,
+    change_amount INT NOT NULL,
+    available_after INT NOT NULL,
+    frozen_after INT NOT NULL,
+    related_demand_id BIGINT,
+    related_order_id BIGINT,
+    operator_id BIGINT,
+    reason VARCHAR(255),
     created_at TIMESTAMP
 );
 
@@ -90,6 +110,16 @@ CREATE TABLE IF NOT EXISTS message_reports (
     created_at TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS credit_appeals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    reason VARCHAR(500),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reviewed_by BIGINT,
+    reviewed_at TIMESTAMP,
+    created_at TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS demands (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     publisher_id BIGINT NOT NULL,
@@ -124,6 +154,7 @@ CREATE TABLE IF NOT EXISTS orders (
     cancelled_at TIMESTAMP,
     cancel_reason VARCHAR(500),
     auto_confirm_deadline TIMESTAMP,
+    acceptor_deposit_amount INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );

@@ -12,6 +12,7 @@ import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.dto.UserUpdateDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.QuotaService;
 import com.example.backend.user.service.UserService;
 import com.example.backend.user.validation.UserProfileValidator;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ContentModerationService contentModerationService;
+    private final QuotaService quotaService;
 
     public UserServiceImpl(UserRepository userRepository,
-                           ContentModerationService contentModerationService) {
+                           ContentModerationService contentModerationService,
+                           QuotaService quotaService) {
         this.userRepository = userRepository;
         this.contentModerationService = contentModerationService;
+        this.quotaService = quotaService;
     }
 
     @Override
@@ -56,10 +60,13 @@ public class UserServiceImpl implements UserService {
         user.setEmail(email);
         user.setAvatarUrl(null);
         user.setCreditScore(100);
+        user.setQuotaAvailable(0);
+        user.setQuotaFrozen(0);
         user.setRole(UserRole.STUDENT);
         user.setStatus(UserStatus.PENDING_CERT);
         userRepository.save(user);
-        return UserDto.from(user);
+        grantProfileRewards(user.getId(), phone, email, false, false);
+        return UserDto.from(findUser(user.getId()));
     }
 
     @Override
@@ -78,6 +85,8 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请求体不能为空");
         }
         User user = findUser(userId);
+        boolean hadPhone = !isBlank(user.getPhone());
+        boolean hadEmail = !isBlank(user.getEmail());
         if (req.getRealName() != null) {
             user.setRealName(UserProfileValidator.requireValidRealName(req.getRealName()));
         }
@@ -91,7 +100,17 @@ public class UserServiceImpl implements UserService {
             user.setAvatarUrl(req.getAvatarUrl());
         }
         userRepository.save(user);
-        return UserDto.from(user);
+        grantProfileRewards(userId, user.getPhone(), user.getEmail(), hadPhone, hadEmail);
+        return UserDto.from(findUser(userId));
+    }
+
+    private void grantProfileRewards(Long userId, String phone, String email, boolean hadPhone, boolean hadEmail) {
+        if (!hadPhone && !isBlank(phone)) {
+            quotaService.grantPhoneReward(userId);
+        }
+        if (!hadEmail && !isBlank(email)) {
+            quotaService.grantEmailReward(userId);
+        }
     }
 
     private User findUser(Long userId) {

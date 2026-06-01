@@ -11,6 +11,8 @@ public class AdminUserDto {
     private String status;
     private String role;
     private Integer creditScore;
+    private Integer quotaAvailable;
+    private Integer quotaFrozen;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -67,6 +69,22 @@ public class AdminUserDto {
 
     public void setCreditScore(Integer creditScore) {
         this.creditScore = creditScore;
+    }
+
+    public Integer getQuotaAvailable() {
+        return quotaAvailable;
+    }
+
+    public void setQuotaAvailable(Integer quotaAvailable) {
+        this.quotaAvailable = quotaAvailable;
+    }
+
+    public Integer getQuotaFrozen() {
+        return quotaFrozen;
+    }
+
+    public void setQuotaFrozen(Integer quotaFrozen) {
+        this.quotaFrozen = quotaFrozen;
     }
 
     public LocalDateTime getCreatedAt() {

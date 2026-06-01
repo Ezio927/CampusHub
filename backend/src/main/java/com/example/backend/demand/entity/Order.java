@@ -21,6 +21,7 @@ public class Order {
     private LocalDateTime cancelledAt;
     private String cancelReason;
     private LocalDateTime autoConfirmDeadline;
+    private Integer acceptorDepositAmount = 0;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -52,6 +53,8 @@ public class Order {
     public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
     public LocalDateTime getAutoConfirmDeadline() { return autoConfirmDeadline; }
     public void setAutoConfirmDeadline(LocalDateTime autoConfirmDeadline) { this.autoConfirmDeadline = autoConfirmDeadline; }
+    public Integer getAcceptorDepositAmount() { return acceptorDepositAmount == null ? 0 : acceptorDepositAmount; }
+    public void setAcceptorDepositAmount(Integer acceptorDepositAmount) { this.acceptorDepositAmount = acceptorDepositAmount; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

@@ -3,10 +3,13 @@ package com.example.backend.user.controller;
 import com.example.backend.auth.security.AuthContext;
 import com.example.backend.common.ApiResponse;
 import com.example.backend.user.dto.CreditRecordDto;
+import com.example.backend.user.dto.QuotaAccountDto;
+import com.example.backend.user.dto.QuotaRecordDto;
 import com.example.backend.user.dto.UserDto;
 import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.dto.UserUpdateDto;
 import com.example.backend.user.service.CreditService;
+import com.example.backend.user.service.QuotaService;
 import com.example.backend.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,10 +36,12 @@ public class UserController {
 
     private final UserService userService;
     private final CreditService creditService;
+    private final QuotaService quotaService;
 
-    public UserController(UserService userService, CreditService creditService) {
+    public UserController(UserService userService, CreditService creditService, QuotaService quotaService) {
         this.userService = userService;
         this.creditService = creditService;
+        this.quotaService = quotaService;
     }
 
     @Operation(summary = "查看我的个人信息")
@@ -62,6 +67,24 @@ public class UserController {
     @GetMapping("/me/credit-records")
     public ApiResponse<List<CreditRecordDto>> getMyCreditRecords() {
         return ApiResponse.success(creditService.listRecords(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "查看我的额度分账户")
+    @GetMapping("/me/quota")
+    public ApiResponse<QuotaAccountDto> getMyQuota() {
+        return ApiResponse.success(quotaService.getAccount(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "查看我的额度分流水")
+    @GetMapping("/me/quota-records")
+    public ApiResponse<List<QuotaRecordDto>> getMyQuotaRecords() {
+        return ApiResponse.success(quotaService.listRecords(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "每日签到领取额度分")
+    @PostMapping("/me/quota/check-in")
+    public ApiResponse<QuotaRecordDto> checkIn() {
+        return ApiResponse.success(quotaService.checkIn(AuthContext.requireUserId()));
     }
 
     @Operation(summary = "提交信用分申诉")

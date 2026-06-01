@@ -3,7 +3,7 @@
     <div class="dc">
       <div class="flex-between mb-md"><h1>{{ d.title }}</h1><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
       <div class="grid-2 mb-md">
-        <div class="mi"><span class="lbl">报酬</span><span class="val" style="color:var(--danger)">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'积分' }}</span></div>
+        <div class="mi"><span class="lbl">报酬</span><span class="val" style="color:var(--danger)">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'额度分' }}</span></div>
         <div class="mi"><span class="lbl">位置</span><span class="val">{{ d.locationTag||'不限' }}</span></div>
         <div class="mi"><span class="lbl">状态</span><span class="val"><span class="badge" :style="{background:statusBg(d.status)}">{{ statusTxt(d.status) }}</span></span></div>
         <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ d.createdAt?.substring(0,10) }}</span></div>

@@ -1,5 +1,6 @@
 package com.example.backend.demand.pattern.observer;
 
+import com.example.backend.common.PageResult;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.demand.dto.DemandCreateDto;
@@ -60,7 +61,7 @@ class DemandStatusListenerTest {
         }
 
         @Override
-        public List<DemandDto> search(DemandSearchCriteria criteria) {
+        public PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size) {
             throw new UnsupportedOperationException();
         }
 

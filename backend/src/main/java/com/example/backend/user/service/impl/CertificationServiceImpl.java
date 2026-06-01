@@ -13,10 +13,12 @@ import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.CertificationRepository;
 import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.CertificationService;
+import com.example.backend.user.service.QuotaService;
 import com.example.backend.user.validation.UserProfileValidator;
 import com.example.backend.notification.service.NotificationService;
 import com.example.backend.common.enums.NotificationType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,16 +28,20 @@ public class CertificationServiceImpl implements CertificationService {
     private final CertificationRepository certificationRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final QuotaService quotaService;
 
     public CertificationServiceImpl(CertificationRepository certificationRepository,
                                     UserRepository userRepository,
-                                    NotificationService notificationService) {
+                                    NotificationService notificationService,
+                                    QuotaService quotaService) {
         this.certificationRepository = certificationRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.quotaService = quotaService;
     }
 
     @Override
+    @Transactional
     public CertificationDto submit(Long userId, CertificationSubmitDto req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -87,6 +93,7 @@ public class CertificationServiceImpl implements CertificationService {
     }
 
     @Override
+    @Transactional
     public CertificationDto review(Long id, boolean approve, String reason, Long reviewerId) {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -106,6 +113,7 @@ public class CertificationServiceImpl implements CertificationService {
         if (approve) {
             certification.approve(reviewerId);
             applicant.setStatus(UserStatus.ACTIVE);
+            quotaService.grantCertificationReward(applicant.getId(), reviewerId);
         } else {
             if (isBlank(reason)) {
                 throw new BusinessException(ErrorCode.BAD_REQUEST, "请填写拒绝原因");

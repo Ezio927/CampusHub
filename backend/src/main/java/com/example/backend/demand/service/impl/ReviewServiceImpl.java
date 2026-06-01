@@ -14,6 +14,7 @@ import com.example.backend.demand.repository.ReviewRepository;
 import com.example.backend.demand.service.ArbitrationService;
 import com.example.backend.demand.service.ReviewService;
 import com.example.backend.notification.service.NotificationService;
+import com.example.backend.user.service.QuotaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,15 +27,18 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
     private final ArbitrationService arbitrationService;
     private final NotificationService notificationService;
+    private final QuotaService quotaService;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
                              OrderRepository orderRepository,
                              ArbitrationService arbitrationService,
-                             NotificationService notificationService) {
+                             NotificationService notificationService,
+                             QuotaService quotaService) {
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
         this.arbitrationService = arbitrationService;
         this.notificationService = notificationService;
+        this.quotaService = quotaService;
     }
 
     @Override
@@ -50,6 +54,15 @@ public class ReviewServiceImpl implements ReviewService {
         if (order.getStatus() != OrderStatus.COMPLETED && order.getStatus() != OrderStatus.PENDING_CONFIRM) {
             throw new BusinessException(ErrorCode.CONFLICT, "订单未完成，无法评价");
         }
+        boolean reviewerIsPublisher = userId.equals(order.getPublisherId());
+        boolean reviewerIsAcceptor = userId.equals(order.getAcceptorId());
+        if (!reviewerIsPublisher && !reviewerIsAcceptor) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "只有订单参与者才能评价");
+        }
+        Long expectedRevieweeId = reviewerIsPublisher ? order.getAcceptorId() : order.getPublisherId();
+        if (!req.getRevieweeId().equals(expectedRevieweeId)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "被评价者必须是该订单的另一方");
+        }
         reviewRepository.findByOrderIdAndReviewerId(req.getOrderId(), userId).ifPresent(review -> {
             throw new BusinessException(ErrorCode.REVIEW_DUPLICATED);
         });
@@ -58,7 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setOrderId(req.getOrderId());
         review.setReviewerId(userId);
         review.setRevieweeId(req.getRevieweeId());
-        review.setReviewerRole(userId.equals(order.getPublisherId()) ? ReviewerRole.PUBLISHER : ReviewerRole.ACCEPTOR);
+        review.setReviewerRole(reviewerIsPublisher ? ReviewerRole.PUBLISHER : ReviewerRole.ACCEPTOR);
         review.setRating(req.getRating());
         review.setContent(req.getContent());
         review.setImageUrls(req.getImageUrls());
@@ -68,6 +81,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (req.getRating() <= 3) {
             arbitrationService.createTicket(userId, req.getOrderId(), review.getId(), req.getContent(), req.getImageUrls());
+        } else {
+            quotaService.rewardGoodReview(req.getRevieweeId(), order.getId());
         }
         return ReviewDto.from(review);
     }

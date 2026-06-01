@@ -22,7 +22,7 @@
       <p class="dd">{{ d.description }}</p>
       <div class="df">
         <span class="text-muted text-sm">{{ d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
-        <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '积分' }}</span>
+        <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
       <div v-if="d.urgent" class="mt-sm"><span class="du">🔥 紧急</span></div>
     </div>

@@ -23,12 +23,15 @@ import com.example.backend.demand.repository.OrderStatusLogRepository;
 import com.example.backend.demand.service.DemandService;
 import com.example.backend.demand.service.OrderService;
 import com.example.backend.notification.service.NotificationService;
+import com.example.backend.user.dto.QuotaRecordDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.CreditService;
+import com.example.backend.user.service.QuotaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
     private final DemandService demandService;
     private final UserRepository userRepository;
     private final CreditService creditService;
+    private final QuotaService quotaService;
     private final ConversationService conversationService;
 
     @Autowired
@@ -62,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
             DemandService demandService,
             UserRepository userRepository,
             CreditService creditService,
+            QuotaService quotaService,
             ConversationService conversationService) {
         this.orderRepository = orderRepository;
         this.orderStatusLogRepository = orderStatusLogRepository;
@@ -70,6 +75,7 @@ public class OrderServiceImpl implements OrderService {
         this.demandService = demandService;
         this.userRepository = userRepository;
         this.creditService = creditService;
+        this.quotaService = quotaService;
         this.conversationService = conversationService;
     }
 
@@ -80,6 +86,7 @@ public class OrderServiceImpl implements OrderService {
             DemandRepository demandRepository,
             UserRepository userRepository,
             CreditService creditService,
+            QuotaService quotaService,
             ConversationService conversationService,
             NotificationService notificationService) {
         this(
@@ -91,10 +98,12 @@ public class OrderServiceImpl implements OrderService {
                 new DemandRepositoryDemandServiceAdapter(demandRepository),
                 userRepository,
                 creditService,
+                quotaService,
                 conversationService);
     }
 
     @Override
+    @Transactional
     public OrderDto acceptDemand(Long userId, AcceptOrderDto req) {
         User acceptor = requireActiveUser(userId);
         if (req == null || req.getDemandId() == null) {
@@ -103,6 +112,8 @@ public class OrderServiceImpl implements OrderService {
         if (!creditService.checkCredit(userId)) {
             throw new BusinessException(ErrorCode.CREDIT_INSUFFICIENT);
         }
+        int acceptorCredit = creditService.getCreditScore(userId);
+        int depositAmount = acceptorCredit < 70 ? QuotaService.LOW_CREDIT_DEPOSIT : 0;
 
         DemandDto demand = demandService.getDetail(req.getDemandId());
         if (demand == null) {
@@ -127,7 +138,11 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAcceptedAt(LocalDateTime.now());
         order.setAutoConfirmDeadline(LocalDateTime.now().plusHours(24));
+        order.setAcceptorDepositAmount(depositAmount);
         orderRepository.save(order);
+        if (depositAmount > 0) {
+            quotaService.freezeOrderDeposit(userId, order.getId(), depositAmount);
+        }
 
         appendLogAndPublish(order, null, userId, "accept demand");
         postOrderSystemMessage(order, "平台消息：" + userDisplayName(acceptor.getId())
@@ -166,6 +181,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto deliver(Long orderId, Long userId) {
         Order order = requireParticipantOrder(orderId, userId);
         if (!order.isAcceptor(userId)) {
@@ -185,6 +201,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto confirm(Long orderId, Long userId) {
         Order order = requireParticipantOrder(orderId, userId);
         orderStateContext.assertCanOperate(order, OrderAction.CONFIRM_COMPLETED);
@@ -196,6 +213,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.COMPLETED);
         order.setCompletedAt(LocalDateTime.now());
         orderRepository.save(order);
+        settleCompletedOrder(order);
 
         appendLogAndPublish(order, fromStatus, userId, "confirm");
         postOrderSystemMessage(order, "平台消息：发布者已确认需求「"
@@ -204,6 +222,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto cancel(Long orderId, Long userId, OrderCancelDto req) {
         Order order = requireParticipantOrder(orderId, userId);
         orderStateContext.assertCanOperate(order, OrderAction.CANCEL);
@@ -212,12 +231,13 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "取消原因不能为空");
         }
 
+        OrderStatus fromStatus = order.getStatus();
         int penalty = calculateCancelPenalty(order, LocalDateTime.now());
         if (penalty > 0) {
             creditService.deductCredit(userId, penalty, "取消订单", order.getId());
         }
+        int quotaPenalty = applyCancelQuotaEffects(order, fromStatus, userId, penalty);
 
-        OrderStatus fromStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
         order.setCancelReason(reason);
@@ -228,10 +248,12 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDto dto = enrichDto(order);
         dto.setCreditPenalty(-penalty);
+        dto.setQuotaPenalty(-quotaPenalty);
         return dto;
     }
 
     @Scheduled(fixedDelay = 600_000)
+    @Transactional
     public void autoConfirmExpired() {
         LocalDateTime now = LocalDateTime.now();
         for (Order order : orderRepository.findByStatusAndAutoConfirmDeadlineBefore(OrderStatus.PENDING_CONFIRM, now)) {
@@ -242,6 +264,7 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.COMPLETED);
             order.setCompletedAt(now);
             orderRepository.save(order);
+            settleCompletedOrder(order);
             appendLogAndPublish(order, fromStatus, null, "auto confirm completed");
         }
     }
@@ -264,6 +287,64 @@ public class OrderServiceImpl implements OrderService {
         log.setRemark(remark);
         orderStatusLogRepository.save(log);
         orderEventPublisher.publish(order, fromStatus, operatorId, remark);
+    }
+
+    private void settleCompletedOrder(Order order) {
+        if (order == null || quotaService == null) {
+            return;
+        }
+        DemandDto demand = demandService.getDetail(order.getDemandId());
+        if (demand != null) {
+            quotaService.payDemandReward(order.getPublisherId(), order.getAcceptorId(),
+                    order.getDemandId(), order.getId(), demand.getRewardType(), demand.getRewardAmount());
+        }
+        quotaService.refundOrderDeposit(order.getAcceptorId(), order.getId(),
+                order.getAcceptorDepositAmount(), "订单完成，退回接单保证金");
+        if (order.getAcceptorId() != null) {
+            quotaService.rewardDailyOrderCompletion(order.getAcceptorId(), order.getId());
+        }
+    }
+
+    private int applyCancelQuotaEffects(Order order, OrderStatus fromStatus, Long operatorId, int creditPenalty) {
+        if (order == null || quotaService == null) {
+            return 0;
+        }
+        int quotaPenalty = 0;
+        boolean depositPenalized = false;
+        if (creditPenalty > 0) {
+            if (order.isAcceptor(operatorId) && order.getAcceptorDepositAmount() > 0) {
+                quotaPenalty += absChange(quotaService.deductOrderDeposit(order.getAcceptorId(), order.getId(),
+                        order.getAcceptorDepositAmount(), "逾期取消订单，扣除接单保证金"));
+                depositPenalized = true;
+            } else {
+                quotaPenalty += absChange(quotaService.deductLateCancelPenalty(operatorId, order.getId(),
+                        QuotaService.LATE_CANCEL_PENALTY, "逾期取消订单扣除额度分"));
+            }
+        }
+        if (!depositPenalized) {
+            quotaService.refundOrderDeposit(order.getAcceptorId(), order.getId(),
+                    order.getAcceptorDepositAmount(), "订单取消，退回接单保证金");
+        }
+        if (!isAcceptorCancelBeforeDelivery(order, fromStatus, operatorId)) {
+            refundOrderDemandReward(order);
+        }
+        return quotaPenalty;
+    }
+
+    private void refundOrderDemandReward(Order order) {
+        DemandDto demand = demandService.getDetail(order.getDemandId());
+        if (demand == null) {
+            return;
+        }
+        quotaService.refundDemandReward(order.getPublisherId(), order.getDemandId(),
+                demand.getRewardType(), demand.getRewardAmount(), "订单取消，退回冻结报酬");
+    }
+
+    private int absChange(QuotaRecordDto record) {
+        if (record == null || record.getChangeAmount() == null) {
+            return 0;
+        }
+        return Math.abs(record.getChangeAmount());
     }
 
     private void postOrderSystemMessage(Order order, String content, Long actorId) {

@@ -160,6 +160,8 @@ public class AdminServiceImpl implements AdminService {
         dto.setStatus(user.getStatus().name());
         dto.setRole(user.getRole().name());
         dto.setCreditScore(user.getCreditScore());
+        dto.setQuotaAvailable(user.getQuotaAvailable());
+        dto.setQuotaFrozen(user.getQuotaFrozen());
         dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }

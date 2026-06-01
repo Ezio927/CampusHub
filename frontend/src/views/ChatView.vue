@@ -93,7 +93,14 @@
         <button v-for="emoji in emojis" :key="emoji" type="button" @click="insertEmoji(emoji)">{{ emoji }}</button>
       </div>
       <div class="compose-row">
-        <textarea v-model="txt" :placeholder="placeholder" maxlength="500" rows="2" :disabled="inputDisabled"></textarea>
+        <textarea
+          v-model="txt"
+          :placeholder="placeholder"
+          maxlength="500"
+          rows="2"
+          :disabled="inputDisabled"
+          @keydown.enter="handleComposerEnter"
+        ></textarea>
         <div class="compose-actions">
           <label class="btn-outline btn-sm file-btn">
             图片
@@ -331,6 +338,12 @@ async function submitReport() {
 function insertEmoji(emoji) {
   if (inputDisabled.value) return
   txt.value += emoji
+}
+
+function handleComposerEnter(event) {
+  if (event.shiftKey || event.isComposing) return
+  event.preventDefault()
+  send()
 }
 
 function pickImage(event) {

@@ -10,7 +10,7 @@
       <div v-for="d in demands" :key="'d'+d.id" class="oc" @click="goDemand(d.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ d.title }}</div><div class="text-sm text-muted">{{ catTxt(d.category) }}</div></div>
-          <div style="text-align:right"><div class="dp">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'积分' }}</div><span class="badge" :style="{background:dsb(d.status)}">{{ dst(d.status) }}</span></div>
+          <div style="text-align:right"><div class="dp">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:dsb(d.status)}">{{ dst(d.status) }}</span></div>
         </div>
       </div>
 
@@ -20,7 +20,7 @@
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</div><div class="text-sm text-muted">{{ o.publisherName }} → {{ o.acceptorName }}</div></div>
-          <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'积分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
+          <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
         </div>
       </div>
     </template>
@@ -30,7 +30,7 @@
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</div><div class="text-sm text-muted">{{ o.publisherName }} → {{ o.acceptorName }}</div></div>
-          <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'积分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
+          <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
         </div>
       </div>
     </template>

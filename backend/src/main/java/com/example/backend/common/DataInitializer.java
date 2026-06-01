@@ -34,6 +34,8 @@ public class DataInitializer implements CommandLineRunner {
         user.setStudentId(studentId);
         user.setRealName(realName);
         user.setCreditScore(100);
+        user.setQuotaAvailable(status == UserStatus.ACTIVE && role == UserRole.STUDENT ? 20 : 0);
+        user.setQuotaFrozen(0);
         user.setRole(role);
         user.setStatus(status);
         user.setCreatedAt(java.time.LocalDateTime.now());

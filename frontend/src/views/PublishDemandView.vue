@@ -19,7 +19,7 @@
           />
         </div>
       </div>
-      <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="POINT">积分</option></select></div>
+      <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="POINT">额度分</option></select></div>
 
       <!-- 跑腿：必填位置 -->
       <div v-if="f.category==='ERRAND'" class="form-group"><label>位置 *</label><input v-model="f.locationTag" placeholder="如：图书馆、校门口、3号宿舍楼" required /></div>

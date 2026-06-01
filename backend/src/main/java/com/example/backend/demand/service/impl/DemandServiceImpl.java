@@ -5,6 +5,7 @@ import com.example.backend.common.ErrorCode;
 import com.example.backend.common.PageResult;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
+import com.example.backend.common.enums.RewardType;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.common.moderation.ContentModerationService;
 import com.example.backend.common.moderation.ModerationResult;
@@ -23,7 +24,9 @@ import com.example.backend.demand.service.DemandService;
 import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.QuotaService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,22 +43,26 @@ public class DemandServiceImpl implements DemandService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
     private final ContentModerationService contentModerationService;
+    private final QuotaService quotaService;
 
     public DemandServiceImpl(DemandFactory demandFactory,
                              DemandRepository demandRepository,
                              DemandImageRepository demandImageRepository,
                              TagRepository tagRepository,
                              UserRepository userRepository,
-                             ContentModerationService contentModerationService) {
+                             ContentModerationService contentModerationService,
+                             QuotaService quotaService) {
         this.demandFactory = demandFactory;
         this.demandRepository = demandRepository;
         this.demandImageRepository = demandImageRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
         this.contentModerationService = contentModerationService;
+        this.quotaService = quotaService;
     }
 
     @Override
+    @Transactional
     public DemandDto createDemand(Long userId, DemandCreateDto req) {
         User publisher = requireActiveUser(userId);
         List<String> warnings = validateDemandTextAndReward(req);
@@ -63,6 +70,7 @@ public class DemandServiceImpl implements DemandService {
         demand.setPublisherId(publisher.getId());
         demandRepository.save(demand);
         saveImages(demand.getId(), req == null ? null : req.getImageUrls());
+        quotaService.freezeDemandReward(publisher.getId(), demand.getId(), demand.getRewardType(), demand.getRewardAmount());
         DemandDto dto = toDto(demand);
         dto.setRiskWarnings(warnings);
         return dto;
@@ -115,12 +123,16 @@ public class DemandServiceImpl implements DemandService {
     }
 
     @Override
+    @Transactional
     public DemandDto update(Long demandId, Long userId, DemandUpdateDto req) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
         if (!demand.isOpen()) {
             throw new BusinessException(ErrorCode.CONFLICT, "需求状态不是开放中");
         }
+
+        RewardType oldRewardType = demand.getRewardType();
+        Integer oldRewardAmount = demand.getRewardAmount();
 
         if (req != null) {
             if (req.getTitle() != null) {
@@ -156,6 +168,8 @@ public class DemandServiceImpl implements DemandService {
             List<String> warnings = validateDemandEntityTextAndReward(demand);
             validateUpdatedDemand(demand);
             demandRepository.save(demand);
+            quotaService.adjustDemandRewardFreeze(demand.getPublisherId(), demand.getId(),
+                    oldRewardType, oldRewardAmount, demand.getRewardType(), demand.getRewardAmount());
             DemandDto dto = toDto(demand);
             dto.setRiskWarnings(warnings);
             return dto;
@@ -165,6 +179,7 @@ public class DemandServiceImpl implements DemandService {
     }
 
     @Override
+    @Transactional
     public void cancel(Long demandId, Long userId) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
@@ -173,9 +188,12 @@ public class DemandServiceImpl implements DemandService {
         }
         demand.cancel();
         demandRepository.save(demand);
+        quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
+                demand.getRewardType(), demand.getRewardAmount(), "发布者取消需求，退回冻结报酬");
     }
 
     @Override
+    @Transactional
     public void delete(Long demandId, Long userId) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
@@ -184,6 +202,8 @@ public class DemandServiceImpl implements DemandService {
         }
         demandImageRepository.deleteByDemandId(demandId);
         demandRepository.deleteById(demandId);
+        quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
+                demand.getRewardType(), demand.getRewardAmount(), "发布者删除需求，退回冻结报酬");
     }
 
     private void validateUpdatedDemand(Demand demand) {

@@ -1,6 +1,7 @@
 package com.example.backend.admin.controller;
 
 import com.example.backend.admin.dto.AdminUserDto;
+import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.admin.service.AdminService;
@@ -17,7 +18,10 @@ import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.user.dto.CertificationDto;
 import com.example.backend.user.dto.CertificationReviewDto;
 import com.example.backend.user.dto.CreditAppealDto;
+import com.example.backend.user.dto.CreditRecordDto;
+import com.example.backend.user.dto.QuotaRecordDto;
 import com.example.backend.user.service.CreditService;
+import com.example.backend.user.service.QuotaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -41,13 +45,16 @@ public class AdminController {
     private final AdminService adminService;
     private final MessageReportService messageReportService;
     private final CreditService creditService;
+    private final QuotaService quotaService;
 
     public AdminController(AdminService adminService,
                            MessageReportService messageReportService,
-                           CreditService creditService) {
+                           CreditService creditService,
+                           QuotaService quotaService) {
         this.adminService = adminService;
         this.messageReportService = messageReportService;
         this.creditService = creditService;
+        this.quotaService = quotaService;
     }
 
     @Operation(summary = "数据看板")
@@ -83,6 +90,32 @@ public class AdminController {
         requireAdmin();
         adminService.unbanUser(id, AuthContext.requireUserId());
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "管理员调整用户信用分")
+    @PutMapping("/users/{id}/credit")
+    public ApiResponse<CreditRecordDto> adjustCredit(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @RequestBody AdjustBalanceDto request) {
+        requireAdmin();
+        if (request == null || request.getAmount() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "调整值不能为空");
+        }
+        return ApiResponse.success(creditService.adjustCreditByAdmin(
+                id, request.getAmount(), request.getReason(), AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "管理员调整用户额度分")
+    @PutMapping("/users/{id}/quota")
+    public ApiResponse<QuotaRecordDto> adjustQuota(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @RequestBody AdjustBalanceDto request) {
+        requireAdmin();
+        if (request == null || request.getAmount() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "调整值不能为空");
+        }
+        return ApiResponse.success(quotaService.adjustByAdmin(
+                id, request.getAmount(), request.getReason(), AuthContext.requireUserId()));
     }
 
     @Operation(summary = "审核认证")

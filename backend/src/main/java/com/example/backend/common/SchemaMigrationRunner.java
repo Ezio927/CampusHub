@@ -30,6 +30,13 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("CREATE UNIQUE INDEX uk_messages_sender_client ON messages(sender_id, client_message_id)");
         executeIgnoreDuplicate("ALTER TABLE certifications MODIFY card_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE certifications ALTER COLUMN card_image_url CLOB");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_available INT NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_frozen INT NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN type VARCHAR(30)");
+        executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN before_score INT");
+        executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN after_score INT");
+        executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN operator_id BIGINT");
+        executeIgnoreDuplicate("ALTER TABLE orders ADD COLUMN acceptor_deposit_amount INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_type VARCHAR(20)");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url CLOB");
@@ -64,6 +71,24 @@ public class SchemaMigrationRunner implements CommandLineRunner {
                     created_at TIMESTAMP
                 )
                 """);
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS quota_records (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    type VARCHAR(40) NOT NULL,
+                    change_amount INT NOT NULL,
+                    available_after INT NOT NULL,
+                    frozen_after INT NOT NULL,
+                    related_demand_id BIGINT,
+                    related_order_id BIGINT,
+                    operator_id BIGINT,
+                    reason VARCHAR(255),
+                    created_at TIMESTAMP
+                )
+                """);
+        executeIgnoreDuplicate("CREATE INDEX idx_quota_records_user_id ON quota_records(user_id)");
+        executeIgnoreDuplicate("CREATE INDEX idx_quota_records_demand ON quota_records(related_demand_id)");
+        executeIgnoreDuplicate("CREATE INDEX idx_quota_records_order ON quota_records(related_order_id)");
     }
 
     private void executeIgnoreDuplicate(String sql) {
