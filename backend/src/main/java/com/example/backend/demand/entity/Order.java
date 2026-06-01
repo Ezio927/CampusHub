@@ -29,7 +29,7 @@ public class Order {
     public boolean isParticipant(Long userId) { return userId != null && (userId.equals(publisherId) || userId.equals(acceptorId)); }
     public boolean isPublisher(Long userId) { return userId != null && userId.equals(publisherId); }
     public boolean isAcceptor(Long userId) { return userId != null && userId.equals(acceptorId); }
-    public boolean canCancel() { return status == OrderStatus.PENDING_ACCEPT || status == OrderStatus.ACCEPTED || status == OrderStatus.IN_PROGRESS || status == OrderStatus.PENDING_CONFIRM; }
+    public boolean canCancel() { return status == OrderStatus.PENDING_ACCEPT || status == OrderStatus.ACCEPTED || status == OrderStatus.PENDING_CONFIRM; }
     public boolean isAutoConfirmExpired() { return autoConfirmDeadline != null && autoConfirmDeadline.isBefore(LocalDateTime.now()); }
     public boolean isAutoConfirmExpired(LocalDateTime now) { return autoConfirmDeadline != null && now != null && autoConfirmDeadline.isBefore(now); }
 

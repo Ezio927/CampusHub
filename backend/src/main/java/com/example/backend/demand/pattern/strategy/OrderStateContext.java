@@ -19,7 +19,7 @@ public class OrderStateContext {
     public OrderStateContext() {
         register(new PendingAcceptStrategy());
         register(new AcceptedStrategy());
-        register(new InProgressStrategy());
+
         register(new PendingConfirmStrategy());
         register(new CompletedStrategy());
         register(new CancelledStrategy());

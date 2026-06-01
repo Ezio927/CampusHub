@@ -52,7 +52,6 @@ public class OrderRepository {
                         .eq(Order::getDemandId, demandId)
                         .in(Order::getStatus,
                                 OrderStatus.ACCEPTED,
-                                OrderStatus.IN_PROGRESS,
                                 OrderStatus.PENDING_CONFIRM)
                         .orderByDesc(Order::getCreatedAt)
                         .orderByDesc(Order::getId));
