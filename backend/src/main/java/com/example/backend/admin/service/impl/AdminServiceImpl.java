@@ -11,6 +11,7 @@ import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
@@ -107,7 +108,13 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void banUser(Long userId, Long adminId, BanUserDto req) {
+        if (adminId.equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "管理员不能封禁自己");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "不能封禁其他管理员");
+        }
         user.setStatus(UserStatus.BANNED);
         userRepository.save(user);
         notificationService.createNotification(userId, NotificationType.SYSTEM_ANNOUNCEMENT,

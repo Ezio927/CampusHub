@@ -13,5 +13,8 @@ public class StudyValidator implements DemandValidator {
         if (param == null || param.getUrgentDeadline() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "学习需求必须设置截止时间");
         }
+        if (param.getUrgentDeadline().isBefore(java.time.LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "学习需求的截止时间必须在未来");
+        }
     }
 }

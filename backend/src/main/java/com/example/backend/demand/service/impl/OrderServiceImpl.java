@@ -374,7 +374,7 @@ public class OrderServiceImpl implements OrderService {
     private boolean isAcceptorCancelBeforeDelivery(Order order, OrderStatus fromStatus, Long operatorId) {
         return order != null
                 && order.isAcceptor(operatorId)
-                && (fromStatus == OrderStatus.ACCEPTED || fromStatus == OrderStatus.IN_PROGRESS);
+                && fromStatus == OrderStatus.ACCEPTED;
     }
 
     private String userDisplayName(Long userId) {

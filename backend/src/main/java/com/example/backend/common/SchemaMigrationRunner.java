@@ -1,11 +1,15 @@
 package com.example.backend.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SchemaMigrationRunner implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(SchemaMigrationRunner.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -94,7 +98,29 @@ public class SchemaMigrationRunner implements CommandLineRunner {
     private void executeIgnoreDuplicate(String sql) {
         try {
             jdbcTemplate.execute(sql);
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException ex) {
+            if (isExpectedMigrationError(ex)) {
+                return;
+            }
+            log.warn("Migration failed, SQL: {} — {}", sql, ex.getMessage());
+            throw ex;
         }
+    }
+
+    private boolean isExpectedMigrationError(Throwable ex) {
+        if (ex == null) {
+            return false;
+        }
+        String msg = ex.getMessage();
+        if (msg != null) {
+            String lower = msg.toLowerCase();
+            if (lower.contains("duplicate")
+                    || lower.contains("already exists")
+                    || lower.contains("syntax error")
+                    || lower.contains("bad sql grammar")) {
+                return true;
+            }
+        }
+        return isExpectedMigrationError(ex.getCause());
     }
 }

@@ -16,7 +16,6 @@ class OrderStateContextTest {
     private final OrderStateContext context = new OrderStateContext(List.of(
             new PendingAcceptStrategy(),
             new AcceptedStrategy(),
-            new InProgressStrategy(),
             new PendingConfirmStrategy(),
             new CompletedStrategy(),
             new CancelledStrategy()

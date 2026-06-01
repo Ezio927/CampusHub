@@ -12,7 +12,8 @@
         <span v-else-if="appeal.status==='REJECTED'">❌ 申诉已被驳回</span>
       </div>
       <button v-if="auth.user?.creditScore < 60 && (!appeal || appeal.status==='REJECTED')" class="btn-appeal" @click="submitAppeal">信用分低于60，申请恢复</button>
-      <button type="button" class="btn-checkin" @click="checkIn">每日签到 +3 额度分</button>
+      <button v-if="checkedInToday" type="button" class="btn-checkin btn-checked-in" disabled>✅ 今日已签到</button>
+      <button v-else type="button" class="btn-checkin" @click="checkIn">每日签到 +3 额度分</button>
     </div>
     <div class="grid-2 mb-md">
       <div class="sc"><div class="sv">{{ auth.user?.creditScore }}</div><div class="sl">信用分</div></div>
@@ -53,14 +54,14 @@
       </div>
     </div>
     <div class="card"><h3 class="mb-sm">✏️ 编辑资料</h3>
-      <div class="rr"><div class="form-group"><label>姓名</label><input v-model="e.realName" :placeholder="auth.user?.realName" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
+      <div class="rr"><div class="form-group"><label>用户名</label><input v-model="e.username" :placeholder="auth.user?.username" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
       <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
     <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
       <div v-if="cert" class="cert-state">
         状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':cert.status==='REJECTED'?'var(--danger)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span>
-        <p v-if="cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
+        <p v-if="cert.status==='REJECTED' && cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
       </div>
       <template v-if="canSubmitCert">
         <div class="form-group"><label>类型</label><select v-model="cf.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
@@ -116,21 +117,22 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
-import { normalizeEmail, normalizePhone, normalizeRealName } from '@/utils/validators'
+import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
-const e=reactive({realName:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
+const e=reactive({username:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
 const certErr=ref('')
 const certSubmitting=ref(false)
 const certImageViewer=ref('')
 const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
 const canSubmitCert=computed(()=>!cert.value||cert.value.status==='REJECTED')
+const checkedInToday=computed(()=>{const today=new Date().toISOString().substring(0,10);return quotaList.value.some(r=>r.type==='DAILY_CHECK_IN'&&r.createdAt?.substring(0,10)===today)})
 async function update(){
   const d={}
   try{
-    if(e.realName)d.realName=normalizeRealName(e.realName)
+    if(e.username)d.username=normalizeUsername(e.username)
     if(e.phone)d.phone=normalizePhone(e.phone)
     if(e.email)d.email=normalizeEmail(e.email)
     await userAPI.update(d)
@@ -179,6 +181,8 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .btn-appeal:hover{background:rgba(255,255,255,.45)}
 .btn-checkin{display:block;margin:10px auto 0;padding:8px 18px;border-radius:20px;background:#fff;color:var(--primary);font-size:13px;font-weight:700;box-shadow:0 8px 20px rgba(15,23,42,.14)}
 .btn-checkin:hover{transform:translateY(-1px)}
+.btn-checked-in{background:rgba(255,255,255,.35);color:#fff;cursor:default;box-shadow:none}
+.btn-checked-in:hover{transform:none}
 .appeal-status{margin-top:8px;padding:6px 14px;border-radius:12px;font-size:12px;font-weight:600;text-align:center}
 .appeal-PENDING{background:rgba(251,191,36,.2);color:#fbbf24}
 .appeal-APPROVED{background:rgba(16,185,129,.2);color:#34d399}
