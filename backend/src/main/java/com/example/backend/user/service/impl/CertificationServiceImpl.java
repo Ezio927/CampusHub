@@ -3,9 +3,9 @@ package com.example.backend.user.service.impl;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.CertStatus;
-import com.example.backend.common.enums.CertType;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
+import com.example.backend.common.validation.ImageDataUrlValidator;
 import com.example.backend.user.dto.CertificationDto;
 import com.example.backend.user.dto.CertificationSubmitDto;
 import com.example.backend.user.entity.Certification;
@@ -13,9 +13,12 @@ import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.CertificationRepository;
 import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.CertificationService;
+import com.example.backend.user.service.QuotaService;
+import com.example.backend.user.validation.UserProfileValidator;
 import com.example.backend.notification.service.NotificationService;
 import com.example.backend.common.enums.NotificationType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,16 +28,20 @@ public class CertificationServiceImpl implements CertificationService {
     private final CertificationRepository certificationRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final QuotaService quotaService;
 
     public CertificationServiceImpl(CertificationRepository certificationRepository,
                                     UserRepository userRepository,
-                                    NotificationService notificationService) {
+                                    NotificationService notificationService,
+                                    QuotaService quotaService) {
         this.certificationRepository = certificationRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.quotaService = quotaService;
     }
 
     @Override
+    @Transactional
     public CertificationDto submit(Long userId, CertificationSubmitDto req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -45,9 +52,11 @@ public class CertificationServiceImpl implements CertificationService {
         if (req == null || req.getCertType() == null || isBlank(req.getStudentId())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "认证类型和学号不能为空");
         }
-        if (req.getCertType() == CertType.STUDENT_CARD && isBlank(req.getCardImageUrl())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "校园卡认证需要上传图片");
+        String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
+        if (user.getStudentId() == null || !studentId.equalsIgnoreCase(user.getStudentId())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "实名认证学号必须与账号注册学号一致");
         }
+        String cardImageUrl = ImageDataUrlValidator.requireValidImageDataUrl(req.getCardImageUrl(), "认证图片");
 
         certificationRepository.findByUserId(userId).ifPresent(existing -> {
             if (existing.getStatus() == CertStatus.PENDING) {
@@ -61,8 +70,8 @@ public class CertificationServiceImpl implements CertificationService {
         Certification certification = certificationRepository.findByUserId(userId).orElseGet(Certification::new);
         certification.setUserId(userId);
         certification.setCertType(req.getCertType());
-        certification.setStudentId(req.getStudentId());
-        certification.setCardImageUrl(req.getCardImageUrl());
+        certification.setStudentId(studentId);
+        certification.setCardImageUrl(cardImageUrl);
         certification.setStatus(CertStatus.PENDING);
         certification.setRejectReason(null);
         certification.setReviewedBy(null);
@@ -84,6 +93,7 @@ public class CertificationServiceImpl implements CertificationService {
     }
 
     @Override
+    @Transactional
     public CertificationDto review(Long id, boolean approve, String reason, Long reviewerId) {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -103,6 +113,7 @@ public class CertificationServiceImpl implements CertificationService {
         if (approve) {
             certification.approve(reviewerId);
             applicant.setStatus(UserStatus.ACTIVE);
+            quotaService.grantCertificationReward(applicant.getId(), reviewerId);
         } else {
             if (isBlank(reason)) {
                 throw new BusinessException(ErrorCode.BAD_REQUEST, "请填写拒绝原因");

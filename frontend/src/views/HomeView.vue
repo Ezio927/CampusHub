@@ -7,12 +7,14 @@
     <div class="flex gap-sm mb-md flex-wrap">
       <select v-model="store.filters.category" @change="store.fetch()" class="sel">
         <option value="">全部分类</option>
-        <option value="ERRAND">跑腿</option>
-        <option value="SKILL">技能</option>
-        <option value="STUDY">学习</option>
-        <option value="SECONDHAND">二手</option>
+        <option value="ERRAND">跑腿代办</option>
+        <option value="SKILL">技能求助</option>
+        <option value="STUDY">学习互助</option>
+        <option value="SECONDHAND">二手交易</option>
+        <option value="OTHER">其他</option>
       </select>
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
+      <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
     <div v-if="store.list.length===0" class="empty">📭<p class="mt-sm">暂无需求</p></div>
     <div v-for="d in store.list" :key="d.id" class="dc" @click="goDetail(d.id)">
@@ -20,7 +22,7 @@
       <p class="dd">{{ d.description }}</p>
       <div class="df">
         <span class="text-muted text-sm">{{ d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
-        <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '积分' }}</span>
+        <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
       <div v-if="d.urgent" class="mt-sm"><span class="du">🔥 紧急</span></div>
     </div>
@@ -36,14 +38,16 @@ const auth = useAuthStore()
 const router = useRouter()
 let t
 function debounce() { clearTimeout(t); t = setTimeout(() => store.fetch(), 300) }
-function catTxt(c) { return { ERRAND:'跑腿', SKILL:'技能', STUDY:'学习', SECONDHAND:'二手' }[c] || c }
-function catBg(c) { return { ERRAND:'#f59e0b', SKILL:'#6366f1', STUDY:'#10b981', SECONDHAND:'#ef4444' }[c] || '#888' }
+function catTxt(c) { return { ERRAND:'跑腿代办', SKILL:'技能求助', STUDY:'学习互助', SECONDHAND:'二手交易', OTHER:'其他' }[c] || c }
+function catBg(c) { return { ERRAND:'#f59e0b', SKILL:'#6366f1', STUDY:'#10b981', SECONDHAND:'#ef4444', OTHER:'#8b5cf6' }[c] || '#888' }
 function goDetail(id) { router.push('/demands/' + id) }
 onMounted(() => store.fetch())
 </script>
 <style scoped>
 .sel{width:auto;min-width:100px;border-radius:10px;padding:10px 14px;font-weight:500}
 .kw{flex:1;min-width:140px;border-radius:10px;padding:10px 14px}
+.open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+.open-only input{width:auto}
 .dc{background:#fff;border-radius:14px;padding:20px;margin-bottom:12px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
 .dc:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}

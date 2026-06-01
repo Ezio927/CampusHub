@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     real_name VARCHAR(50),
     avatar_url VARCHAR(255),
     credit_score INT NOT NULL DEFAULT 100,
+    quota_available INT NOT NULL DEFAULT 0,
+    quota_frozen INT NOT NULL DEFAULT 0,
     role VARCHAR(20) NOT NULL DEFAULT 'STUDENT',
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING_CERT',
     created_at DATETIME,
@@ -27,7 +29,7 @@ CREATE TABLE IF NOT EXISTS certifications (
     user_id BIGINT NOT NULL,
     cert_type VARCHAR(20),
     student_id VARCHAR(20),
-    card_image_url VARCHAR(255),
+    card_image_url MEDIUMTEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     reject_reason VARCHAR(255),
     reviewed_by BIGINT,
@@ -40,15 +42,37 @@ CREATE TABLE IF NOT EXISTS certifications (
 CREATE TABLE IF NOT EXISTS credit_records (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    type VARCHAR(30),
     change_amount INT NOT NULL,
+    before_score INT,
+    after_score INT,
     reason VARCHAR(255),
     related_order_id BIGINT,
+    operator_id BIGINT,
     created_at DATETIME,
     INDEX idx_credit_records_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS quota_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(40) NOT NULL,
+    change_amount INT NOT NULL,
+    available_after INT NOT NULL,
+    frozen_after INT NOT NULL,
+    related_demand_id BIGINT,
+    related_order_id BIGINT,
+    operator_id BIGINT,
+    reason VARCHAR(255),
+    created_at DATETIME,
+    INDEX idx_quota_records_user_id (user_id),
+    INDEX idx_quota_records_demand (related_demand_id),
+    INDEX idx_quota_records_order (related_order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS conversations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    conversation_key VARCHAR(80) UNIQUE,
     user1_id BIGINT NOT NULL,
     user2_id BIGINT NOT NULL,
     related_demand_id BIGINT,
@@ -56,20 +80,65 @@ CREATE TABLE IF NOT EXISTS conversations (
     last_message_at DATETIME,
     created_at DATETIME,
     unread_count BIGINT DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'NORMAL',
+    blocked_by_user_id BIGINT,
+    user1_last_read_message_id BIGINT DEFAULT 0,
+    user2_last_read_message_id BIGINT DEFAULT 0,
     INDEX idx_conversations_user1 (user1_id),
-    INDEX idx_conversations_user2 (user2_id)
+    INDEX idx_conversations_user2 (user2_id),
+    INDEX idx_conversations_key (conversation_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id BIGINT NOT NULL,
     sender_id BIGINT NOT NULL,
-    content TEXT,
+    client_message_id VARCHAR(80),
+    content MEDIUMTEXT,
     message_type VARCHAR(20) NOT NULL DEFAULT 'TEXT',
+    status VARCHAR(20) NOT NULL DEFAULT 'SENT',
+    quoted_message_id BIGINT,
+    quoted_content VARCHAR(500),
     `read` TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME,
     INDEX idx_messages_conversation (conversation_id),
-    INDEX idx_messages_sender (sender_id)
+    INDEX idx_messages_sender (sender_id),
+    INDEX idx_messages_conversation_id (conversation_id, id),
+    UNIQUE KEY uk_messages_sender_client (sender_id, client_message_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS message_reports (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    message_id BIGINT NOT NULL,
+    conversation_id BIGINT NOT NULL,
+    reporter_id BIGINT NOT NULL,
+    target_user_id BIGINT NOT NULL,
+    category VARCHAR(30) NOT NULL,
+    reason TEXT,
+    evidence_urls TEXT,
+    message_snapshot TEXT,
+    message_type VARCHAR(20),
+    message_image_url MEDIUMTEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reviewed_by BIGINT,
+    reviewed_at DATETIME,
+    resolution TEXT,
+    created_at DATETIME,
+    INDEX idx_message_reports_status (status),
+    INDEX idx_message_reports_reporter (reporter_id),
+    INDEX idx_message_reports_message (message_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS credit_appeals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    reason VARCHAR(500),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reviewed_by BIGINT,
+    reviewed_at DATETIME,
+    created_at DATETIME,
+    INDEX idx_credit_appeals_status (status),
+    INDEX idx_credit_appeals_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS demands (
@@ -109,6 +178,7 @@ CREATE TABLE IF NOT EXISTS orders (
     cancelled_at DATETIME,
     cancel_reason VARCHAR(500),
     auto_confirm_deadline DATETIME,
+    acceptor_deposit_amount INT NOT NULL DEFAULT 0,
     created_at DATETIME,
     updated_at DATETIME,
     INDEX idx_orders_demand (demand_id),

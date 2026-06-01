@@ -24,7 +24,8 @@ class DemandFactoryValidatorsTest {
                 new ErrandValidator(),
                 new SkillValidator(),
                 new StudyValidator(),
-                new SecondhandValidator()
+                new SecondhandValidator(),
+                new OtherValidator()
         );
     }
 
@@ -50,16 +51,12 @@ class DemandFactoryValidatorsTest {
     }
 
     @Test
-    void skillValidatorShouldRequireTags() {
+    void skillValidatorShouldCreateWithoutTags() {
         DemandCreateDto dto = buildDto("java help", DemandCategory.SKILL);
         dto.setLocationTag("library");
-        Assertions.assertEquals(ErrorCode.BAD_REQUEST.getCode(),
-                Assertions.assertThrows(BusinessException.class,
-                        () -> demandFactory.createDemand(dto)).getCode());
-
-        dto.setTagIds(List.of(1L));
         Demand demand = demandFactory.createDemand(dto);
         Assertions.assertNotNull(demand);
+        Assertions.assertEquals(DemandCategory.SKILL, demand.getCategory());
     }
 
     @Test
@@ -112,6 +109,25 @@ class DemandFactoryValidatorsTest {
 
         Demand demand = demandFactory.createDemand(dto);
         Assertions.assertFalse(demand.getUrgent());
+    }
+
+    @Test
+    void otherValidatorShouldAcceptWithoutExtraFields() {
+        DemandCreateDto dto = buildDto("misc task", DemandCategory.OTHER);
+        Demand demand = demandFactory.createDemand(dto);
+        Assertions.assertNotNull(demand);
+        Assertions.assertEquals(DemandCategory.OTHER, demand.getCategory());
+    }
+
+    @Test
+    void shouldRejectNegativeRewardAmount() {
+        DemandCreateDto dto = buildDto("test", DemandCategory.ERRAND);
+        dto.setLocationTag("gate");
+        dto.setRewardAmount(-1);
+
+        BusinessException ex = Assertions.assertThrows(BusinessException.class,
+                () -> demandFactory.createDemand(dto));
+        Assertions.assertEquals(ErrorCode.INVALID_PARAM.getCode(), ex.getCode());
     }
 
     private DemandCreateDto buildDto(String title, DemandCategory category) {

@@ -16,6 +16,13 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import {
+  normalizeEmail,
+  normalizePhone,
+  normalizeRealName,
+  normalizeStudentId,
+  normalizeUsername,
+} from '@/utils/validators'
 const r = useRouter()
 const auth = useAuthStore()
 const f = reactive({ username:'', password:'', studentId:'', realName:'', phone:'', email:'' })
@@ -23,7 +30,17 @@ const err = ref('')
 const ing = ref(false)
 async function reg() {
   err.value = ''; ing.value = true
-  try { await auth.register({...f}); r.push('/login') }
+  try {
+    await auth.register({
+      ...f,
+      username: normalizeUsername(f.username),
+      realName: normalizeRealName(f.realName),
+      phone: normalizePhone(f.phone),
+      email: normalizeEmail(f.email),
+      studentId: normalizeStudentId(f.studentId),
+    })
+    r.push('/login')
+  }
   catch (e) { err.value = e.message || '注册失败' }
   finally { ing.value = false }
 }

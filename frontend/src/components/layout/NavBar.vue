@@ -5,6 +5,7 @@
       <div class="nav-right">
         <template v-if="auth.isLoggedIn">
           <router-link to="/orders" class="nav-link">订单</router-link>
+          <router-link to="/messages" class="nav-link nav-message">私信<span v-if="messageUnread" class="dot">{{ messageUnread }}</span></router-link>
           <router-link v-if="auth.user?.role==='ADMIN'" to="/admin" class="nav-link">管理</router-link>
           <router-link to="/profile" class="nav-user" :style="{background:avatarColor}">{{ auth.user?.username?.[0]?.toUpperCase() }}</router-link>
         </template>
@@ -16,18 +17,27 @@
   </header>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { chatAPI } from '@/api/chat'
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const unread = ref(0)
+const messageUnread = computed(() => unread.value > 99 ? '99+' : unread.value)
 function goHome() {
   if (route.path === '/') router.go(0)
   else router.push('/')
 }
 const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0)||0) % colors.length])
+async function fetchMessageUnread() {
+  if (!auth.isLoggedIn) { unread.value = 0; return }
+  try { const res = await chatAPI.unread(); unread.value = res.data || 0 } catch { unread.value = 0 }
+}
+onMounted(fetchMessageUnread)
+watch(() => route.fullPath, fetchMessageUnread)
 </script>
 <style scoped>
 .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
@@ -36,5 +46,7 @@ const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0)||0
 .nav-right { display: flex; align-items: center; gap: 12px; }
 .nav-link { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
 .nav-link:hover { color: var(--primary); }
+.nav-message { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+.dot { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
 .nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; }
 </style>

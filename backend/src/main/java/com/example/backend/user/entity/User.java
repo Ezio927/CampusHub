@@ -22,6 +22,8 @@ public class User {
     private String realName;
     private String avatarUrl;
     private Integer creditScore = 100;
+    private Integer quotaAvailable = 0;
+    private Integer quotaFrozen = 0;
     private UserRole role = UserRole.STUDENT;
     private UserStatus status = UserStatus.PENDING_CERT;
     private LocalDateTime createdAt;
@@ -36,13 +38,46 @@ public class User {
 
     public void addCredit(int amount) {
         if (amount <= 0) return;
-        this.creditScore = getCreditScore() + amount;
+        this.creditScore = Math.min(100, getCreditScore() + amount);
         this.updatedAt = LocalDateTime.now();
     }
 
     public void deductCredit(int amount) {
         if (amount <= 0) return;
         this.creditScore = Math.max(0, getCreditScore() - amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addQuotaAvailable(int amount) {
+        if (amount <= 0) return;
+        this.quotaAvailable = getQuotaAvailable() + amount;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void deductQuotaAvailable(int amount) {
+        if (amount <= 0) return;
+        this.quotaAvailable = Math.max(0, getQuotaAvailable() - amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void freezeQuota(int amount) {
+        if (amount <= 0) return;
+        this.quotaAvailable = getQuotaAvailable() - amount;
+        this.quotaFrozen = getQuotaFrozen() + amount;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void releaseQuota(int amount) {
+        if (amount <= 0) return;
+        int actual = Math.min(amount, getQuotaFrozen());
+        this.quotaFrozen = getQuotaFrozen() - actual;
+        this.quotaAvailable = getQuotaAvailable() + actual;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void consumeFrozenQuota(int amount) {
+        if (amount <= 0) return;
+        this.quotaFrozen = Math.max(0, getQuotaFrozen() - amount);
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -64,6 +99,10 @@ public class User {
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public Integer getCreditScore() { return creditScore == null ? 0 : creditScore; }
     public void setCreditScore(Integer creditScore) { this.creditScore = creditScore; }
+    public Integer getQuotaAvailable() { return quotaAvailable == null ? 0 : quotaAvailable; }
+    public void setQuotaAvailable(Integer quotaAvailable) { this.quotaAvailable = quotaAvailable; }
+    public Integer getQuotaFrozen() { return quotaFrozen == null ? 0 : quotaFrozen; }
+    public void setQuotaFrozen(Integer quotaFrozen) { this.quotaFrozen = quotaFrozen; }
     public UserRole getRole() { return role; }
     public void setRole(UserRole role) { this.role = role; }
     public UserStatus getStatus() { return status; }

@@ -22,6 +22,8 @@ public class OrderDto {
     private LocalDateTime cancelledAt;
     private String cancelReason;
     private Integer creditPenalty;
+    private Integer quotaPenalty;
+    private Integer acceptorDepositAmount;
     private LocalDateTime autoConfirmDeadline;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -40,6 +42,7 @@ public class OrderDto {
         dto.setCompletedAt(order.getCompletedAt());
         dto.setCancelledAt(order.getCancelledAt());
         dto.setCancelReason(order.getCancelReason());
+        dto.setAcceptorDepositAmount(order.getAcceptorDepositAmount());
         dto.setAutoConfirmDeadline(order.getAutoConfirmDeadline());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setUpdatedAt(order.getUpdatedAt());
@@ -135,6 +138,22 @@ public class OrderDto {
 
     public void setCreditPenalty(Integer creditPenalty) {
         this.creditPenalty = creditPenalty;
+    }
+
+    public Integer getQuotaPenalty() {
+        return quotaPenalty;
+    }
+
+    public void setQuotaPenalty(Integer quotaPenalty) {
+        this.quotaPenalty = quotaPenalty;
+    }
+
+    public Integer getAcceptorDepositAmount() {
+        return acceptorDepositAmount;
+    }
+
+    public void setAcceptorDepositAmount(Integer acceptorDepositAmount) {
+        this.acceptorDepositAmount = acceptorDepositAmount;
     }
 
     public LocalDateTime getAutoConfirmDeadline() {

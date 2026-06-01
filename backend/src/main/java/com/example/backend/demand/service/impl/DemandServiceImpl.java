@@ -1,11 +1,14 @@
 package com.example.backend.demand.service.impl;
 
-import com.example.backend.auth.security.AuthContext;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.PageResult;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
+import com.example.backend.common.enums.RewardType;
 import com.example.backend.common.enums.UserStatus;
+import com.example.backend.common.moderation.ContentModerationService;
+import com.example.backend.common.moderation.ModerationResult;
 import com.example.backend.demand.dto.DemandCreateDto;
 import com.example.backend.demand.dto.DemandDto;
 import com.example.backend.demand.dto.DemandSearchCriteria;
@@ -21,7 +24,9 @@ import com.example.backend.demand.service.DemandService;
 import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.QuotaService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,32 +42,49 @@ public class DemandServiceImpl implements DemandService {
     private final DemandImageRepository demandImageRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final ContentModerationService contentModerationService;
+    private final QuotaService quotaService;
 
     public DemandServiceImpl(DemandFactory demandFactory,
                              DemandRepository demandRepository,
                              DemandImageRepository demandImageRepository,
                              TagRepository tagRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ContentModerationService contentModerationService,
+                             QuotaService quotaService) {
         this.demandFactory = demandFactory;
         this.demandRepository = demandRepository;
         this.demandImageRepository = demandImageRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
+        this.contentModerationService = contentModerationService;
+        this.quotaService = quotaService;
     }
 
     @Override
+    @Transactional
     public DemandDto createDemand(Long userId, DemandCreateDto req) {
         User publisher = requireActiveUser(userId);
+        List<String> warnings = validateDemandTextAndReward(req);
         Demand demand = demandFactory.createDemand(req);
         demand.setPublisherId(publisher.getId());
         demandRepository.save(demand);
         saveImages(demand.getId(), req == null ? null : req.getImageUrls());
-        return toDto(demand);
+        quotaService.freezeDemandReward(publisher.getId(), demand.getId(), demand.getRewardType(), demand.getRewardAmount());
+        DemandDto dto = toDto(demand);
+        dto.setRiskWarnings(warnings);
+        return dto;
     }
 
     @Override
-    public List<DemandDto> search(DemandSearchCriteria criteria) {
-        List<Demand> demands = demandRepository.findAll();
+    public PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size) {
+        int safeSize = Math.min(Math.max(1, size), 100);
+        List<Demand> demands;
+        if (criteria != null && criteria.getPublisherId() != null) {
+            demands = demandRepository.findByPublisherIdOrderByCreatedAtDesc(criteria.getPublisherId());
+        } else {
+            demands = demandRepository.findAll();
+        }
         if (criteria != null) {
             demands = demands.stream()
                     .filter(demand -> criteria.getCategory() == null || demand.getCategory() == criteria.getCategory())
@@ -75,7 +97,13 @@ public class DemandServiceImpl implements DemandService {
                     .collect(Collectors.toList());
             demands = sortDemands(demands, criteria.getSortBy(), criteria.getSortDir());
         }
-        return demands.stream().map(this::toDto).collect(Collectors.toList());
+        int from = Math.max(0, page) * safeSize;
+        int to = Math.min(demands.size(), from + safeSize);
+        if (from >= demands.size()) {
+            return PageResult.of(List.of(), page, safeSize, demands.size());
+        }
+        List<DemandDto> content = demands.subList(from, to).stream().map(this::toDto).collect(Collectors.toList());
+        return PageResult.of(content, page, safeSize, demands.size());
     }
 
     @Override
@@ -95,12 +123,16 @@ public class DemandServiceImpl implements DemandService {
     }
 
     @Override
+    @Transactional
     public DemandDto update(Long demandId, Long userId, DemandUpdateDto req) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
         if (!demand.isOpen()) {
             throw new BusinessException(ErrorCode.CONFLICT, "需求状态不是开放中");
         }
+
+        RewardType oldRewardType = demand.getRewardType();
+        Integer oldRewardAmount = demand.getRewardAmount();
 
         if (req != null) {
             if (req.getTitle() != null) {
@@ -130,16 +162,24 @@ public class DemandServiceImpl implements DemandService {
             if (req.getLocationTag() != null) {
                 demand.setLocationTag(req.getLocationTag());
             }
-            if (req.getTagIds() != null) {
+            if (req.getImageUrls() != null || req.getTagIds() != null) {
                 updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());
             }
+            List<String> warnings = validateDemandEntityTextAndReward(demand);
             validateUpdatedDemand(demand);
+            demandRepository.save(demand);
+            quotaService.adjustDemandRewardFreeze(demand.getPublisherId(), demand.getId(),
+                    oldRewardType, oldRewardAmount, demand.getRewardType(), demand.getRewardAmount());
+            DemandDto dto = toDto(demand);
+            dto.setRiskWarnings(warnings);
+            return dto;
         }
         demandRepository.save(demand);
         return toDto(demand);
     }
 
     @Override
+    @Transactional
     public void cancel(Long demandId, Long userId) {
         Demand demand = requireDemand(demandId);
         ensureOwner(userId, demand);
@@ -148,6 +188,22 @@ public class DemandServiceImpl implements DemandService {
         }
         demand.cancel();
         demandRepository.save(demand);
+        quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
+                demand.getRewardType(), demand.getRewardAmount(), "发布者取消需求，退回冻结报酬");
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long demandId, Long userId) {
+        Demand demand = requireDemand(demandId);
+        ensureOwner(userId, demand);
+        if (!demand.isOpen()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "需求已被接单，不能删除");
+        }
+        demandImageRepository.deleteByDemandId(demandId);
+        demandRepository.deleteById(demandId);
+        quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
+                demand.getRewardType(), demand.getRewardAmount(), "发布者删除需求，退回冻结报酬");
     }
 
     private void validateUpdatedDemand(Demand demand) {
@@ -165,9 +221,44 @@ public class DemandServiceImpl implements DemandService {
         demandFactory.createDemand(validate);
     }
 
+    private List<String> validateDemandTextAndReward(DemandCreateDto req) {
+        if (req == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "请求不能为空");
+        }
+        return validateDemandFields(req.getTitle(), req.getDescription(), req.getRewardAmount(), req.getLocationTag());
+    }
+
+    private List<String> validateDemandEntityTextAndReward(Demand demand) {
+        return validateDemandFields(demand.getTitle(), demand.getDescription(), demand.getRewardAmount(), demand.getLocationTag());
+    }
+
+    private List<String> validateDemandFields(String title, String description, Integer rewardAmount, String locationTag) {
+        if (isBlank(title)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "标题不能为空");
+        }
+        if (isBlank(description)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "详细描述不能为空");
+        }
+        if (rewardAmount == null || rewardAmount < 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "报酬金额不能为负数");
+        }
+        List<String> warnings = new ArrayList<String>();
+        ModerationResult titleResult = contentModerationService.assertDemandContentAllowed("标题", title);
+        ModerationResult descriptionResult = contentModerationService.assertDemandContentAllowed("详细描述", description);
+        warnings.addAll(titleResult.getWarnings());
+        warnings.addAll(descriptionResult.getWarnings());
+        if (!isBlank(locationTag)) {
+            ModerationResult locationResult = contentModerationService.assertDemandContentAllowed("位置", locationTag);
+            warnings.addAll(locationResult.getWarnings());
+        }
+        return warnings.stream().distinct().collect(Collectors.toList());
+    }
+
     private void updateImagesAndTags(Long demandId, List<Long> tagIds, List<String> imageUrls) {
-        demandImageRepository.deleteByDemandId(demandId);
-        saveImages(demandId, imageUrls);
+        if (imageUrls != null) {
+            demandImageRepository.deleteByDemandId(demandId);
+            saveImages(demandId, imageUrls);
+        }
     }
 
     private List<Long> getTagIdsForDemand(DemandCategory category) {

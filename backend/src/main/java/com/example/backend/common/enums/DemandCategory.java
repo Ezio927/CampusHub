@@ -4,5 +4,6 @@ public enum DemandCategory {
     ERRAND,
     SKILL,
     STUDY,
-    SECONDHAND
+    SECONDHAND,
+    OTHER
 }

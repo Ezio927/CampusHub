@@ -15,6 +15,7 @@ public class UserPublicDto {
     private String email;
     private String avatarUrl;
     private Integer creditScore;
+    private Integer quotaAvailable;
     private UserRole role;
     private UserStatus status;
     private LocalDateTime createdAt;
@@ -34,6 +35,7 @@ public class UserPublicDto {
         dto.setEmail(maskEmail(user.getEmail()));
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setCreditScore(user.getCreditScore());
+        dto.setQuotaAvailable(user.getQuotaAvailable());
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
         dto.setCreatedAt(user.getCreatedAt());
@@ -115,6 +117,14 @@ public class UserPublicDto {
 
     public void setCreditScore(Integer creditScore) {
         this.creditScore = creditScore;
+    }
+
+    public Integer getQuotaAvailable() {
+        return quotaAvailable;
+    }
+
+    public void setQuotaAvailable(Integer quotaAvailable) {
+        this.quotaAvailable = quotaAvailable;
     }
 
     public UserRole getRole() {

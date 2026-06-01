@@ -23,14 +23,26 @@
         <div class="nc-info"><div class="nc-title">仲裁处理</div><div class="nc-desc">处理纠纷与申诉工单</div></div>
         <span class="nc-arrow">→</span>
       </router-link>
+      <router-link to="/admin/message-reports" class="nc">
+        <div class="nc-icon" style="background:#fef2f2">!</div>
+        <div class="nc-info"><div class="nc-title">私信举报</div><div class="nc-desc">审核用户提交的聊天举报</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
+      <router-link to="/admin/credit-appeals" class="nc">
+        <div class="nc-icon" style="background:#eef2ff">⭐</div>
+        <div class="nc-info"><div class="nc-title">信用申诉</div><div class="nc-desc">处理用户信用分恢复申请</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
     </div>
   </div>
 </template>
 <script setup>
 import {reactive,onMounted} from 'vue'
 import {adminAPI} from '@/api/admin'
+import { useModal } from '@/composables/useModal'
+const modal = useModal()
 const d=reactive({totalUsers:0,activeDemands:0,completedOrders:0,averageRating:0})
-onMounted(async()=>{try{const r=await adminAPI.dashboard();Object.assign(d,r.data)}catch(e){alert(e.message)}})
+onMounted(async()=>{try{const r=await adminAPI.dashboard();Object.assign(d,r.data)}catch(e){modal.alert('加载失败', e.message)}})
 </script>
 <style scoped>
 .sc{background:#fff;border-radius:14px;padding:24px;text-align:center;border:1px solid var(--border)}

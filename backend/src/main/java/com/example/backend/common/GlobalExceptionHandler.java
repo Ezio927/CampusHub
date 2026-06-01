@@ -69,4 +69,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404)
                 .body(ApiResponse.error(ErrorCode.NOT_FOUND));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
+        log.error("Unhandled server exception", ex);
+        return ResponseEntity.status(500)
+                .body(ApiResponse.error(ErrorCode.SERVER_ERROR));
+    }
 }

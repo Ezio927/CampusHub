@@ -1,5 +1,6 @@
 package com.example.backend.demand.service;
 
+import com.example.backend.common.PageResult;
 import com.example.backend.demand.dto.DemandCreateDto;
 import com.example.backend.demand.dto.DemandDto;
 import com.example.backend.demand.dto.DemandSearchCriteria;
@@ -12,7 +13,7 @@ public interface DemandService {
 
     DemandDto createDemand(Long userId, DemandCreateDto req);
 
-    List<DemandDto> search(DemandSearchCriteria criteria);
+    PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size);
 
     DemandDto getDetail(Long demandId);
 
@@ -23,4 +24,6 @@ public interface DemandService {
     DemandDto update(Long demandId, Long userId, DemandUpdateDto req);
 
     void cancel(Long demandId, Long userId);
+
+    void delete(Long demandId, Long userId);
 }

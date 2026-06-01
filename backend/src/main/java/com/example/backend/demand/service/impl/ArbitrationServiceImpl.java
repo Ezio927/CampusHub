@@ -9,11 +9,14 @@ import com.example.backend.demand.dto.ArbitrationCreateDto;
 import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.demand.entity.ArbitrationTicket;
+import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.repository.ArbitrationTicketRepository;
+import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.service.ArbitrationService;
 import com.example.backend.notification.service.NotificationService;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.CreditService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,13 +29,19 @@ public class ArbitrationServiceImpl implements ArbitrationService {
     private final ArbitrationTicketRepository arbitrationTicketRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final CreditService creditService;
+    private final OrderRepository orderRepository;
 
     public ArbitrationServiceImpl(ArbitrationTicketRepository arbitrationTicketRepository,
                                   UserRepository userRepository,
-                                  NotificationService notificationService) {
+                                  NotificationService notificationService,
+                                  CreditService creditService,
+                                  OrderRepository orderRepository) {
         this.arbitrationTicketRepository = arbitrationTicketRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.creditService = creditService;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -46,7 +55,7 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         ticket.setStatus(ArbitrationStatus.PENDING);
         arbitrationTicketRepository.save(ticket);
         notificationService.createNotification(reporterId, NotificationType.ARBITRATION_UPDATE,
-                "Arbitration created", "Your arbitration ticket has been created.", ticket.getId());
+                "仲裁工单已创建", "您的仲裁申请已提交，管理员会尽快处理。", ticket.getId());
         return ArbitrationDto.from(ticket);
     }
 
@@ -88,8 +97,19 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         ticket.setResolvedBy(adminId);
         ticket.setResolvedAt(LocalDateTime.now());
         arbitrationTicketRepository.save(ticket);
+
+        if ("RESOLVED".equalsIgnoreCase(action) && ticket.getOrderId() != null) {
+            orderRepository.findById(ticket.getOrderId()).ifPresent(order -> {
+                creditService.deductCredit(order.getAcceptorId(), 10,
+                        "仲裁判定违约", order.getId());
+            });
+        } else if ("DISMISS".equalsIgnoreCase(action)) {
+            creditService.deductCredit(ticket.getReporterId(), 10,
+                    "恶意差评", ticket.getOrderId());
+        }
+
         notificationService.createNotification(ticket.getReporterId(), NotificationType.ARBITRATION_UPDATE,
-                "Arbitration resolved", "Your arbitration ticket has been resolved.", ticket.getId());
+                "仲裁已处理", req == null ? "" : req.getResolution(), ticket.getId());
         return ArbitrationDto.from(ticket);
     }
 }

@@ -28,7 +28,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        if (path.startsWith("/api/auth/login")
+        if (path.startsWith("/uploads")
+                || path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
                 || path.startsWith("/error")
                 || path.startsWith("/api-docs")
@@ -39,7 +40,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Public GET: user profile, demand search, demand detail
         if ("GET".equalsIgnoreCase(method)) {
             if (path.equals("/api/users") || (path.startsWith("/api/users/") && !path.startsWith("/api/users/me"))) return true;
-            if (path.equals("/api/demands") || path.startsWith("/api/demands/")) return true;
+            if (path.equals("/api/demands") || path.startsWith("/api/demands/")) {
+                if (request.getParameter("my") == null) return true;
+            }
         }
 
         return false;

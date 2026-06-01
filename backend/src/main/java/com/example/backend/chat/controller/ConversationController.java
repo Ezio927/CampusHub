@@ -4,8 +4,11 @@ import com.example.backend.auth.security.AuthContext;
 import com.example.backend.chat.dto.ConversationDto;
 import com.example.backend.chat.dto.CreateConversationDto;
 import com.example.backend.chat.dto.MessageDto;
+import com.example.backend.chat.dto.MessageReportCreateDto;
+import com.example.backend.chat.dto.MessageReportDto;
 import com.example.backend.chat.dto.SendMessageDto;
 import com.example.backend.chat.service.ConversationService;
+import com.example.backend.chat.service.MessageReportService;
 import com.example.backend.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,9 +32,12 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final MessageReportService messageReportService;
 
-    public ConversationController(ConversationService conversationService) {
+    public ConversationController(ConversationService conversationService,
+                                  MessageReportService messageReportService) {
         this.conversationService = conversationService;
+        this.messageReportService = messageReportService;
     }
 
     @Operation(summary = "创建或获取会话")
@@ -44,6 +50,19 @@ public class ConversationController {
     @GetMapping
     public ApiResponse<List<ConversationDto>> list() {
         return ApiResponse.success(conversationService.listConversations(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "未读私信总数")
+    @GetMapping("/unread-count")
+    public ApiResponse<Long> unreadCount() {
+        return ApiResponse.success(conversationService.countUnread(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "会话详情")
+    @GetMapping("/{id}")
+    public ApiResponse<ConversationDto> detail(
+            @Parameter(description = "会话ID") @PathVariable Long id) {
+        return ApiResponse.success(conversationService.getConversation(id, AuthContext.requireUserId()));
     }
 
     @Operation(summary = "发送消息")
@@ -59,15 +78,57 @@ public class ConversationController {
     public ApiResponse<List<MessageDto>> getMessages(
             @Parameter(description = "会话ID") @PathVariable Long id,
             @Parameter(description = "页码") @RequestParam(value = "page", defaultValue = "0") int page,
-            @Parameter(description = "每页数量") @RequestParam(value = "size", defaultValue = "20") int size) {
-        return ApiResponse.success(conversationService.getMessages(id, AuthContext.requireUserId(), page, size));
+            @Parameter(description = "每页数量") @RequestParam(value = "size", defaultValue = "20") int size,
+            @Parameter(description = "增量拉取起始消息ID") @RequestParam(value = "afterId", required = false) Long afterId) {
+        return ApiResponse.success(conversationService.getMessages(id, AuthContext.requireUserId(), page, size, afterId));
+    }
+
+    @Operation(summary = "搜索会话内消息")
+    @GetMapping("/{id}/messages/search")
+    public ApiResponse<List<MessageDto>> searchMessages(
+            @Parameter(description = "会话ID") @PathVariable Long id,
+            @Parameter(description = "关键词") @RequestParam(value = "keyword") String keyword) {
+        return ApiResponse.success(conversationService.searchMessages(id, AuthContext.requireUserId(), keyword));
     }
 
     @Operation(summary = "标记会话为已读")
     @PutMapping("/{id}/read")
     public ApiResponse<Void> markRead(
-            @Parameter(description = "会话ID") @PathVariable Long id) {
-        conversationService.markRead(id, AuthContext.requireUserId());
+            @Parameter(description = "会话ID") @PathVariable Long id,
+            @Parameter(description = "已读到的最后一条消息ID") @RequestParam(value = "lastReadMessageId", required = false) Long lastReadMessageId) {
+        conversationService.markRead(id, AuthContext.requireUserId(), lastReadMessageId);
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "拉黑会话对方")
+    @PutMapping("/{id}/block")
+    public ApiResponse<ConversationDto> block(
+            @Parameter(description = "会话ID") @PathVariable Long id) {
+        return ApiResponse.success(conversationService.blockConversation(id, AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "解除拉黑")
+    @PutMapping("/{id}/unblock")
+    public ApiResponse<ConversationDto> unblock(
+            @Parameter(description = "会话ID") @PathVariable Long id) {
+        return ApiResponse.success(conversationService.unblockConversation(id, AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "撤回私信消息")
+    @PutMapping("/{id}/messages/{messageId}/recall")
+    public ApiResponse<MessageDto> recallMessage(
+            @Parameter(description = "会话ID") @PathVariable Long id,
+            @Parameter(description = "消息ID") @PathVariable Long messageId) {
+        return ApiResponse.success(conversationService.recallMessage(id, messageId, AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "举报私信消息")
+    @PostMapping("/{id}/messages/{messageId}/reports")
+    public ApiResponse<MessageReportDto> reportMessage(
+            @Parameter(description = "会话ID") @PathVariable Long id,
+            @Parameter(description = "消息ID") @PathVariable Long messageId,
+            @RequestBody MessageReportCreateDto request) {
+        return ApiResponse.success(messageReportService.createReport(
+                AuthContext.requireUserId(), id, messageId, request));
     }
 }

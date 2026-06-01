@@ -1,10 +1,14 @@
 package com.example.backend.admin.controller;
 
 import com.example.backend.admin.dto.AdminUserDto;
+import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.admin.service.AdminService;
 import com.example.backend.auth.security.AuthContext;
+import com.example.backend.chat.dto.MessageReportDto;
+import com.example.backend.chat.dto.MessageReportReviewDto;
+import com.example.backend.chat.service.MessageReportService;
 import com.example.backend.common.ApiResponse;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
@@ -13,6 +17,11 @@ import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.user.dto.CertificationDto;
 import com.example.backend.user.dto.CertificationReviewDto;
+import com.example.backend.user.dto.CreditAppealDto;
+import com.example.backend.user.dto.CreditRecordDto;
+import com.example.backend.user.dto.QuotaRecordDto;
+import com.example.backend.user.service.CreditService;
+import com.example.backend.user.service.QuotaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -34,9 +43,18 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final MessageReportService messageReportService;
+    private final CreditService creditService;
+    private final QuotaService quotaService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService,
+                           MessageReportService messageReportService,
+                           CreditService creditService,
+                           QuotaService quotaService) {
         this.adminService = adminService;
+        this.messageReportService = messageReportService;
+        this.creditService = creditService;
+        this.quotaService = quotaService;
     }
 
     @Operation(summary = "数据看板")
@@ -74,6 +92,32 @@ public class AdminController {
         return ApiResponse.success();
     }
 
+    @Operation(summary = "管理员调整用户信用分")
+    @PutMapping("/users/{id}/credit")
+    public ApiResponse<CreditRecordDto> adjustCredit(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @RequestBody AdjustBalanceDto request) {
+        requireAdmin();
+        if (request == null || request.getAmount() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "调整值不能为空");
+        }
+        return ApiResponse.success(creditService.adjustCreditByAdmin(
+                id, request.getAmount(), request.getReason(), AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "管理员调整用户额度分")
+    @PutMapping("/users/{id}/quota")
+    public ApiResponse<QuotaRecordDto> adjustQuota(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @RequestBody AdjustBalanceDto request) {
+        requireAdmin();
+        if (request == null || request.getAmount() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "调整值不能为空");
+        }
+        return ApiResponse.success(quotaService.adjustByAdmin(
+                id, request.getAmount(), request.getReason(), AuthContext.requireUserId()));
+    }
+
     @Operation(summary = "审核认证")
     @PutMapping("/certifications/{id}/review")
     public ApiResponse<CertificationDto> reviewCertification(
@@ -90,6 +134,39 @@ public class AdminController {
             @RequestBody ArbitrationResolveDto request) {
         requireAdmin();
         return ApiResponse.success(adminService.resolveArbitration(id, AuthContext.requireUserId(), request));
+    }
+
+    @Operation(summary = "待审核私信举报")
+    @GetMapping("/message-reports")
+    public ApiResponse<List<MessageReportDto>> listMessageReports() {
+        requireAdmin();
+        return ApiResponse.success(messageReportService.listPending());
+    }
+
+    @Operation(summary = "审核私信举报")
+    @PutMapping("/message-reports/{id}/review")
+    public ApiResponse<MessageReportDto> reviewMessageReport(
+            @Parameter(description = "举报ID") @PathVariable Long id,
+            @RequestBody MessageReportReviewDto request) {
+        requireAdmin();
+        return ApiResponse.success(messageReportService.review(id, AuthContext.requireUserId(), request));
+    }
+
+    @Operation(summary = "待审核信用申诉列表")
+    @GetMapping("/credit-appeals")
+    public ApiResponse<List<CreditAppealDto>> listCreditAppeals() {
+        requireAdmin();
+        return ApiResponse.success(creditService.listPendingAppeals());
+    }
+
+    @Operation(summary = "审核信用申诉")
+    @PutMapping("/credit-appeals/{id}/review")
+    public ApiResponse<CreditAppealDto> reviewCreditAppeal(
+            @Parameter(description = "申诉ID") @PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body) {
+        requireAdmin();
+        Boolean approved = body != null ? body.getOrDefault("approved", false) : false;
+        return ApiResponse.success(creditService.reviewAppeal(id, AuthContext.requireUserId(), approved));
     }
 
     private void requireAdmin() {

@@ -11,6 +11,7 @@ public enum ErrorCode {
     CREDIT_INSUFFICIENT(40301, "信用分不足，无法接单"),
     NOT_CERTIFIED(40302, "未完成实名认证"),
     ACCOUNT_BANNED(40303, "账号已被封禁"),
+    QUOTA_INSUFFICIENT(40304, "额度分不足"),
     NOT_FOUND(40400, "资源不存在"),
     USER_NOT_FOUND(40401, "用户不存在"),
     DEMAND_NOT_FOUND(40402, "需求不存在"),

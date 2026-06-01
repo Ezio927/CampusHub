@@ -5,50 +5,68 @@ import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
+import com.example.backend.common.moderation.ContentModerationService;
 import com.example.backend.user.dto.UserCreateDto;
 import com.example.backend.user.dto.UserDto;
 import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.dto.UserUpdateDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
+import com.example.backend.user.service.QuotaService;
 import com.example.backend.user.service.UserService;
+import com.example.backend.user.validation.UserProfileValidator;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ContentModerationService contentModerationService;
+    private final QuotaService quotaService;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           ContentModerationService contentModerationService,
+                           QuotaService quotaService) {
         this.userRepository = userRepository;
+        this.contentModerationService = contentModerationService;
+        this.quotaService = quotaService;
     }
 
     @Override
     public UserDto createUser(UserCreateDto req) {
-        if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())
-                || isBlank(req.getStudentId()) || isBlank(req.getRealName())) {
+        if (req == null || isBlank(req.getPassword()) || isBlank(req.getStudentId())) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码/学号/姓名不能为空");
         }
-        if (userRepository.existsByUsername(req.getUsername())) {
+        String username = UserProfileValidator.requireValidUsername(req.getUsername());
+        String realName = UserProfileValidator.requireValidRealName(req.getRealName());
+        String phone = UserProfileValidator.normalizeOptionalPhone(req.getPhone());
+        String email = UserProfileValidator.normalizeOptionalEmail(req.getEmail());
+        String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
+        contentModerationService.assertUsernameAllowed(username);
+
+        if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
-        if (userRepository.existsByStudentId(req.getStudentId())) {
+        if (userRepository.existsByStudentId(studentId)) {
             throw new BusinessException(ErrorCode.STUDENT_ID_EXISTS);
         }
 
         User user = new User();
-        user.setUsername(req.getUsername());
+        user.setUsername(username);
         user.setPasswordHash(PasswordHasher.hash(req.getPassword()));
-        user.setStudentId(req.getStudentId());
-        user.setRealName(req.getRealName());
-        user.setPhone(req.getPhone());
-        user.setEmail(req.getEmail());
+        user.setStudentId(studentId);
+        user.setRealName(realName);
+        user.setPhone(phone);
+        user.setEmail(email);
         user.setAvatarUrl(null);
         user.setCreditScore(100);
+        user.setQuotaAvailable(0);
+        user.setQuotaFrozen(0);
         user.setRole(UserRole.STUDENT);
         user.setStatus(UserStatus.PENDING_CERT);
         userRepository.save(user);
-        return UserDto.from(user);
+        grantProfileRewards(user.getId(), phone, email, false, false);
+        return UserDto.from(findUser(user.getId()));
     }
 
     @Override
@@ -67,20 +85,32 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请求体不能为空");
         }
         User user = findUser(userId);
+        boolean hadPhone = !isBlank(user.getPhone());
+        boolean hadEmail = !isBlank(user.getEmail());
         if (req.getRealName() != null) {
-            user.setRealName(req.getRealName());
+            user.setRealName(UserProfileValidator.requireValidRealName(req.getRealName()));
         }
         if (req.getPhone() != null) {
-            user.setPhone(req.getPhone());
+            user.setPhone(UserProfileValidator.normalizeOptionalPhone(req.getPhone()));
         }
         if (req.getEmail() != null) {
-            user.setEmail(req.getEmail());
+            user.setEmail(UserProfileValidator.normalizeOptionalEmail(req.getEmail()));
         }
         if (req.getAvatarUrl() != null) {
             user.setAvatarUrl(req.getAvatarUrl());
         }
         userRepository.save(user);
-        return UserDto.from(user);
+        grantProfileRewards(userId, user.getPhone(), user.getEmail(), hadPhone, hadEmail);
+        return UserDto.from(findUser(userId));
+    }
+
+    private void grantProfileRewards(Long userId, String phone, String email, boolean hadPhone, boolean hadEmail) {
+        if (!hadPhone && !isBlank(phone)) {
+            quotaService.grantPhoneReward(userId);
+        }
+        if (!hadEmail && !isBlank(email)) {
+            quotaService.grantEmailReward(userId);
+        }
     }
 
     private User findUser(Long userId) {

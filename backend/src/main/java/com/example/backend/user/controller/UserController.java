@@ -3,23 +3,30 @@ package com.example.backend.user.controller;
 import com.example.backend.auth.security.AuthContext;
 import com.example.backend.common.ApiResponse;
 import com.example.backend.user.dto.CreditRecordDto;
+import com.example.backend.user.dto.QuotaAccountDto;
+import com.example.backend.user.dto.QuotaRecordDto;
 import com.example.backend.user.dto.UserDto;
 import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.dto.UserUpdateDto;
 import com.example.backend.user.service.CreditService;
+import com.example.backend.user.service.QuotaService;
 import com.example.backend.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.example.backend.user.dto.CreditAppealDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "用户", description = "个人信息查询、更新、信用记录")
@@ -29,10 +36,12 @@ public class UserController {
 
     private final UserService userService;
     private final CreditService creditService;
+    private final QuotaService quotaService;
 
-    public UserController(UserService userService, CreditService creditService) {
+    public UserController(UserService userService, CreditService creditService, QuotaService quotaService) {
         this.userService = userService;
         this.creditService = creditService;
+        this.quotaService = quotaService;
     }
 
     @Operation(summary = "查看我的个人信息")
@@ -58,5 +67,36 @@ public class UserController {
     @GetMapping("/me/credit-records")
     public ApiResponse<List<CreditRecordDto>> getMyCreditRecords() {
         return ApiResponse.success(creditService.listRecords(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "查看我的额度分账户")
+    @GetMapping("/me/quota")
+    public ApiResponse<QuotaAccountDto> getMyQuota() {
+        return ApiResponse.success(quotaService.getAccount(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "查看我的额度分流水")
+    @GetMapping("/me/quota-records")
+    public ApiResponse<List<QuotaRecordDto>> getMyQuotaRecords() {
+        return ApiResponse.success(quotaService.listRecords(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "每日签到领取额度分")
+    @PostMapping("/me/quota/check-in")
+    public ApiResponse<QuotaRecordDto> checkIn() {
+        return ApiResponse.success(quotaService.checkIn(AuthContext.requireUserId()));
+    }
+
+    @Operation(summary = "提交信用分申诉")
+    @PostMapping("/me/credit-appeal")
+    public ApiResponse<CreditAppealDto> submitCreditAppeal(@RequestBody Map<String, String> body) {
+        String reason = body != null ? body.getOrDefault("reason", "") : "";
+        return ApiResponse.success(creditService.submitAppeal(AuthContext.requireUserId(), reason));
+    }
+
+    @Operation(summary = "查看我最近的申诉")
+    @GetMapping("/me/credit-appeal")
+    public ApiResponse<CreditAppealDto> getMyCreditAppeal() {
+        return ApiResponse.success(creditService.getMyLatestAppeal(AuthContext.requireUserId()));
     }
 }
