@@ -9,6 +9,15 @@
         <div class="mi"><span class="lbl">时间</span><span class="val text-sm">{{ o.createdAt?.substring(0,10) }}</span></div>
       </div>
     </div>
+    <div v-if="showReview" class="review-card">
+      <h3>评价 {{ targetUserId === o.acceptorId ? '接单者' : '发布者' }}</h3>
+      <div class="star-row">
+        <button v-for="i in 5" :key="i" type="button" class="star-btn" :class="{on:reviewRating>=i}" @click="reviewRating=i">{{ reviewRating>=i?'★':'☆' }}</button>
+      </div>
+      <textarea v-model="reviewContent" class="review-input" placeholder="写下你的评价（选填）" maxlength="500" rows="2"></textarea>
+      <p v-if="reviewErr" class="form-error">{{ reviewErr }}</p>
+      <button class="btn-primary btn-block" :disabled="reviewSubmitting" @click="submitReviewAction">{{ reviewSubmitting?'提交中...':'提交评价' }}</button>
+    </div>
     <div class="acts">
       <button v-if="targetUserId" class="btn-outline btn-block" @click="messagePeer">私信对方</button>
       <button v-for="a in acts" :key="a.k" class="btn-primary btn-block" @click="doAct(a.k)">{{ a.l }}</button>
@@ -22,15 +31,34 @@ import { useRoute,useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { orderAPI } from '@/api/orders'
 import { chatAPI } from '@/api/chat'
+import { reviewAPI } from '@/api/reviews'
 import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
 const r=useRoute();const ro=useRouter();const a=useAuthStore();const o=ref(null)
 const modal = useModal()
+const showReview=ref(false)
+const reviewRating=ref(0)
+const reviewContent=ref('')
+const reviewErr=ref('')
+const reviewSubmitting=ref(false)
 function st(s){return{PENDING_ACCEPT:'待接单',ACCEPTED:'已接单',PENDING_CONFIRM:'待确认',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function sb(s){return{PENDING_ACCEPT:'#3b82f6',ACCEPTED:'#06b6d4',PENDING_CONFIRM:'#eab308',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
 const acts=computed(()=>{if(!o.value)return[];const uid=a.user?.id;const s=o.value.status;const as=[];if(s==='ACCEPTED'&&o.value.acceptorId===uid)as.push({k:'deliver',l:'📦 标记已送达'});if(s==='PENDING_CONFIRM'&&o.value.publisherId===uid)as.push({k:'confirm',l:'✅ 确认完成'});if(['PENDING_ACCEPT','ACCEPTED','PENDING_CONFIRM'].includes(s))as.push({k:'cancel',l:'❌ 取消订单'});return as})
 const targetUserId=computed(()=>{if(!o.value)return null;const uid=a.user?.id;if(o.value.publisherId===uid)return o.value.acceptorId;if(o.value.acceptorId===uid)return o.value.publisherId;return null})
-async function doAct(key){try{if(key==='deliver')await orderAPI.deliver(o.value.id);else if(key==='confirm'){await orderAPI.confirm(o.value.id);ro.push('/reviews/'+o.value.acceptorId)}else if(key==='cancel'){const r=await modal.prompt('取消订单','请输入取消原因（必填）','请输入取消原因');if(!r||!r.trim()){await modal.alert('原因不能为空','请填写取消原因');return}else{await orderAPI.cancel(o.value.id,{reason:r.trim()})}}ro.go(0)}catch(e){modal.alert('操作失败', errorMessage(e))}}
+async function doAct(key){try{if(key==='deliver'){await orderAPI.deliver(o.value.id);await refresh()}else if(key==='confirm'){await orderAPI.confirm(o.value.id);showReview.value=true;await refresh()}else if(key==='cancel'){const r=await modal.prompt('取消订单','请输入取消原因（必填）','请输入取消原因');if(!r||!r.trim()){await modal.alert('原因不能为空','请填写取消原因');return}else{await orderAPI.cancel(o.value.id,{reason:r.trim()})};ro.go(0)}}catch(e){modal.alert('操作失败', errorMessage(e))}}
+async function submitReviewAction(){
+  reviewErr.value=''
+  if(reviewRating.value<1||reviewRating.value>5){reviewErr.value='请选择评分';return}
+  if(reviewRating.value<=3&&(!reviewContent.value||reviewContent.value.trim().length<15)){reviewErr.value='差评需要至少15字说明';return}
+  reviewSubmitting.value=true
+  try{
+    const revieweeId=targetUserId.value
+    if(!revieweeId)throw new Error('无法确定评价对象')
+    await reviewAPI.submit({orderId:o.value.id,revieweeId,rating:reviewRating.value,content:reviewContent.value.trim()||undefined,imageUrls:[]})
+    ro.push('/reviews/'+revieweeId)
+  }catch(e){reviewErr.value=errorMessage(e)}finally{reviewSubmitting.value=false}
+}
+async function refresh(){const res=await orderAPI.detail(r.params.id);o.value=res.data}
 async function messagePeer(){
   if(!targetUserId.value){modal.alert('发起私信失败','对方用户信息缺失，暂时无法发起私信');return}
   try{
@@ -47,4 +75,13 @@ onMounted(async()=>{const res=await orderAPI.detail(r.params.id);o.value=res.dat
 .lbl{font-size:12px;color:var(--text-muted)}.val{font-size:16px;font-weight:700}
 .acts{display:flex;flex-direction:column;gap:8px}
 .acts button{padding:14px;border-radius:12px;font-size:15px;font-weight:700}
+.review-card{background:#fff;border-radius:16px;padding:20px 24px;margin-bottom:14px;border:1px solid var(--border)}
+.review-card h3{font-size:15px;font-weight:800;margin:0 0 12px}
+.star-row{display:flex;gap:4px;margin-bottom:12px}
+.star-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#d1d5db;padding:0;transition:color .12s}
+.star-btn.on{color:#f59e0b}
+.star-btn:hover{color:#f59e0b}
+.review-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;resize:vertical;margin-bottom:10px;box-sizing:border-box}
+.review-input:focus{border-color:var(--primary);outline:none}
+.form-error{color:var(--danger);font-size:13px;margin-bottom:8px}
 </style>
