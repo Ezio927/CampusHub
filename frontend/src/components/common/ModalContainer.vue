@@ -54,7 +54,8 @@ function onCancel() {
   padding: 28px 24px 20px;
   max-width: 380px;
   width: 100%;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, .18);
+  border: 3px solid black;
+  box-shadow: 6px 6px 0px rgba(0,0,0,1);
   animation: modalIn .18s ease-out;
 }
 @keyframes modalIn {
@@ -63,7 +64,7 @@ function onCancel() {
 }
 .modal-title {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 900;
   margin-bottom: 8px;
 }
 .modal-msg {
@@ -76,7 +77,7 @@ function onCancel() {
 .modal-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 2px solid black;
   border-radius: 10px;
   font-size: 14px;
   margin-bottom: 16px;
@@ -94,16 +95,19 @@ function onCancel() {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .15s;
+  transition: all 0.2s ease;
+  border: 2px solid black;
 }
 .modal-btn-cancel {
   background: #f1f5f9;
   color: var(--text-secondary);
+  box-shadow: 4px 4px 0px rgba(0,0,0,1);
 }
-.modal-btn-cancel:hover { background: #e2e8f0; }
+.modal-btn-cancel:hover { background: #e2e8f0; transform: translate(1px,1px); box-shadow: none; }
 .modal-btn-ok {
   background: var(--primary);
   color: #fff;
+  box-shadow: 4px 4px 0px rgba(0,0,0,1);
 }
-.modal-btn-ok:hover { filter: brightness(1.1); }
+.modal-btn-ok:hover { filter: brightness(1.1); transform: translate(1px,1px); box-shadow: none; }
 </style>

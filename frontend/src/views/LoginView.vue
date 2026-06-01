@@ -31,14 +31,14 @@ async function login() {
 }
 </script>
 <style scoped>
-.lp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#667eea,#764ba2)}
+.lp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC}
 .lb{width:100%;max-width:400px}
-.lc{background:#fff;border-radius:20px;padding:40px 32px;box-shadow:0 20px 60px rgba(0,0,0,.15);text-align:center}
-.li{width:56px;height:56px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px}
-h1{font-size:24px;font-weight:800;margin-bottom:4px}
-.ls{color:var(--text-secondary);font-size:14px;margin-bottom:28px}
-.inp{margin-bottom:14px;padding:14px 16px;border-radius:12px;font-size:15px;text-align:left}
-.lbn{padding:14px;border-radius:12px;font-size:16px;font-weight:700;margin-top:8px}
-.lf{margin-top:20px;text-align:center;font-size:14px;color:rgba(255,255,255,.85)}
-.lf a{color:#fff;font-weight:700;text-decoration:underline}
+.lc{background:#fff;border-radius:12px;padding:40px 32px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);text-align:center}
+.li{width:56px;height:56px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;border:2px solid black}
+h1{font-size:24px;font-weight:900;margin-bottom:4px}
+.ls{color:var(--text-secondary);font-size:14px;margin-bottom:28px;font-weight:500}
+.inp{margin-bottom:14px;padding:14px 16px;border-radius:10px;font-size:15px;text-align:left}
+.lbn{padding:14px;border-radius:10px;font-size:16px;font-weight:700;margin-top:8px}
+.lf{margin-top:20px;text-align:center;font-size:14px;color:var(--text-secondary)}
+.lf a{color:var(--primary);font-weight:700}
 </style>

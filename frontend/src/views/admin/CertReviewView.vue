@@ -36,10 +36,10 @@ load()
 <style scoped>
 .cert-item{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .cert-main{display:flex;align-items:center;gap:12px;min-width:0}
-.cert-thumb{width:96px;height:72px;padding:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff;flex-shrink:0}
+.cert-thumb{width:96px;height:72px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:#fff;flex-shrink:0}
 .cert-thumb img{display:block;width:100%;height:100%;object-fit:cover}
 .image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
-.image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:8px;background:#fff}
+.image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:12px;background:#fff;border:2px solid black}
 .viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text)}
 @media (max-width: 640px){
   .cert-item{align-items:flex-start;flex-direction:column}

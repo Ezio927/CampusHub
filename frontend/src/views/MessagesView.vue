@@ -56,13 +56,14 @@ onMounted(load)
   padding: 16px;
   margin-bottom: 10px;
   background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  border: 3px solid black;
+  border-radius: 12px;
+  box-shadow: 6px 6px 0px rgba(0,0,0,1);
   text-align: left;
+  transition: all 0.2s ease;
 }
 .conv:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  transform: translateY(-2px);
 }
 .avatar {
   width: 46px;
@@ -75,6 +76,7 @@ onMounted(load)
   justify-content: center;
   font-weight: 800;
   flex-shrink: 0;
+  border: 2px solid black;
 }
 .conv-main {
   flex: 1;

@@ -82,14 +82,15 @@ onMounted(load)
   background: #f8fafc;
   white-space: pre-wrap;
   word-break: break-word;
+  border: 2px solid black;
 }
 .snapshot-image {
   display: block;
   width: 180px;
   height: 132px;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid black;
+  border-radius: 10px;
   overflow: hidden;
   background: #fff;
 }
@@ -112,8 +113,9 @@ onMounted(load)
 .image-viewer img {
   max-width: min(960px, 96vw);
   max-height: 86vh;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
+  border: 2px solid black;
 }
 .viewer-close {
   position: absolute;

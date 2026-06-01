@@ -1,13 +1,13 @@
 <template>
   <div class="layout">
-    <NavBar />
-    <main><slot /></main>
+    <SideBar />
+    <main class="main"><slot /></main>
   </div>
 </template>
 <script setup>
-import NavBar from './NavBar.vue'
+import SideBar from './SideBar.vue'
 </script>
 <style scoped>
-.layout { min-height: 100vh; display: flex; flex-direction: column; }
-main { flex: 1; }
+.layout { min-height: 100vh; display: flex; }
+.main { flex: 1; margin-left: 240px; min-width: 0; }
 </style>

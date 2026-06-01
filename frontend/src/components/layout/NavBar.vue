@@ -40,13 +40,13 @@ onMounted(fetchMessageUnread)
 watch(() => route.fullPath, fetchMessageUnread)
 </script>
 <style scoped>
-.nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; height: 56px; }
-.nav-logo { font-size: 20px; font-weight: 800; color: var(--primary) !important; }
+.nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 3px solid black; }
+.nav-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 56px; }
+.nav-logo { font-size: 20px; font-weight: 900; color: var(--primary) !important; }
 .nav-right { display: flex; align-items: center; gap: 12px; }
 .nav-link { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
 .nav-link:hover { color: var(--primary); }
 .nav-message { position: relative; display: inline-flex; align-items: center; gap: 4px; }
 .dot { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
-.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; }
+.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; border: 2px solid black; }
 </style>
