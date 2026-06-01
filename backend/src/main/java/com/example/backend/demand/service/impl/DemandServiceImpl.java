@@ -25,13 +25,12 @@ import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.entity.User;
 import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.QuotaService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,31 +78,10 @@ public class DemandServiceImpl implements DemandService {
     @Override
     public PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size) {
         int safeSize = Math.min(Math.max(1, size), 100);
-        List<Demand> demands;
-        if (criteria != null && criteria.getPublisherId() != null) {
-            demands = demandRepository.findByPublisherIdOrderByCreatedAtDesc(criteria.getPublisherId());
-        } else {
-            demands = demandRepository.findAll();
-        }
-        if (criteria != null) {
-            demands = demands.stream()
-                    .filter(demand -> criteria.getCategory() == null || demand.getCategory() == criteria.getCategory())
-                    .filter(demand -> criteria.getStatus() == null || demand.getStatus() == criteria.getStatus())
-                    .filter(demand -> criteria.getUrgent() == null || demand.getUrgent().equals(criteria.getUrgent()))
-                    .filter(demand -> isBlank(criteria.getLocationTag()) || containsIgnoreCase(demand.getLocationTag(), criteria.getLocationTag()))
-                    .filter(demand -> isBlank(criteria.getKeyword())
-                            || containsIgnoreCase(demand.getTitle(), criteria.getKeyword())
-                            || containsIgnoreCase(demand.getDescription(), criteria.getKeyword()))
-                    .collect(Collectors.toList());
-            demands = sortDemands(demands, criteria.getSortBy(), criteria.getSortDir());
-        }
-        int from = Math.max(0, page) * safeSize;
-        int to = Math.min(demands.size(), from + safeSize);
-        if (from >= demands.size()) {
-            return PageResult.of(List.of(), page, safeSize, demands.size());
-        }
-        List<DemandDto> content = demands.subList(from, to).stream().map(this::toDto).collect(Collectors.toList());
-        return PageResult.of(content, page, safeSize, demands.size());
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<Demand> mpPage =
+                demandRepository.searchByCriteria(criteria, page, safeSize);
+        List<DemandDto> content = mpPage.getRecords().stream().map(this::toDto).collect(Collectors.toList());
+        return PageResult.of(content, page, safeSize, (int) mpPage.getTotal());
     }
 
     @Override
@@ -204,6 +182,17 @@ public class DemandServiceImpl implements DemandService {
         demandRepository.deleteById(demandId);
         quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
                 demand.getRewardType(), demand.getRewardAmount(), "发布者删除需求，退回冻结报酬");
+    }
+
+    @Scheduled(fixedDelay = 600_000)
+    @Transactional
+    public void autoExpireUrgent() {
+        LocalDateTime now = java.time.LocalDateTime.now();
+        List<Demand> expired = demandRepository.findOpenUrgentWithDeadlineBefore(now);
+        for (Demand demand : expired) {
+            demand.setStatus(DemandStatus.EXPIRED);
+            demandRepository.save(demand);
+        }
     }
 
     private void validateUpdatedDemand(Demand demand) {
@@ -315,28 +304,6 @@ public class DemandServiceImpl implements DemandService {
         if (userId == null || demand.getPublisherId() == null || !demand.getPublisherId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
-    }
-
-    private List<Demand> sortDemands(List<Demand> demands, String sortBy, String sortDir) {
-        Comparator<Demand> comparator;
-        if ("rewardAmount".equalsIgnoreCase(sortBy)) {
-            comparator = Comparator.comparing(Demand::getRewardAmount, Comparator.nullsLast(Integer::compareTo));
-        } else if ("urgentDeadline".equalsIgnoreCase(sortBy)) {
-            comparator = Comparator.comparing(Demand::getUrgentDeadline, Comparator.nullsLast(java.util.Comparator.naturalOrder()));
-        } else {
-            comparator = Comparator.comparing(Demand::getCreatedAt, Comparator.nullsLast(java.util.Comparator.naturalOrder()));
-        }
-        if ("asc".equalsIgnoreCase(sortDir)) {
-            return demands.stream().sorted(comparator).collect(Collectors.toList());
-        }
-        return demands.stream().sorted(comparator.reversed()).collect(Collectors.toList());
-    }
-
-    private boolean containsIgnoreCase(String source, String keyword) {
-        if (isBlank(source) || isBlank(keyword)) {
-            return false;
-        }
-        return source.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
     }
 
     private boolean isBlank(String value) {
