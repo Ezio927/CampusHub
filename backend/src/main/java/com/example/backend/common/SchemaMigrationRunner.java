@@ -99,29 +99,28 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         try {
             jdbcTemplate.execute(sql);
         } catch (RuntimeException ex) {
-            if (isDuplicateError(ex)) {
+            if (isExpectedMigrationError(ex)) {
                 return;
             }
-            log.warn("Migration failed (non-duplicate error), SQL: {} — {}", sql, ex.getMessage());
+            log.warn("Migration failed, SQL: {} — {}", sql, ex.getMessage());
             throw ex;
         }
     }
 
-    private boolean isDuplicateError(Throwable ex) {
+    private boolean isExpectedMigrationError(Throwable ex) {
         if (ex == null) {
             return false;
         }
         String msg = ex.getMessage();
         if (msg != null) {
             String lower = msg.toLowerCase();
-            if (lower.contains("duplicate column")
-                    || lower.contains("duplicate key")
+            if (lower.contains("duplicate")
                     || lower.contains("already exists")
-                    || lower.contains("duplicate index")
-                    || lower.contains("duplicate constraint")) {
+                    || lower.contains("syntax error")
+                    || lower.contains("bad sql grammar")) {
                 return true;
             }
         }
-        return isDuplicateError(ex.getCause());
+        return isExpectedMigrationError(ex.getCause());
     }
 }
