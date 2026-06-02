@@ -11,6 +11,10 @@ public class AdminUserDto {
     private String status;
     private String role;
     private Integer creditScore;
+    private Double publisherRating;
+    private Integer publisherRatingCount;
+    private Double acceptorRating;
+    private Integer acceptorRatingCount;
     private Integer quotaAvailable;
     private Integer quotaFrozen;
     private LocalDateTime createdAt;
@@ -69,6 +73,38 @@ public class AdminUserDto {
 
     public void setCreditScore(Integer creditScore) {
         this.creditScore = creditScore;
+    }
+
+    public Double getPublisherRating() {
+        return publisherRating;
+    }
+
+    public void setPublisherRating(Double publisherRating) {
+        this.publisherRating = publisherRating;
+    }
+
+    public Integer getPublisherRatingCount() {
+        return publisherRatingCount;
+    }
+
+    public void setPublisherRatingCount(Integer publisherRatingCount) {
+        this.publisherRatingCount = publisherRatingCount;
+    }
+
+    public Double getAcceptorRating() {
+        return acceptorRating;
+    }
+
+    public void setAcceptorRating(Double acceptorRating) {
+        this.acceptorRating = acceptorRating;
+    }
+
+    public Integer getAcceptorRatingCount() {
+        return acceptorRatingCount;
+    }
+
+    public void setAcceptorRatingCount(Integer acceptorRatingCount) {
+        this.acceptorRatingCount = acceptorRatingCount;
     }
 
     public Integer getQuotaAvailable() {

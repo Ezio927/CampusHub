@@ -2,8 +2,8 @@ package com.example.backend.demand.service.impl;
 
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
-import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.NotificationType;
+import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.ReviewerRole;
 import com.example.backend.demand.dto.ReviewDto;
 import com.example.backend.demand.dto.ReviewSubmitDto;
@@ -14,8 +14,11 @@ import com.example.backend.demand.repository.ReviewRepository;
 import com.example.backend.demand.service.ArbitrationService;
 import com.example.backend.demand.service.ReviewService;
 import com.example.backend.notification.service.NotificationService;
+import com.example.backend.user.entity.User;
+import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.QuotaService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,20 +31,24 @@ public class ReviewServiceImpl implements ReviewService {
     private final ArbitrationService arbitrationService;
     private final NotificationService notificationService;
     private final QuotaService quotaService;
+    private final UserRepository userRepository;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
                              OrderRepository orderRepository,
                              ArbitrationService arbitrationService,
                              NotificationService notificationService,
-                             QuotaService quotaService) {
+                             QuotaService quotaService,
+                             UserRepository userRepository) {
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
         this.arbitrationService = arbitrationService;
         this.notificationService = notificationService;
         this.quotaService = quotaService;
+        this.userRepository = userRepository;
     }
 
     @Override
+    @Transactional
     public ReviewDto submitReview(Long userId, ReviewSubmitDto req) {
         if (req == null || req.getOrderId() == null || req.getRevieweeId() == null || req.getRating() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "评价信息不完整");
@@ -76,8 +83,10 @@ public class ReviewServiceImpl implements ReviewService {
         review.setContent(req.getContent());
         review.setImageUrls(req.getImageUrls());
         reviewRepository.save(review);
+        updateUserRating(req.getRevieweeId(), reviewerIsPublisher, req.getRating());
+
         notificationService.createNotification(req.getRevieweeId(), NotificationType.REVIEW_RECEIVED,
-                "New review received", "You have received a new review.", order.getId());
+                "收到新的评价", "你收到了一条新的订单评价。", order.getId());
 
         if (req.getRating() <= 3) {
             arbitrationService.createTicket(userId, req.getOrderId(), review.getId(), req.getContent(), req.getImageUrls());
@@ -106,5 +115,16 @@ public class ReviewServiceImpl implements ReviewService {
                 .stream()
                 .map(ReviewDto::from)
                 .collect(Collectors.toList());
+    }
+
+    private void updateUserRating(Long revieweeId, boolean reviewerIsPublisher, int rating) {
+        User reviewee = userRepository.findById(revieweeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (reviewerIsPublisher) {
+            reviewee.addAcceptorRating(rating);
+        } else {
+            reviewee.addPublisherRating(rating);
+        }
+        userRepository.save(reviewee);
     }
 }

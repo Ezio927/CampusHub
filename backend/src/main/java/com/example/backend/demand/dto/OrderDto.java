@@ -23,6 +23,8 @@ public class OrderDto {
     private LocalDateTime completedAt;
     private LocalDateTime cancelledAt;
     private String cancelReason;
+    private Boolean publisherReviewed;
+    private Boolean acceptorReviewed;
     private Integer creditPenalty;
     private Integer quotaPenalty;
     private Integer acceptorDepositAmount;
@@ -136,6 +138,22 @@ public class OrderDto {
 
     public void setCancelReason(String cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public Boolean getPublisherReviewed() {
+        return publisherReviewed;
+    }
+
+    public void setPublisherReviewed(Boolean publisherReviewed) {
+        this.publisherReviewed = publisherReviewed;
+    }
+
+    public Boolean getAcceptorReviewed() {
+        return acceptorReviewed;
+    }
+
+    public void setAcceptorReviewed(Boolean acceptorReviewed) {
+        this.acceptorReviewed = acceptorReviewed;
     }
 
     public Integer getCreditPenalty() {

@@ -20,6 +20,10 @@ class UserPublicDtoTest {
         user.setAvatarUrl("/avatars/a.png");
         user.setGender(UserGender.FEMALE);
         user.setCreditScore(90);
+        user.setPublisherRating(4.5);
+        user.setPublisherRatingCount(2);
+        user.setAcceptorRating(5.0);
+        user.setAcceptorRatingCount(3);
         user.setQuotaAvailable(31);
         user.setRole(UserRole.STUDENT);
         user.setStatus(UserStatus.ACTIVE);
@@ -30,6 +34,10 @@ class UserPublicDtoTest {
         Assertions.assertEquals("alice", dto.getUsername());
         Assertions.assertEquals("/avatars/a.png", dto.getAvatarUrl());
         Assertions.assertEquals(90, dto.getCreditScore());
+        Assertions.assertEquals(4.5, dto.getPublisherRating());
+        Assertions.assertEquals(2, dto.getPublisherRatingCount());
+        Assertions.assertEquals(5.0, dto.getAcceptorRating());
+        Assertions.assertEquals(3, dto.getAcceptorRatingCount());
         Assertions.assertNull(dto.getRealName());
         Assertions.assertNull(dto.getQuotaAvailable());
         Assertions.assertNull(dto.getRole());

@@ -4,6 +4,7 @@ import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.admin.dto.RatingUpdateDto;
 import com.example.backend.admin.entity.AdminOperationLog;
 import com.example.backend.admin.repository.AdminOperationLogRepository;
 import com.example.backend.admin.service.AdminService;
@@ -12,6 +13,7 @@ import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.common.enums.ReviewerRole;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.demand.dto.ArbitrationDto;
@@ -176,6 +178,34 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public AdminUserDto updateUserRating(Long userId, Long adminId, RatingUpdateDto req) {
+        if (req == null || req.getRole() == null || req.getAverageRating() == null || req.getRatingCount() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "评分类型、平均分和评分次数不能为空");
+        }
+        if (req.getRatingCount() < 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "评分次数不能为负数");
+        }
+        double average = req.getRatingCount() == 0 ? 0.0 : req.getAverageRating();
+        if (average < 0.0 || average > 5.0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "平均评分必须在0到5之间");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (req.getRole() == ReviewerRole.PUBLISHER) {
+            user.setPublisherRating(roundRating(average));
+            user.setPublisherRatingCount(req.getRatingCount());
+        } else {
+            user.setAcceptorRating(roundRating(average));
+            user.setAcceptorRatingCount(req.getRatingCount());
+        }
+        userRepository.save(user);
+        log(adminId, "UPDATE_USER_RATING", "user", userId,
+                req.getRole().name() + "=" + average + "/" + req.getRatingCount()
+                        + (isBlank(req.getReason()) ? "" : ", reason=" + req.getReason()));
+        return toAdminUserDto(user);
+    }
+
+    @Override
     public CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req) {
         if (certificationService == null) {
             throw new BusinessException(ErrorCode.SERVER_ERROR, "认证服务不可用");
@@ -283,6 +313,10 @@ public class AdminServiceImpl implements AdminService {
         dto.setStatus(user.getStatus().name());
         dto.setRole(user.getRole().name());
         dto.setCreditScore(user.getCreditScore());
+        dto.setPublisherRating(user.getPublisherRating());
+        dto.setPublisherRatingCount(user.getPublisherRatingCount());
+        dto.setAcceptorRating(user.getAcceptorRating());
+        dto.setAcceptorRatingCount(user.getAcceptorRatingCount());
         dto.setQuotaAvailable(user.getQuotaAvailable());
         dto.setQuotaFrozen(user.getQuotaFrozen());
         dto.setCreatedAt(user.getCreatedAt());
@@ -309,6 +343,10 @@ public class AdminServiceImpl implements AdminService {
             return false;
         }
         return source.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
+    }
+
+    private double roundRating(double value) {
+        return Math.round(value * 10.0) / 10.0;
     }
 
     private void assertKnownManageStatus(String status) {

@@ -12,6 +12,8 @@ public interface OrderService {
 
     List<OrderDto> list(Long userId, String role, String status);
 
+    List<OrderDto> history(Long userId);
+
     OrderDto getDetail(Long orderId, Long userId);
 
     OrderDto deliver(Long orderId, Long userId);
