@@ -1,6 +1,7 @@
 package com.example.backend.admin.service;
 
 import com.example.backend.admin.dto.AdminUserDto;
+import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.demand.dto.ArbitrationDto;
@@ -16,6 +17,8 @@ public interface AdminService {
 
     List<AdminUserDto> listUsers(String keyword, String status);
 
+    List<AdminOrderManageDto> listOrders(String status);
+
     void banUser(Long userId, Long adminId, BanUserDto req);
 
     void unbanUser(Long userId, Long adminId);
@@ -23,4 +26,8 @@ public interface AdminService {
     CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req);
 
     ArbitrationDto resolveArbitration(Long ticketId, Long adminId, ArbitrationResolveDto req);
+
+    void deleteOrder(Long orderId, Long adminId);
+
+    void deleteDemand(Long demandId, Long adminId);
 }

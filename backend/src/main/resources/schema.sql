@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS demand_images (
 CREATE TABLE IF NOT EXISTS orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     demand_id BIGINT NOT NULL,
+    active_demand_id BIGINT,
     publisher_id BIGINT NOT NULL,
     acceptor_id BIGINT,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING_ACCEPT',
@@ -184,7 +185,8 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_orders_demand (demand_id),
     INDEX idx_orders_publisher (publisher_id),
     INDEX idx_orders_acceptor (acceptor_id),
-    INDEX idx_orders_status_deadline (status, auto_confirm_deadline)
+    INDEX idx_orders_status_deadline (status, auto_confirm_deadline),
+    UNIQUE KEY uk_orders_active_demand (active_demand_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS order_status_logs (

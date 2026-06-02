@@ -1,7 +1,6 @@
 package com.example.backend.demand.dto;
 
 import com.example.backend.common.enums.DemandCategory;
-import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.RewardType;
 
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ public class DemandUpdateDto {
     private DemandCategory category;
     private Integer rewardAmount;
     private RewardType rewardType;
-    private DemandStatus status;
     private Boolean urgent;
     private LocalDateTime urgentDeadline;
     private String locationTag;
@@ -60,14 +58,6 @@ public class DemandUpdateDto {
 
     public void setRewardType(RewardType rewardType) {
         this.rewardType = rewardType;
-    }
-
-    public DemandStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DemandStatus status) {
-        this.status = status;
     }
 
     public Boolean getUrgent() {
