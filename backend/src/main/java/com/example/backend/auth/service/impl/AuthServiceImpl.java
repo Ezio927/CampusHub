@@ -64,9 +64,6 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if (user.getStatus() == UserStatus.BANNED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
         if (!PasswordHasher.matches(req.getPassword(), user.getPasswordHash())) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
