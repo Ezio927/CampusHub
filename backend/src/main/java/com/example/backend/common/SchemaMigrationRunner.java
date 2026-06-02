@@ -41,6 +41,8 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN after_score INT");
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN operator_id BIGINT");
         executeIgnoreDuplicate("ALTER TABLE orders ADD COLUMN acceptor_deposit_amount INT NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE orders ADD COLUMN active_demand_id BIGINT");
+        executeIgnoreDuplicate("CREATE UNIQUE INDEX uk_orders_active_demand ON orders(active_demand_id)");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_type VARCHAR(20)");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url CLOB");

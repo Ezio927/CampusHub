@@ -1,6 +1,7 @@
 package com.example.backend.admin.controller;
 
 import com.example.backend.admin.dto.AdminUserDto;
+import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -71,6 +73,32 @@ public class AdminController {
             @Parameter(description = "用户状态筛选") @RequestParam(value = "status", required = false) String status) {
         requireAdmin();
         return ApiResponse.success(adminService.listUsers(keyword, status));
+    }
+
+    @Operation(summary = "管理员订单列表")
+    @GetMapping("/orders")
+    public ApiResponse<List<AdminOrderManageDto>> listOrders(
+            @Parameter(description = "订单状态筛选") @RequestParam(value = "status", required = false) String status) {
+        requireAdmin();
+        return ApiResponse.success(adminService.listOrders(status));
+    }
+
+    @Operation(summary = "管理员删除订单")
+    @DeleteMapping("/orders/{id}")
+    public ApiResponse<Void> deleteOrder(
+            @Parameter(description = "订单ID") @PathVariable Long id) {
+        requireAdmin();
+        adminService.deleteOrder(id, AuthContext.requireUserId());
+        return ApiResponse.success();
+    }
+
+    @Operation(summary = "管理员删除未接单需求")
+    @DeleteMapping("/demands/{id}")
+    public ApiResponse<Void> deleteDemand(
+            @Parameter(description = "需求ID") @PathVariable Long id) {
+        requireAdmin();
+        adminService.deleteDemand(id, AuthContext.requireUserId());
+        return ApiResponse.success();
     }
 
     @Operation(summary = "封禁用户")

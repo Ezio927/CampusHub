@@ -20,6 +20,7 @@ public class OrderRepository {
     }
 
     public Order save(Order o) {
+        normalizeActiveDemandId(o);
         if (o.getCreatedAt() == null) o.setCreatedAt(LocalDateTime.now());
         o.setUpdatedAt(LocalDateTime.now());
         if (o.getId() == null) {
@@ -77,6 +78,13 @@ public class OrderRepository {
         return mapper.selectList(q);
     }
 
+    public List<Order> findByStatus(OrderStatus status) {
+        LambdaQueryWrapper<Order> q = new LambdaQueryWrapper<Order>();
+        if (status != null) q.eq(Order::getStatus, status);
+        q.orderByDesc(Order::getCreatedAt);
+        return mapper.selectList(q);
+    }
+
     public List<Order> findByStatusAndAutoConfirmDeadlineBefore(OrderStatus status, LocalDateTime deadline) {
         return mapper.selectList(
                 new LambdaQueryWrapper<Order>()
@@ -87,5 +95,20 @@ public class OrderRepository {
 
     public List<Order> findAll() {
         return mapper.selectList(null);
+    }
+
+    public void deleteById(Long id) {
+        mapper.deleteById(id);
+    }
+
+    private void normalizeActiveDemandId(Order order) {
+        if (order == null) {
+            return;
+        }
+        if (order.getStatus() == OrderStatus.ACCEPTED || order.getStatus() == OrderStatus.PENDING_CONFIRM) {
+            order.setActiveDemandId(order.getDemandId());
+        } else {
+            order.setActiveDemandId(null);
+        }
     }
 }

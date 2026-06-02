@@ -29,6 +29,7 @@ import com.example.backend.user.repository.UserRepository;
 import com.example.backend.user.service.CreditService;
 import com.example.backend.user.service.QuotaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -139,7 +140,11 @@ public class OrderServiceImpl implements OrderService {
         order.setAcceptedAt(LocalDateTime.now());
         order.setAutoConfirmDeadline(LocalDateTime.now().plusHours(24));
         order.setAcceptorDepositAmount(depositAmount);
-        orderRepository.save(order);
+        try {
+            orderRepository.save(order);
+        } catch (DataIntegrityViolationException ex) {
+            throw new BusinessException(ErrorCode.DEMAND_ALREADY_ACCEPTED);
+        }
         if (depositAmount > 0) {
             quotaService.freezeOrderDeposit(userId, order.getId(), depositAmount);
         }

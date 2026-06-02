@@ -146,6 +146,7 @@ CREATE TABLE IF NOT EXISTS demand_images (
 CREATE TABLE IF NOT EXISTS orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     demand_id BIGINT NOT NULL,
+    active_demand_id BIGINT UNIQUE,
     publisher_id BIGINT NOT NULL,
     acceptor_id BIGINT,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING_ACCEPT',

@@ -129,9 +129,6 @@ public class DemandServiceImpl implements DemandService {
             if (req.getRewardType() != null) {
                 demand.setRewardType(req.getRewardType());
             }
-            if (req.getStatus() != null) {
-                demand.setStatus(req.getStatus());
-            }
             if (req.getUrgent() != null) {
                 demand.setUrgent(req.getUrgent());
             }

@@ -33,4 +33,9 @@ public class OrderStatusLogRepository {
                         .eq(OrderStatusLog::getOrderId, orderId)
                         .orderByDesc(OrderStatusLog::getCreatedAt));
     }
+
+    public void deleteByOrderId(Long orderId) {
+        mapper.delete(new LambdaQueryWrapper<OrderStatusLog>()
+                .eq(OrderStatusLog::getOrderId, orderId));
+    }
 }

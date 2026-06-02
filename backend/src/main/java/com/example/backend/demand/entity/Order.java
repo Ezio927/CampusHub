@@ -13,6 +13,7 @@ public class Order {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long demandId;
+    private Long activeDemandId;
     private Long publisherId;
     private Long acceptorId;
     private OrderStatus status = OrderStatus.PENDING_ACCEPT;
@@ -37,6 +38,8 @@ public class Order {
     public void setId(Long id) { this.id = id; }
     public Long getDemandId() { return demandId; }
     public void setDemandId(Long demandId) { this.demandId = demandId; }
+    public Long getActiveDemandId() { return activeDemandId; }
+    public void setActiveDemandId(Long activeDemandId) { this.activeDemandId = activeDemandId; }
     public Long getPublisherId() { return publisherId; }
     public void setPublisherId(Long publisherId) { this.publisherId = publisherId; }
     public Long getAcceptorId() { return acceptorId; }

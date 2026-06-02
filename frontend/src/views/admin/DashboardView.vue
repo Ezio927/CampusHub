@@ -13,6 +13,11 @@
         <div class="nc-info"><div class="nc-title">用户管理</div><div class="nc-desc">查看、封禁、解封用户</div></div>
         <span class="nc-arrow">→</span>
       </router-link>
+      <router-link to="/admin/orders" class="nc">
+        <div class="nc-icon" style="background:#f0f9ff">#</div>
+        <div class="nc-info"><div class="nc-title">订单管理</div><div class="nc-desc">查看订单并执行管理员删除</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
       <router-link to="/admin/certifications" class="nc">
         <div class="nc-icon" style="background:#ecfdf5">🪪</div>
         <div class="nc-info"><div class="nc-title">认证审核</div><div class="nc-desc">审核学生实名认证</div></div>
