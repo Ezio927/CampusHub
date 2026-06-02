@@ -56,7 +56,7 @@ public class UserController {
         return ApiResponse.success(userService.updateProfile(AuthContext.requireUserId(), request));
     }
 
-    @Operation(summary = "查看用户公开信息（无需登录）")
+    @Operation(summary = "查看用户公开信息（需登录，字段脱敏）")
     @GetMapping("/{id}")
     public ApiResponse<UserPublicDto> getPublicInfo(
             @Parameter(description = "用户ID") @PathVariable Long id) {

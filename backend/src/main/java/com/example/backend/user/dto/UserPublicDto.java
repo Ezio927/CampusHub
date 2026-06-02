@@ -23,6 +23,7 @@ public class UserPublicDto {
     public UserPublicDto() {
     }
 
+    /** 需求详情、会话列表等内嵌展示（仅昵称、信用分等必要字段）。 */
     public static UserPublicDto from(User user) {
         if (user == null) {
             return null;
@@ -39,6 +40,19 @@ public class UserPublicDto {
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
         dto.setCreatedAt(user.getCreatedAt());
+        return dto;
+    }
+
+    /** GET /api/users/{id} 专用：不返回姓名、额度分、角色、状态等敏感字段。 */
+    public static UserPublicDto forPublicApi(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserPublicDto dto = new UserPublicDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setCreditScore(user.getCreditScore());
         return dto;
     }
 
