@@ -5,18 +5,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
-    private static final Set<String> ALLOWED_TYPES = Set.of(
-            "image/png", "image/jpeg", "image/gif", "image/webp");
     private static final long MAX_SIZE = 3 * 1024 * 1024;
 
     private final Path uploadDir;
@@ -37,12 +35,12 @@ public class FileStorageService {
         if (file.getSize() > MAX_SIZE) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "图片需小于3MB");
         }
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+        String imageType = detectImageType(file);
+        if (imageType == null) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "仅支持 png、jpg、gif、webp 格式");
         }
 
-        String ext = extension(contentType);
+        String ext = extension(imageType);
         String filename = UUID.randomUUID() + ext;
         try {
             Path target = uploadDir.resolve(filename);
@@ -51,6 +49,46 @@ public class FileStorageService {
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.SERVER_ERROR, "文件存储失败");
         }
+    }
+
+    private String detectImageType(MultipartFile file) {
+        return detectByMagic(file);
+    }
+
+    private String detectByMagic(MultipartFile file) {
+        byte[] header = new byte[12];
+        int length;
+        try (InputStream in = file.getInputStream()) {
+            length = in.read(header);
+        } catch (IOException ex) {
+            throw new BusinessException(ErrorCode.SERVER_ERROR, "文件读取失败");
+        }
+        if (length >= 3
+                && (header[0] & 0xFF) == 0xFF
+                && (header[1] & 0xFF) == 0xD8
+                && (header[2] & 0xFF) == 0xFF) {
+            return "image/jpeg";
+        }
+        if (length >= 8
+                && (header[0] & 0xFF) == 0x89
+                && header[1] == 0x50
+                && header[2] == 0x4E
+                && header[3] == 0x47
+                && header[4] == 0x0D
+                && header[5] == 0x0A
+                && header[6] == 0x1A
+                && header[7] == 0x0A) {
+            return "image/png";
+        }
+        if (length >= 6 && header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46
+                && header[3] == 0x38 && (header[4] == 0x37 || header[4] == 0x39) && header[5] == 0x61) {
+            return "image/gif";
+        }
+        if (length >= 12 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46
+                && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50) {
+            return "image/webp";
+        }
+        return null;
     }
 
     private String extension(String contentType) {

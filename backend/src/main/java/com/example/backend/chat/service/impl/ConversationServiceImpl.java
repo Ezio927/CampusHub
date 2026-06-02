@@ -325,7 +325,7 @@ public class ConversationServiceImpl implements ConversationService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "不能发送系统消息");
         }
         if (type == MessageType.IMAGE) {
-            ImageDataUrlValidator.requireValidImageDataUrl(content.trim(), "图片");
+            ImageDataUrlValidator.requireValidImageReference(content.trim(), "图片");
             return new ModerationResult();
         }
         String trimmed = content.trim();
