@@ -7,31 +7,37 @@
       <!-- 我发布的需求（未接单） -->
       <div class="section-title">我发布的需求</div>
       <div v-if="demands.length===0" class="empty">📋<p class="mt-sm">暂无发布的需求</p></div>
+      <div v-else class="card-grid">
       <div v-for="d in demands" :key="'d'+d.id" class="oc" @click="goDemand(d.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ d.title }}</div><div class="text-sm text-muted">{{ catTxt(d.category) }}</div></div>
           <div style="text-align:right"><div class="dp">{{ d.rewardType==='MONEY'?'¥'+d.rewardAmount:d.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:dsb(d.status)}">{{ dst(d.status) }}</span></div>
         </div>
       </div>
+      </div>
 
       <!-- 已生成的订单 -->
       <div class="section-title" style="margin-top:20px">已生成的订单</div>
       <div v-if="orders.length===0" class="empty">📋<p class="mt-sm">暂无订单</p></div>
+      <div v-else class="card-grid">
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</div><div class="text-sm text-muted">{{ o.publisherName }} → {{ o.acceptorName }}</div></div>
           <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
         </div>
       </div>
+      </div>
     </template>
 
     <template v-else>
       <div v-if="orders.length===0" class="empty">📋<p class="mt-sm">暂无订单</p></div>
+      <div v-else class="card-grid">
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">
           <div><div class="text-bold">{{ o.demandTitle || '需求 #'+o.demandId }}</div><div class="text-sm text-muted">{{ o.publisherName }} → {{ o.acceptorName }}</div></div>
           <div style="text-align:right"><div class="dp">{{ o.rewardType==='MONEY'?'¥'+o.rewardAmount:o.rewardAmount+'额度分' }}</div><span class="badge" :style="{background:sb(o.status)}">{{ st(o.status) }}</span></div>
         </div>
+      </div>
       </div>
     </template>
   </div>
@@ -66,7 +72,8 @@ onMounted(load)
 .tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:all 0.2s ease}
 .tab.on{background:var(--primary);color:#fff}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
-.oc{background:#fff;border-radius:12px;padding:18px;margin-bottom:10px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.oc{background:#fff;border-radius:12px;padding:18px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
 .oc:hover{transform:translateY(-2px)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

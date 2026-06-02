@@ -70,12 +70,12 @@ async function messagePeer(){
 onMounted(async()=>{const res=await orderAPI.detail(r.params.id);o.value=res.data})
 </script>
 <style scoped>
-.dc{background:#fff;border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.dc{background:#fff;border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
 .mi{padding:12px;background:#f8fafc;border-radius:10px;display:flex;flex-direction:column;gap:4px;border:2px solid black}
 .lbl{font-size:12px;color:var(--text-muted);font-weight:500}.val{font-size:16px;font-weight:700}
-.acts{display:flex;flex-direction:column;gap:8px}
+.acts{display:flex;flex-direction:column;gap:8px;max-width:680px;margin-left:auto;margin-right:auto}
 .acts button{padding:14px;border-radius:10px;font-size:15px;font-weight:700}
-.review-card{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.review-card{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
 .review-card h3{font-size:15px;font-weight:900;margin:0 0 12px}
 .star-row{display:flex;gap:4px;margin-bottom:12px}
 .star-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#d1d5db;padding:0;transition:color .12s}
