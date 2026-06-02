@@ -6,6 +6,7 @@ import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.DemandStatus;
+import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.demand.dto.AcceptOrderDto;
@@ -57,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
     private final CreditService creditService;
     private final QuotaService quotaService;
     private final ConversationService conversationService;
+    private final NotificationService notificationService;
 
     @Autowired
     public OrderServiceImpl(
@@ -68,7 +70,8 @@ public class OrderServiceImpl implements OrderService {
             UserRepository userRepository,
             CreditService creditService,
             QuotaService quotaService,
-            ConversationService conversationService) {
+            ConversationService conversationService,
+            NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.orderStatusLogRepository = orderStatusLogRepository;
         this.orderStateContext = orderStateContext;
@@ -78,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
         this.creditService = creditService;
         this.quotaService = quotaService;
         this.conversationService = conversationService;
+        this.notificationService = notificationService;
     }
 
     // [Human-written] 兼容旧测试构造签名：把 DemandRepository 适配成最小 DemandService 能力。
@@ -100,7 +104,8 @@ public class OrderServiceImpl implements OrderService {
                 userRepository,
                 creditService,
                 quotaService,
-                conversationService);
+                conversationService,
+                notificationService);
     }
 
     @Override
@@ -152,6 +157,8 @@ public class OrderServiceImpl implements OrderService {
         appendLogAndPublish(order, null, userId, "accept demand");
         postOrderSystemMessage(order, "平台消息：" + userDisplayName(acceptor.getId())
                 + " 已接取需求「" + demandTitle(demand.getId()) + "」。", userId);
+        notificationService.createNotification(demand.getPublisherId(), NotificationType.ORDER_ACCEPTED,
+                "需求已被接取", userDisplayName(acceptor.getId()) + " 已接取你的需求「" + demandTitle(demand.getId()) + "」", order.getId());
 
         return enrichDto(order);
     }
@@ -202,6 +209,8 @@ public class OrderServiceImpl implements OrderService {
         appendLogAndPublish(order, fromStatus, userId, "deliver");
         postOrderSystemMessage(order, "平台消息：" + userDisplayName(order.getAcceptorId())
                 + " 已标记需求「" + demandTitle(order.getDemandId()) + "」已完成，等待发布者确认。", userId);
+        notificationService.createNotification(order.getPublisherId(), NotificationType.ORDER_COMPLETED,
+                "需求已完成，请确认", userDisplayName(order.getAcceptorId()) + " 已标记需求「" + demandTitle(order.getDemandId()) + "」已完成", order.getId());
         return enrichDto(order);
     }
 
@@ -223,6 +232,8 @@ public class OrderServiceImpl implements OrderService {
         appendLogAndPublish(order, fromStatus, userId, "confirm");
         postOrderSystemMessage(order, "平台消息：发布者已确认需求「"
                 + demandTitle(order.getDemandId()) + "」完成。", userId);
+        notificationService.createNotification(order.getAcceptorId(), NotificationType.ORDER_COMPLETED,
+                "订单已完成", "发布者已确认需求「" + demandTitle(order.getDemandId()) + "」完成", order.getId());
         return enrichDto(order);
     }
 
@@ -250,6 +261,9 @@ public class OrderServiceImpl implements OrderService {
 
         appendLogAndPublish(order, fromStatus, userId, reason);
         postOrderSystemMessage(order, cancelSystemMessage(order, fromStatus, userId), userId);
+        Long cancelNotifyUserId = order.isPublisher(userId) ? order.getAcceptorId() : order.getPublisherId();
+        notificationService.createNotification(cancelNotifyUserId, NotificationType.ORDER_CANCELLED,
+                "订单已取消", userDisplayName(userId) + " 已取消订单「" + demandTitle(order.getDemandId()) + "」" + (isBlank(reason) ? "" : "，原因：" + reason), order.getId());
 
         OrderDto dto = enrichDto(order);
         dto.setCreditPenalty(-penalty);
@@ -271,6 +285,11 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(order);
             settleCompletedOrder(order);
             appendLogAndPublish(order, fromStatus, null, "auto confirm completed");
+            String autoMsg = "需求「" + demandTitle(order.getDemandId()) + "」已超过24小时自动确认完成";
+            notificationService.createNotification(order.getPublisherId(), NotificationType.ORDER_COMPLETED,
+                    "订单已自动确认", autoMsg, order.getId());
+            notificationService.createNotification(order.getAcceptorId(), NotificationType.ORDER_COMPLETED,
+                    "订单已自动确认", autoMsg, order.getId());
         }
     }
 

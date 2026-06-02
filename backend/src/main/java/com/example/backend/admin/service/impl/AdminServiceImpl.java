@@ -4,6 +4,7 @@ import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.admin.dto.SendNotificationRequest;
 import com.example.backend.admin.entity.AdminOperationLog;
 import com.example.backend.admin.repository.AdminOperationLogRepository;
 import com.example.backend.admin.service.AdminService;
@@ -245,6 +246,35 @@ public class AdminServiceImpl implements AdminService {
                     demand.getRewardType(), demand.getRewardAmount(), "Admin deleted demand");
         }
         log(adminId, "DELETE_DEMAND", "demand", demandId, demand.getStatus().name());
+    }
+
+    @Override
+    public void sendNotification(SendNotificationRequest request, Long adminId) {
+        if (request == null || isBlank(request.getTitle())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "标题不能为空");
+        }
+        if (isBlank(request.getContent())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "内容不能为空");
+        }
+        String targetType = request.getTargetType();
+        if (isBlank(targetType)) {
+            targetType = "ALL";
+        }
+        if ("SPECIFIC".equalsIgnoreCase(targetType)) {
+            if (request.getTargetUserId() == null) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "指定用户ID不能为空");
+            }
+            notificationService.createNotification(request.getTargetUserId(),
+                    NotificationType.SYSTEM_ANNOUNCEMENT, request.getTitle(), request.getContent(), null);
+        } else {
+            List<User> allUsers = userRepository.findAll();
+            for (User user : allUsers) {
+                notificationService.createNotification(user.getId(),
+                        NotificationType.SYSTEM_ANNOUNCEMENT, request.getTitle(), request.getContent(), null);
+            }
+        }
+        log(adminId, "SEND_NOTIFICATION", "notification", null,
+                targetType + ": " + request.getTitle());
     }
 
     private AdminOrderManageDto toOrderManageDto(Order order) {

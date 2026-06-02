@@ -5,6 +5,7 @@ import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.admin.dto.SendNotificationRequest;
 import com.example.backend.admin.service.AdminService;
 import com.example.backend.auth.security.AuthContext;
 import com.example.backend.chat.dto.MessageReportDto;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -195,6 +197,14 @@ public class AdminController {
         requireAdmin();
         Boolean approved = body != null ? body.getOrDefault("approved", false) : false;
         return ApiResponse.success(creditService.reviewAppeal(id, AuthContext.requireUserId(), approved));
+    }
+
+    @Operation(summary = "管理员发送通知（全体或指定用户）")
+    @PostMapping("/notifications/send")
+    public ApiResponse<Void> sendNotification(@RequestBody SendNotificationRequest request) {
+        requireAdmin();
+        adminService.sendNotification(request, AuthContext.requireUserId());
+        return ApiResponse.success();
     }
 
     private void requireAdmin() {

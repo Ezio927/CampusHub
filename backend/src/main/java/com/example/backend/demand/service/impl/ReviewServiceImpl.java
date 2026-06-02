@@ -77,7 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setImageUrls(req.getImageUrls());
         reviewRepository.save(review);
         notificationService.createNotification(req.getRevieweeId(), NotificationType.REVIEW_RECEIVED,
-                "New review received", "You have received a new review.", order.getId());
+                "收到新评价", "你收到了一条新评价，评分 " + req.getRating() + " 分", order.getId());
 
         if (req.getRating() <= 3) {
             arbitrationService.createTicket(userId, req.getOrderId(), review.getId(), req.getContent(), req.getImageUrls());

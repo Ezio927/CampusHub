@@ -10,6 +10,10 @@
           消息
           <span v-if="messageUnread" class="dot">{{ messageUnread }}</span>
         </router-link>
+        <router-link v-if="auth.isLoggedIn" to="/notifications" class="nav-link nav-msg">
+          通知
+          <span v-if="notifUnread" class="dot">{{ notifUnread }}</span>
+        </router-link>
         <router-link v-if="auth.isLoggedIn" to="/profile" class="nav-link">个人中心</router-link>
         <router-link v-if="auth.isLoggedIn && auth.user?.role==='ADMIN'" to="/admin" class="nav-link">管理后台</router-link>
       </nav>
@@ -28,12 +32,15 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useNotifStore } from '@/stores/notifications'
 import { chatAPI } from '@/api/chat'
 const auth = useAuthStore()
+const notif = useNotifStore()
 const router = useRouter()
 const route = useRoute()
 const unread = ref(0)
 const messageUnread = computed(() => unread.value > 99 ? '99+' : unread.value)
+const notifUnread = computed(() => { const c = notif.unread; return c > 99 ? '99+' : (c || '') })
 function goHome() {
   if (route.path === '/') router.go(0)
   else router.push('/')
@@ -44,8 +51,8 @@ async function fetchMessageUnread() {
   if (!auth.isLoggedIn) { unread.value = 0; return }
   try { const res = await chatAPI.unread(); unread.value = res.data || 0 } catch { unread.value = 0 }
 }
-onMounted(fetchMessageUnread)
-watch(() => route.fullPath, fetchMessageUnread)
+onMounted(() => { fetchMessageUnread(); if (auth.isLoggedIn) notif.fetchUnread() })
+watch(() => route.fullPath, () => { fetchMessageUnread(); if (auth.isLoggedIn) notif.fetchUnread() })
 </script>
 <style scoped>
 .nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 3px solid black; }

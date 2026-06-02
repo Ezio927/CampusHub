@@ -38,6 +38,11 @@
         <div class="nc-info"><div class="nc-title">信用申诉</div><div class="nc-desc">处理用户信用分恢复申请</div></div>
         <span class="nc-arrow">→</span>
       </router-link>
+      <router-link to="/admin/notifications" class="nc">
+        <div class="nc-icon" style="background:#f0fdf4">📢</div>
+        <div class="nc-info"><div class="nc-title">发送通知</div><div class="nc-desc">向用户发送系统通知或公告</div></div>
+        <span class="nc-arrow">→</span>
+      </router-link>
     </div>
   </div>
 </template>
