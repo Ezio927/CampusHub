@@ -17,6 +17,7 @@
       <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
     <div v-if="store.list.length===0" class="empty">📭<p class="mt-sm">暂无需求</p></div>
+    <div v-else class="card-grid">
     <div v-for="d in store.list" :key="d.id" class="dc" @click="goDetail(d.id)">
       <div class="dt"><span class="dtl">{{ d.title }}</span><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
       <p class="dd">{{ d.description }}</p>
@@ -25,6 +26,7 @@
         <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
       <div v-if="d.urgent" class="mt-sm"><span class="du">🔥 紧急</span></div>
+    </div>
     </div>
   </div>
 </template>
@@ -48,8 +50,9 @@ onMounted(() => store.fetch())
 .kw{flex:1;min-width:140px;border-radius:10px;padding:10px 14px}
 .open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
 .open-only input{width:auto}
-.dc{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
-.dc:hover{transform:translateY(-2px)}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.dc{background:#fff;border-radius:12px;padding:20px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.dc:hover{transform:scale(1.03);box-shadow:8px 8px 0px rgba(0,0,0,1)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .dtl{font-size:17px;font-weight:700;flex:1;margin-right:10px}
 .cat{display:inline-flex;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:2px solid black;white-space:nowrap}

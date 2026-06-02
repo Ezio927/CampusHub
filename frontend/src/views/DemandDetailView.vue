@@ -59,7 +59,7 @@ async function messagePublisher(){
 onMounted(async()=>{const res=await demandAPI.detail(r.params.id);d.value=res.data})
 </script>
 <style scoped>
-.dc{background:#fff;border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.dc{background:#fff;border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
 h1{font-size:22px;font-weight:900;flex:1;margin-right:12px}
 .cat{display:inline-flex;padding:5px 14px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:2px solid black}
 .mi{padding:12px;background:#f8fafc;border-radius:10px;display:flex;flex-direction:column;gap:4px;border:2px solid black}
@@ -68,7 +68,7 @@ h1{font-size:22px;font-weight:900;flex:1;margin-right:12px}
 .desc{white-space:pre-wrap;line-height:1.8;color:var(--text-secondary);padding:16px;background:#f8fafc;border-radius:10px;margin:16px 0;border:2px solid black}
 .pub{display:flex;align-items:center;gap:12px;padding:16px;background:#f8fafc;border-radius:10px;border:2px solid black}
 .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;border:2px solid black}
-.act-list{display:flex;flex-direction:column;gap:8px}
+.act-list{display:flex;flex-direction:column;gap:8px;max-width:680px;margin-left:auto;margin-right:auto}
 .act-btn{padding:14px;border-radius:10px;font-size:16px}
 .btn-del{background:#dc2626;color:#fff;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1)}
 .btn-del:hover{background:#b91c1c;transform:translate(1px,1px);box-shadow:none}

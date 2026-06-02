@@ -173,6 +173,7 @@ function amountColor(amount){if(amount>0)return 'var(--success)';if(amount<0)ret
 onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuota();loadAppeal()})
 </script>
 <style scoped>
+.page{max-width:680px}
 .ph{background:var(--primary);border-radius:12px;padding:28px;color:#fff;text-align:center;margin-bottom:18px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
 .pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
 .pn{font-size:22px;font-weight:900}.pi{font-size:13px;opacity:.75;margin-top:4px}
