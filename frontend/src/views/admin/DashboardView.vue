@@ -50,13 +50,13 @@ const d=reactive({totalUsers:0,activeDemands:0,completedOrders:0,averageRating:0
 onMounted(async()=>{try{const r=await adminAPI.dashboard();Object.assign(d,r.data)}catch(e){modal.alert('加载失败', e.message)}})
 </script>
 <style scoped>
-.sc{background:#fff;border-radius:14px;padding:24px;text-align:center;border:1px solid var(--border)}
-.sv{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--primary),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sc{background:#fff;border-radius:12px;padding:24px;text-align:center;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.sv{font-size:34px;font-weight:900;color:var(--primary)}
 .sl{font-size:13px;color:var(--text-muted);margin-top:4px;font-weight:500}
 .nav-cards{display:flex;flex-direction:column;gap:10px}
-.nc{display:flex;align-items:center;gap:14px;background:#fff;border-radius:14px;padding:18px 20px;border:1px solid var(--border);transition:all .2s}
-.nc:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);transform:translateY(-1px);border-color:var(--primary)}
-.nc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.nc{display:flex;align-items:center;gap:14px;background:#fff;border-radius:12px;padding:18px 20px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);transition:all 0.2s ease}
+.nc:hover{transform:translateY(-2px)}
+.nc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid black}
 .nc-info{flex:1}.nc-title{font-size:15px;font-weight:700;color:var(--text)}.nc-desc{font-size:13px;color:var(--text-muted);margin-top:2px}
 .nc-arrow{font-size:18px;color:var(--text-muted)}
 </style>

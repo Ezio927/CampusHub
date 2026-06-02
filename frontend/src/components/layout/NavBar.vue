@@ -2,11 +2,19 @@
   <header class="nav">
     <div class="nav-inner">
       <a href="/" class="nav-logo" @click.prevent="goHome">CampusHub</a>
+      <nav class="nav-links">
+        <router-link to="/" class="nav-link" exact-active-class="active">需求大厅</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="nav-link">发布需求</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/orders" class="nav-link">我的订单</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/messages" class="nav-link nav-msg">
+          消息
+          <span v-if="messageUnread" class="dot">{{ messageUnread }}</span>
+        </router-link>
+        <router-link v-if="auth.isLoggedIn" to="/profile" class="nav-link">个人中心</router-link>
+        <router-link v-if="auth.isLoggedIn && auth.user?.role==='ADMIN'" to="/admin" class="nav-link">管理后台</router-link>
+      </nav>
       <div class="nav-right">
         <template v-if="auth.isLoggedIn">
-          <router-link to="/orders" class="nav-link">订单</router-link>
-          <router-link to="/messages" class="nav-link nav-message">私信<span v-if="messageUnread" class="dot">{{ messageUnread }}</span></router-link>
-          <router-link v-if="auth.user?.role==='ADMIN'" to="/admin" class="nav-link">管理</router-link>
           <router-link to="/profile" class="nav-user" :style="{background:avatarColor}">{{ auth.user?.username?.[0]?.toUpperCase() }}</router-link>
         </template>
         <template v-else>
@@ -40,13 +48,18 @@ onMounted(fetchMessageUnread)
 watch(() => route.fullPath, fetchMessageUnread)
 </script>
 <style scoped>
-.nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; height: 56px; }
-.nav-logo { font-size: 20px; font-weight: 800; color: var(--primary) !important; }
-.nav-right { display: flex; align-items: center; gap: 12px; }
-.nav-link { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
-.nav-link:hover { color: var(--primary); }
-.nav-message { position: relative; display: inline-flex; align-items: center; gap: 4px; }
-.dot { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
-.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; }
+.nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 3px solid black; }
+.nav-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 56px; }
+.nav-logo { font-size: 20px; font-weight: 900; color: var(--primary) !important; flex-shrink: 0; }
+.nav-links { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+.nav-link {
+  color: var(--text-secondary); font-size: 15px; font-weight: 700;
+  padding: 8px 14px; border-radius: 10px; transition: all 0.2s ease;
+}
+.nav-link:hover { background: #f1f5f9; color: var(--text); }
+.nav-link.active { background: var(--primary); color: #fff; }
+.nav-msg { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+.dot { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; text-align: center; font-weight: 800; }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; border: 2px solid black; flex-shrink: 0; }
 </style>

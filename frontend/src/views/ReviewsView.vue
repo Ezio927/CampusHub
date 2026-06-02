@@ -16,5 +16,5 @@ const r=useRoute();const list=ref([])
 onMounted(async()=>{const res=await reviewAPI.byUser(r.params.userId);list.value=res.data||[]})
 </script>
 <style scoped>
-.stars{font-size:18px;letter-spacing:2px;color:#f59e0b}
+.stars{font-size:18px;letter-spacing:2px;color:#f59e0b;font-weight:700}
 </style>

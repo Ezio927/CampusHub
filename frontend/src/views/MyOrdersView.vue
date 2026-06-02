@@ -62,11 +62,11 @@ async function load(){
 onMounted(load)
 </script>
 <style scoped>
-.tabs{display:flex;background:#e2e8f0;border-radius:12px;padding:3px;margin-bottom:16px}
-.tab{flex:1;text-align:center;padding:10px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all .2s}
-.tab.on{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tabs{display:flex;background:#fff;border-radius:10px;padding:4px;margin-bottom:16px;border:2px solid black}
+.tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:all 0.2s ease}
+.tab.on{background:var(--primary);color:#fff}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
-.oc{background:#fff;border-radius:14px;padding:18px;margin-bottom:10px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
-.oc:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);transform:translateY(-1px)}
+.oc{background:#fff;border-radius:12px;padding:18px;margin-bottom:10px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.oc:hover{transform:translateY(-2px)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

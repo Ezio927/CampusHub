@@ -403,8 +403,8 @@ onUnmounted(() => {
   gap: 12px;
   padding: 14px;
   margin-bottom: 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid black;
+  border-radius: 10px;
   background: #fff;
 }
 .avatar {
@@ -418,9 +418,10 @@ onUnmounted(() => {
   justify-content: center;
   font-weight: 800;
   flex-shrink: 0;
+  border: 2px solid black;
 }
 .head-main { flex: 1; min-width: 0; }
-.chat-name { font-size: 16px; font-weight: 800; }
+.chat-name { font-size: 16px; font-weight: 900; }
 .chat-context, .state { margin-top: 2px; color: var(--text-muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .state.danger { color: var(--danger); }
 .search-row {
@@ -439,7 +440,7 @@ onUnmounted(() => {
   grid-template-columns: 120px 1fr;
   gap: 8px;
   padding: 8px 10px;
-  border: 1px solid var(--border);
+  border: 2px solid black;
   border-radius: 8px;
   background: #fff;
   text-align: left;
@@ -451,8 +452,8 @@ onUnmounted(() => {
   max-height: 58vh;
   overflow-y: auto;
   padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid black;
+  border-radius: 10px;
   background: #fff;
 }
 .compact { padding: 120px 20px; }
@@ -466,19 +467,20 @@ onUnmounted(() => {
 .msg-bubble {
   max-width: min(76%, 520px);
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #f1f5f9;
   color: var(--text);
+  border: 2px solid black;
 }
 .mine .msg-bubble { background: var(--primary); color: #fff; }
 .system .msg-bubble {
   max-width: min(88%, 560px);
   background: #f8fafc;
   color: var(--text-secondary);
-  border: 1px solid var(--border);
+  border: 2px solid black;
   text-align: center;
 }
-.recalled .msg-bubble { color: var(--text-muted); font-style: italic; }
+.recalled .msg-bubble { color: var(--text-muted); font-style: italic; border: 2px solid #e5e7eb; }
 .msg-bubble p { white-space: pre-wrap; word-break: break-word; }
 .image-link {
   display: block;
@@ -494,6 +496,7 @@ onUnmounted(() => {
   max-height: 180px;
   border-radius: 6px;
   object-fit: cover;
+  border: 2px solid black;
 }
 .quote-in-msg {
   margin-bottom: 8px;
@@ -518,6 +521,7 @@ onUnmounted(() => {
   background: transparent;
   color: var(--text-muted);
   font-size: 12px;
+  border: none;
 }
 .msg-meta button:hover, .link-btn:hover { color: var(--primary); }
 .mine .msg-meta small, .mine .msg-meta button { color: rgba(255,255,255,.78); }
@@ -527,8 +531,8 @@ onUnmounted(() => {
   gap: 8px;
   margin-top: 10px;
   padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid black;
+  border-radius: 10px;
   background: #fff;
 }
 .report-target {
@@ -537,13 +541,14 @@ onUnmounted(() => {
   background: #f8fafc;
   color: var(--text-secondary);
   word-break: break-word;
+  border: 2px solid black;
 }
 .report-image {
   display: block;
   width: 140px;
   height: 104px;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 2px solid black;
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
@@ -565,6 +570,7 @@ onUnmounted(() => {
   background: var(--primary-light);
   color: var(--primary);
   font-size: 13px;
+  border: 2px solid black;
 }
 .quote-preview span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .quote-preview button, .image-preview button {
@@ -572,8 +578,9 @@ onUnmounted(() => {
   padding: 0;
   background: transparent;
   color: var(--primary);
+  border: none;
 }
-.image-preview img { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; }
+.image-preview img { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; border: 2px solid black; }
 .emoji-row {
   display: flex;
   gap: 4px;
@@ -583,10 +590,11 @@ onUnmounted(() => {
   width: 30px;
   height: 30px;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 2px solid black;
   border-radius: 6px;
   background: #fff;
-  line-height: 28px;
+  line-height: 26px;
+  font-size: 16px;
 }
 .compose-row {
   display: grid;
@@ -624,8 +632,9 @@ onUnmounted(() => {
 .image-viewer img {
   max-width: min(960px, 96vw);
   max-height: 86vh;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
+  border: 2px solid black;
 }
 .viewer-close {
   position: absolute;
