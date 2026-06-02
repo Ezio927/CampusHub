@@ -292,6 +292,9 @@ public class DemandServiceImpl implements DemandService {
     private User requireActiveUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
+        }
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.NOT_CERTIFIED);
         }
