@@ -46,6 +46,49 @@ function Wait-ForContainerHealthy {
     throw "$Label did not become ready within $TimeoutSeconds seconds."
 }
 
+function Get-PortListenerProcessIds {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Port
+    )
+
+    $ids = New-Object 'System.Collections.Generic.HashSet[int]'
+    Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | ForEach-Object {
+        if ($_.OwningProcess -gt 0) {
+            [void]$ids.Add($_.OwningProcess)
+        }
+    }
+    return @($ids)
+}
+
+function Stop-PortListener {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Port,
+        [Parameter(Mandatory = $true)]
+        [string]$Label
+    )
+
+    $processIds = Get-PortListenerProcessIds -Port $Port
+    if ($processIds.Count -eq 0) {
+        return
+    }
+
+    $names = $processIds | ForEach-Object {
+        (Get-Process -Id $_ -ErrorAction SilentlyContinue).ProcessName
+    } | Where-Object { $_ } | Select-Object -Unique
+
+    Write-Host "正在释放 ${Label} 占用的端口 ${Port}（进程: $($processIds -join ', ') $($names -join '/ ')）..." -ForegroundColor Yellow
+    foreach ($procId in $processIds) {
+        Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+    }
+    Start-Sleep -Seconds 1
+
+    if ((Get-PortListenerProcessIds -Port $Port).Count -gt 0) {
+        throw "端口 ${Port} 仍被占用，无法启动 ${Label}。请手动结束相关进程后重试。"
+    }
+}
+
 function Start-NewWindow {
     param(
         [Parameter(Mandatory = $true)]
@@ -62,6 +105,7 @@ function Start-NewWindow {
 }
 
 function Start-Backend {
+    Stop-PortListener -Port 8080 -Label '后端'
     Push-Location $BackendDir
     try {
         & .\mvnw.cmd '-Dspring-boot.run.profiles=docker' 'spring-boot:run'
@@ -102,6 +146,7 @@ finally {
 Wait-ForContainerHealthy -ContainerName 'campushub-mysql' -Label 'MySQL'
 Wait-ForContainerHealthy -ContainerName 'campushub-redis' -Label 'Redis'
 
+Stop-PortListener -Port 8080 -Label '后端'
 Write-Host 'Starting backend in a new PowerShell window...' -ForegroundColor Cyan
 Start-NewWindow -WorkingDirectory $Root -Command '.\scripts\dev.ps1 -BackendOnly'
 
@@ -118,6 +163,7 @@ npm run dev
 '@
 }
 
+Stop-PortListener -Port 5173 -Label '前端'
 Write-Host 'Starting frontend in a new PowerShell window...' -ForegroundColor Cyan
 Start-NewWindow -WorkingDirectory $FrontendDir -Command $FrontendCommand
 

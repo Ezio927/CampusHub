@@ -14,6 +14,8 @@ public interface ConversationService {
 
     List<ConversationDto> listConversations(Long userId);
 
+    List<ConversationDto> listBlockedConversations(Long userId);
+
     long countUnread(Long userId);
 
     MessageDto sendMessage(Long conversationId, Long senderId, SendMessageDto req);

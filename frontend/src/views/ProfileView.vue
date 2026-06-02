@@ -114,7 +114,22 @@
         </button>
       </template>
     </div>
-    <div class="card" v-if="creditList.length"><h3 class="mb-sm">📋 信用记录</h3>
+    <div class="card">
+      <div class="flex-between mb-sm">
+        <h3>黑名单</h3>
+        <span class="text-sm text-muted">{{ blockedList.length }} 人</span>
+      </div>
+      <div v-if="blockedList.length===0" class="text-sm text-muted">暂无拉黑用户</div>
+      <div v-for="item in blockedList" :key="item.id" class="blocked-row">
+        <div class="blocked-main">
+          <div class="blocked-name">{{ item.targetUser?.username || ('用户 #' + item.id) }}</div>
+          <div class="blocked-desc">已拉黑，ta 不能继续给你发送私信</div>
+          <div v-if="item.relatedDemandTitle" class="blocked-demand text-xs text-muted">关联需求：{{ item.relatedDemandTitle }}</div>
+        </div>
+        <button class="btn-outline btn-sm" @click="unblockUser(item)">解除拉黑</button>
+      </div>
+    </div>
+    <div class="card" v-if="creditList.length"><h3 class="mb-sm">馃搵 淇＄敤璁板綍</h3>
       <div v-for="r in creditList" :key="r.id" class="cr">
         <div class="flex-between">
           <span class="text-sm">{{ r.reason }}</span>
@@ -149,15 +164,24 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
+<<<<<<< HEAD
 import { uploadImage } from '@/api/upload'
+=======
+import { chatAPI } from '@/api/chat'
+>>>>>>> 205c5fc24173a26442707e40b3861e7758d89f98
 import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { errorMessage } from '@/utils/errors'
 import { genderText, userInitial } from '@/utils/userDisplay'
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
+<<<<<<< HEAD
 const e=reactive({username:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
 const cf=reactive({certType:'STUDENT_ID',studentId:'',gender:'UNDISCLOSED',cardImageUrl:''})
+=======
+const e=reactive({username:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null);const blockedList=ref([])
+const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
+>>>>>>> 205c5fc24173a26442707e40b3861e7758d89f98
 const certErr=ref('')
 const certSubmitting=ref(false)
 const certImageViewer=ref('')
@@ -233,8 +257,17 @@ async function submitAppeal(){const reason=await modal.prompt('信用分申诉',
 async function loadCredit(){try{const r=await userAPI.creditRecords();creditList.value=r.data||[]}catch{creditList.value=[]}}
 async function loadQuota(){try{const r=await userAPI.quotaRecords();quotaList.value=r.data||[]}catch{quotaList.value=[]}}
 async function loadAppeal(){try{const r=await userAPI.myAppeal();appeal.value=r.data}catch{appeal.value=null}}
+async function loadBlockedList(){try{const r=await chatAPI.blockedList();blockedList.value=r.data||[]}catch{blockedList.value=[]}}
+async function unblockUser(item){
+  if(!item?.id)return
+  try{
+    await chatAPI.unblock(item.id)
+    await loadBlockedList()
+    modal.alert('操作成功','已将该用户移出黑名单')
+  }catch(e){modal.alert('操作失败', e.message)}
+}
 function amountColor(amount){if(amount>0)return 'var(--success)';if(amount<0)return 'var(--danger)';return 'var(--text-muted)'}
-onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuota();loadAppeal()})
+onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuota();loadAppeal();loadBlockedList()})
 </script>
 <style scoped>
 .page{max-width:680px}
@@ -265,6 +298,12 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .rule-section ul{margin:0;padding-left:18px;color:var(--text-muted);font-size:13px;line-height:1.75}
 .rule-section li{margin:0 0 4px}
 .cert-state{margin-bottom:12px}
+.blocked-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.blocked-row:last-child{border-bottom:none;padding-bottom:0}
+.blocked-main{min-width:0}
+.blocked-name{font-size:15px;font-weight:800;color:var(--text)}
+.blocked-desc{margin-top:4px;font-size:13px;color:var(--text-muted)}
+.blocked-demand{margin-top:4px}
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .file-btn{position:relative;overflow:hidden}
 .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -280,5 +319,7 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .cr:last-child{border-bottom:none}
 @media(max-width:860px){
   .rules-grid{grid-template-columns:1fr}
+  .blocked-row{align-items:flex-start;flex-direction:column}
+  .blocked-row .btn-sm{width:100%}
 }
 </style>

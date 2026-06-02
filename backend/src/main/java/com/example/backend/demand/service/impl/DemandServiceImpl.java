@@ -3,6 +3,8 @@ package com.example.backend.demand.service.impl;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
 import com.example.backend.common.PageResult;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
 import com.example.backend.common.enums.DemandCategory;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.RewardType;
@@ -44,6 +46,7 @@ public class DemandServiceImpl implements DemandService {
     private final UserRepository userRepository;
     private final ContentModerationService contentModerationService;
     private final QuotaService quotaService;
+    private final ActionRateLimitService actionRateLimitService;
 
     public DemandServiceImpl(DemandFactory demandFactory,
                              DemandRepository demandRepository,
@@ -51,7 +54,8 @@ public class DemandServiceImpl implements DemandService {
                              TagRepository tagRepository,
                              UserRepository userRepository,
                              ContentModerationService contentModerationService,
-                             QuotaService quotaService) {
+                             QuotaService quotaService,
+                             ActionRateLimitService actionRateLimitService) {
         this.demandFactory = demandFactory;
         this.demandRepository = demandRepository;
         this.demandImageRepository = demandImageRepository;
@@ -59,11 +63,13 @@ public class DemandServiceImpl implements DemandService {
         this.userRepository = userRepository;
         this.contentModerationService = contentModerationService;
         this.quotaService = quotaService;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     @Override
     @Transactional
     public DemandDto createDemand(Long userId, DemandCreateDto req) {
+        actionRateLimitService.checkAndRecord(userId, RateLimitAction.DEMAND_CREATE);
         User publisher = requireActiveUser(userId);
         List<String> warnings = validateDemandTextAndReward(req);
         Demand demand = demandFactory.createDemand(req);
