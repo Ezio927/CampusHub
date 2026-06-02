@@ -52,7 +52,7 @@ onMounted(() => store.fetch())
 .open-only input{width:auto}
 .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .dc{background:#fff;border-radius:12px;padding:20px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
-.dc:hover{transform:translateY(-2px)}
+.dc:hover{transform:scale(1.03);box-shadow:8px 8px 0px rgba(0,0,0,1)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .dtl{font-size:17px;font-weight:700;flex:1;margin-right:10px}
 .cat{display:inline-flex;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:2px solid black;white-space:nowrap}
