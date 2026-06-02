@@ -7,11 +7,11 @@
         <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="nav-link" active-class="active">发布需求</router-link>
         <router-link v-if="auth.isLoggedIn" to="/orders" class="nav-link" active-class="active">我的订单</router-link>
         <router-link v-if="auth.isLoggedIn" to="/messages" class="nav-link nav-msg" active-class="active">
-          消息
+          我的消息
           <span v-if="messageUnread" class="dot">{{ messageUnread }}</span>
         </router-link>
         <router-link v-if="auth.isLoggedIn" to="/notifications" class="nav-link nav-msg" active-class="active">
-          通知
+          系统通知
           <span v-if="notifUnread" class="dot">{{ notifUnread }}</span>
         </router-link>
         <router-link v-if="auth.isLoggedIn" to="/profile" class="nav-link" active-class="active">个人中心</router-link>
