@@ -612,12 +612,12 @@ onUnmounted(() => {
   gap: 8px;
   align-items: center;
 }
-.file-btn { position: relative; overflow: hidden; }
+.file-btn { position: relative; overflow: hidden; cursor: pointer; }
 .file-btn input {
   position: absolute;
   inset: 0;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
 }
 .image-viewer {
   position: fixed;

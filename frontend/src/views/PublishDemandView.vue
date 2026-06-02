@@ -116,5 +116,5 @@ async function pub(){
 .img-remove{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:20px;text-align:center;padding:0;border:none}
 .img-add{width:80px;height:80px;border-radius:10px;border:2px dashed black;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text-muted);cursor:pointer;position:relative;overflow:hidden}
 .img-add:hover{border-color:var(--primary);color:var(--primary)}
-.img-add input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-add input{position:absolute;inset:0;opacity:0;pointer-events:none}
 </style>

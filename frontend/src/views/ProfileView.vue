@@ -199,8 +199,8 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .rule-section li{margin:0 0 4px}
 .cert-state{margin-bottom:12px}
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.file-btn{position:relative;overflow:hidden}
-.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.file-btn{position:relative;overflow:hidden;cursor:pointer}
+.file-btn input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:#fff}
 .compact-preview{width:220px;height:150px}
 .cert-preview img{display:block;width:100%;height:100%;object-fit:cover}
