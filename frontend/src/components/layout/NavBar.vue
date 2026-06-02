@@ -4,18 +4,18 @@
       <a href="/" class="nav-logo" @click.prevent="goHome">CampusHub</a>
       <nav class="nav-links">
         <router-link to="/" class="nav-link" exact-active-class="active">需求大厅</router-link>
-        <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="nav-link">发布需求</router-link>
-        <router-link v-if="auth.isLoggedIn" to="/orders" class="nav-link">我的订单</router-link>
-        <router-link v-if="auth.isLoggedIn" to="/messages" class="nav-link nav-msg">
+        <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="nav-link" active-class="active">发布需求</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/orders" class="nav-link" active-class="active">我的订单</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/messages" class="nav-link nav-msg" active-class="active">
           消息
           <span v-if="messageUnread" class="dot">{{ messageUnread }}</span>
         </router-link>
-        <router-link v-if="auth.isLoggedIn" to="/notifications" class="nav-link nav-msg">
+        <router-link v-if="auth.isLoggedIn" to="/notifications" class="nav-link nav-msg" active-class="active">
           通知
           <span v-if="notifUnread" class="dot">{{ notifUnread }}</span>
         </router-link>
-        <router-link v-if="auth.isLoggedIn" to="/profile" class="nav-link">个人中心</router-link>
-        <router-link v-if="auth.isLoggedIn && auth.user?.role==='ADMIN'" to="/admin" class="nav-link">管理后台</router-link>
+        <router-link v-if="auth.isLoggedIn" to="/profile" class="nav-link" active-class="active">个人中心</router-link>
+        <router-link v-if="auth.isLoggedIn && auth.user?.role==='ADMIN'" to="/admin" class="nav-link" active-class="active">管理后台</router-link>
       </nav>
       <div class="nav-right">
         <template v-if="auth.isLoggedIn">
