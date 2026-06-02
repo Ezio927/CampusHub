@@ -37,9 +37,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // Public GET: user profile, demand search, demand detail
+        // Public GET: demand search & detail (not /api/users/{id} — requires login)
         if ("GET".equalsIgnoreCase(method)) {
-            if (path.equals("/api/users") || (path.startsWith("/api/users/") && !path.startsWith("/api/users/me"))) return true;
             if (path.equals("/api/demands") || path.startsWith("/api/demands/")) {
                 if (request.getParameter("my") == null) return true;
             }

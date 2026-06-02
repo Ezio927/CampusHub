@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPublicDto getPublicInfo(Long userId) {
-        return UserPublicDto.from(findUser(userId));
+        return UserPublicDto.forPublicApi(findUser(userId));
     }
 
     @Override
