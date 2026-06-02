@@ -2,6 +2,7 @@ package com.example.backend.user.dto;
 
 import com.example.backend.common.enums.CertStatus;
 import com.example.backend.common.enums.CertType;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.user.entity.Certification;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ public class CertificationDto {
     private Long userId;
     private CertType certType;
     private String studentId;
+    private UserGender gender;
     private String cardImageUrl;
     private CertStatus status;
     private String rejectReason;
@@ -31,6 +33,7 @@ public class CertificationDto {
         dto.setUserId(certification.getUserId());
         dto.setCertType(certification.getCertType());
         dto.setStudentId(certification.getStudentId());
+        dto.setGender(certification.getGender());
         dto.setCardImageUrl(certification.getCardImageUrl());
         dto.setStatus(certification.getStatus());
         dto.setRejectReason(certification.getRejectReason());
@@ -70,6 +73,14 @@ public class CertificationDto {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+
+    public UserGender getGender() {
+        return gender;
+    }
+
+    public void setGender(UserGender gender) {
+        this.gender = gender;
     }
 
     public String getCardImageUrl() {

@@ -1,7 +1,10 @@
 <template>
   <div class="page">
     <div class="ph">
-      <div class="pav">{{ auth.user?.username?.[0]?.toUpperCase() }}</div>
+      <button type="button" class="pav" :class="{hasAvatar:auth.user?.avatarUrl}" @click="openAvatar(auth.user?.avatarUrl)">
+        <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" alt="我的头像" />
+        <span v-else>{{ userInitial(auth.user) }}</span>
+      </button>
       <div class="pn">{{ auth.user?.username }}</div>
       <div class="pi">学号 {{ auth.user?.studentId }}</div>
       <div class="pc">⭐ {{ auth.user?.creditScore }} 信用分</div>
@@ -19,6 +22,7 @@
       <div class="sc"><div class="sv">{{ auth.user?.creditScore }}</div><div class="sl">信用分</div></div>
       <div class="sc"><div class="sv">{{ auth.user?.quotaAvailable || 0 }}</div><div class="sl">可用额度分</div></div>
       <div class="sc"><div class="sv">{{ auth.user?.quotaFrozen || 0 }}</div><div class="sl">冻结额度分</div></div>
+      <div class="sc"><div class="sv gender-value">{{ profileGender }}</div><div class="sl">性别</div></div>
       <div class="sc"><div class="sv">{{ st }}</div><div class="sl">账户状态</div></div>
     </div>
     <div class="card rules-card">
@@ -56,6 +60,18 @@
     <div class="card"><h3 class="mb-sm">✏️ 编辑资料</h3>
       <div class="rr"><div class="form-group"><label>用户名</label><input v-model="e.username" :placeholder="auth.user?.username" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
       <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
+      <div class="form-group">
+        <label>头像</label>
+        <div class="upload-row">
+          <label class="btn-outline btn-sm file-btn">
+            {{ avatarUploading ? '上传中...' : '上传头像' }}
+            <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" :disabled="avatarUploading" @change="pickAvatar" />
+          </label>
+          <button v-if="auth.user?.avatarUrl" type="button" class="btn-outline btn-sm" @click="openAvatar(auth.user.avatarUrl)">查看头像</button>
+          <button v-if="auth.user?.avatarUrl" type="button" class="btn-outline btn-sm" :disabled="avatarUploading" @click="clearAvatar">移除头像</button>
+        </div>
+        <p v-if="avatarErr" class="form-error">{{ avatarErr }}</p>
+      </div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
     <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
@@ -66,6 +82,15 @@
       <template v-if="canSubmitCert">
         <div class="form-group"><label>类型</label><select v-model="cf.certType"><option value="STUDENT_ID">学生证</option><option value="STUDENT_CARD">校园卡</option></select></div>
         <div class="form-group"><label>学号</label><input :value="auth.user?.studentId" readonly /></div>
+        <div class="form-group">
+          <label>性别</label>
+          <select v-model="cf.gender">
+            <option value="MALE">男</option>
+            <option value="FEMALE">女</option>
+            <option value="UNDISCLOSED">不愿透露</option>
+          </select>
+          <p class="text-xs text-muted mt-xs">实名认证通过后性别不再允许修改。</p>
+        </div>
         <div class="form-group">
           <label>认证图片</label>
           <div class="upload-row">
@@ -82,9 +107,12 @@
         <p v-if="certErr" class="form-error">{{ certErr }}</p>
         <button class="btn-primary btn-sm" :disabled="certSubmitting" @click="submitCert">{{ certSubmitting ? '提交中...' : '提交认证' }}</button>
       </template>
-      <button v-else-if="cert?.cardImageUrl" type="button" class="cert-preview compact-preview" @click="certImageViewer=cert.cardImageUrl">
-        <img :src="cert.cardImageUrl" alt="认证图片" />
-      </button>
+      <template v-else>
+        <p class="text-sm text-muted">性别：{{ genderText(auth.user) }}</p>
+        <button v-if="cert?.cardImageUrl" type="button" class="cert-preview compact-preview" @click="certImageViewer=cert.cardImageUrl">
+          <img :src="cert.cardImageUrl" alt="认证图片" />
+        </button>
+      </template>
     </div>
     <div class="card" v-if="creditList.length"><h3 class="mb-sm">📋 信用记录</h3>
       <div v-for="r in creditList" :key="r.id" class="cr">
@@ -109,6 +137,10 @@
       <button type="button" class="viewer-close" @click="certImageViewer=''">关闭</button>
       <img :src="certImageViewer" alt="认证图片" />
     </div>
+    <div v-if="avatarViewer" class="image-viewer" @click.self="avatarViewer=''">
+      <button type="button" class="viewer-close" @click="avatarViewer=''">关闭</button>
+      <img :src="avatarViewer" alt="头像" />
+    </div>
   </div>
 </template>
 <script setup>
@@ -117,18 +149,25 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
+import { uploadImage } from '@/api/upload'
 import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
+import { errorMessage } from '@/utils/errors'
+import { genderText, userInitial } from '@/utils/userDisplay'
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const ro=useRouter();const auth=useAuthStore()
 const e=reactive({username:'',phone:'',email:''});const cert=ref(null);const creditList=ref([]);const quotaList=ref([]);const appeal=ref(null)
-const cf=reactive({certType:'STUDENT_ID',studentId:'',cardImageUrl:''})
+const cf=reactive({certType:'STUDENT_ID',studentId:'',gender:'UNDISCLOSED',cardImageUrl:''})
 const certErr=ref('')
 const certSubmitting=ref(false)
 const certImageViewer=ref('')
+const avatarErr=ref('')
+const avatarUploading=ref(false)
+const avatarViewer=ref('')
 const st=computed(()=>({ACTIVE:'正常',BANNED:'已封禁',PENDING_CERT:'待认证'}[auth.user?.status]||auth.user?.status))
 const canSubmitCert=computed(()=>!cert.value||cert.value.status==='REJECTED')
 const checkedInToday=computed(()=>{const today=new Date().toISOString().substring(0,10);return quotaList.value.some(r=>r.type==='DAILY_CHECK_IN'&&r.createdAt?.substring(0,10)===today)})
+const profileGender=computed(()=>genderText(auth.user))
 async function update(){
   const d={}
   try{
@@ -146,12 +185,13 @@ async function submitCert(){
   certSubmitting.value=true
   try{
     if(!cf.cardImageUrl){certErr.value='请先上传认证图片';return}
+    if(!cf.gender){certErr.value='请选择性别';return}
     await certAPI.submit({...cf,studentId:auth.user?.studentId||''})
     clearCertImage()
     await loadCert()
   }catch(e){modal.alert('提交失败', e.message)}finally{certSubmitting.value=false}
 }
-async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data;cf.studentId=auth.user?.studentId||''}catch{cert.value=null;cf.studentId=auth.user?.studentId||''}}
+async function loadCert(){try{const r=await certAPI.mine();cert.value=r.data;cf.studentId=auth.user?.studentId||'';cf.gender=r.data?.gender||'UNDISCLOSED'}catch{cert.value=null;cf.studentId=auth.user?.studentId||'';cf.gender='UNDISCLOSED'}}
 function pickCertImage(event){
   const file=event.target.files?.[0]
   event.target.value=''
@@ -163,6 +203,30 @@ function pickCertImage(event){
   reader.readAsDataURL(file)
 }
 function clearCertImage(){cf.cardImageUrl=''}
+async function pickAvatar(event){
+  const file=event.target.files?.[0]
+  event.target.value=''
+  if(!file)return
+  avatarErr.value=''
+  if(!file.type.startsWith('image/')){avatarErr.value='请选择图片文件';return}
+  if(file.size>3*1024*1024){avatarErr.value='头像需小于3MB';return}
+  avatarUploading.value=true
+  try{
+    const res=await uploadImage(file)
+    await userAPI.update({avatarUrl:res.data.url})
+    await auth.fetchUser()
+    await modal.alert('头像已更新')
+  }catch(e){avatarErr.value=errorMessage(e,'头像上传失败')}finally{avatarUploading.value=false}
+}
+async function clearAvatar(){
+  avatarErr.value=''
+  avatarUploading.value=true
+  try{
+    await userAPI.update({avatarUrl:''})
+    await auth.fetchUser()
+  }catch(e){avatarErr.value=errorMessage(e,'移除头像失败')}finally{avatarUploading.value=false}
+}
+function openAvatar(src){if(src)avatarViewer.value=src}
 function logout(){auth.logout();ro.push('/login')}
 async function checkIn(){try{const r=await userAPI.checkIn();await auth.fetchUser();await loadQuota();const amount=r.data?.changeAmount||3;modal.alert('签到成功', `已获得 ${amount} 额度分`)}catch(e){modal.alert('签到失败', e.message)}}
 async function submitAppeal(){const reason=await modal.prompt('信用分申诉','请填写申诉理由（必填）','请说明情况，管理员将根据理由审核');if(!reason||!reason.trim()){await modal.alert('理由不能为空','请填写申诉理由');return}try{await userAPI.creditAppeal(reason.trim());modal.alert('已提交','申诉已提交，请等待管理员审核。');await auth.fetchUser();loadAppeal()}catch(e){modal.alert('提交失败', e.message)}}
@@ -175,7 +239,9 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 <style scoped>
 .page{max-width:680px}
 .ph{background:var(--primary);border-radius:12px;padding:28px;color:#fff;text-align:center;margin-bottom:18px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
-.pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
+.pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5);padding:0;color:#fff;overflow:hidden}
+.pav.hasAvatar{background:#fff;cursor:pointer}
+.pav img{width:100%;height:100%;object-fit:cover}
 .pn{font-size:22px;font-weight:900}.pi{font-size:13px;opacity:.75;margin-top:4px}
 .pc{display:inline-flex;gap:6px;padding:6px 16px;background:rgba(255,255,255,.2);border-radius:10px;margin-top:10px;font-size:14px;font-weight:700}
 .btn-appeal{display:block;margin:10px auto 0;padding:8px 18px;border-radius:10px;background:rgba(255,255,255,.3);color:#fff;font-size:13px;font-weight:700;border:2px solid rgba(255,255,255,.5)}
@@ -190,6 +256,7 @@ onMounted(async()=>{await auth.fetchUser();await loadCert();loadCredit();loadQuo
 .appeal-REJECTED{background:rgba(239,68,68,.2);color:#f87171}
 .sc{background:#fff;border-radius:12px;padding:16px;text-align:center;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
 .sv{font-size:22px;font-weight:900;color:var(--primary)}.sl{font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500}
+.gender-value{font-size:20px}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .rules-card{margin-bottom:18px}
 .rules-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}

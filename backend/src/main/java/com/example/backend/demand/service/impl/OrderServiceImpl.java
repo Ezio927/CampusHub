@@ -455,11 +455,17 @@ public class OrderServiceImpl implements OrderService {
         }
         if (order.getPublisherId() != null) {
             userRepository.findById(order.getPublisherId())
-                    .ifPresent(u -> dto.setPublisherName(u.getUsername()));
+                    .ifPresent(u -> {
+                        dto.setPublisherName(u.getUsername());
+                        dto.setPublisherAvatarUrl(u.getAvatarUrl());
+                    });
         }
         if (order.getAcceptorId() != null) {
             userRepository.findById(order.getAcceptorId())
-                    .ifPresent(u -> dto.setAcceptorName(u.getUsername()));
+                    .ifPresent(u -> {
+                        dto.setAcceptorName(u.getUsername());
+                        dto.setAcceptorAvatarUrl(u.getAvatarUrl());
+                    });
         }
         return dto;
     }

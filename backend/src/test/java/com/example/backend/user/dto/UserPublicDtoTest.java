@@ -1,6 +1,7 @@
 package com.example.backend.user.dto;
 
 import com.example.backend.common.enums.UserRole;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.user.entity.User;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +18,7 @@ class UserPublicDtoTest {
         user.setPhone("13800138000");
         user.setEmail("alice@school.edu");
         user.setAvatarUrl("/avatars/a.png");
+        user.setGender(UserGender.FEMALE);
         user.setCreditScore(90);
         user.setQuotaAvailable(31);
         user.setRole(UserRole.STUDENT);
@@ -34,5 +36,6 @@ class UserPublicDtoTest {
         Assertions.assertNull(dto.getStatus());
         Assertions.assertNull(dto.getPhone());
         Assertions.assertNull(dto.getEmail());
+        Assertions.assertNull(dto.getGender());
     }
 }

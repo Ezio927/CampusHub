@@ -1,6 +1,7 @@
 package com.example.backend.user.dto;
 
 import com.example.backend.common.enums.UserRole;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.user.entity.User;
 
@@ -15,6 +16,7 @@ public class UserDto {
     private String phone;
     private String email;
     private String avatarUrl;
+    private UserGender gender;
     private Integer creditScore;
     private Integer quotaAvailable;
     private Integer quotaFrozen;
@@ -37,6 +39,7 @@ public class UserDto {
         dto.setPhone(user.getPhone());
         dto.setEmail(user.getEmail());
         dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setGender(user.getGender());
         dto.setCreditScore(user.getCreditScore());
         dto.setQuotaAvailable(user.getQuotaAvailable());
         dto.setQuotaFrozen(user.getQuotaFrozen());
@@ -100,6 +103,14 @@ public class UserDto {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public UserGender getGender() {
+        return gender;
+    }
+
+    public void setGender(UserGender gender) {
+        this.gender = gender;
     }
 
     public Integer getCreditScore() {

@@ -13,7 +13,9 @@ public class OrderDto {
     private Long acceptorId;
     private String demandTitle;
     private String publisherName;
+    private String publisherAvatarUrl;
     private String acceptorName;
+    private String acceptorAvatarUrl;
     private Integer rewardAmount;
     private String rewardType;
     private OrderStatus status;
@@ -85,8 +87,12 @@ public class OrderDto {
     public void setDemandTitle(String demandTitle) { this.demandTitle = demandTitle; }
     public String getPublisherName() { return publisherName; }
     public void setPublisherName(String publisherName) { this.publisherName = publisherName; }
+    public String getPublisherAvatarUrl() { return publisherAvatarUrl; }
+    public void setPublisherAvatarUrl(String publisherAvatarUrl) { this.publisherAvatarUrl = publisherAvatarUrl; }
     public String getAcceptorName() { return acceptorName; }
     public void setAcceptorName(String acceptorName) { this.acceptorName = acceptorName; }
+    public String getAcceptorAvatarUrl() { return acceptorAvatarUrl; }
+    public void setAcceptorAvatarUrl(String acceptorAvatarUrl) { this.acceptorAvatarUrl = acceptorAvatarUrl; }
     public Integer getRewardAmount() { return rewardAmount; }
     public void setRewardAmount(Integer rewardAmount) { this.rewardAmount = rewardAmount; }
     public String getRewardType() { return rewardType; }

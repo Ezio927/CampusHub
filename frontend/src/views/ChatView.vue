@@ -3,7 +3,10 @@
     <a href="#" class="back" @click.prevent="$router.back()">←</a>
 
     <div class="chat-head">
-      <div class="avatar">{{ conversation?.targetUser?.username?.[0]?.toUpperCase() || '?' }}</div>
+      <button type="button" class="avatar" :class="{hasAvatar:conversation?.targetUser?.avatarUrl}" @click="openImageViewer(conversation?.targetUser?.avatarUrl)">
+        <img v-if="conversation?.targetUser?.avatarUrl" :src="conversation.targetUser.avatarUrl" alt="对方头像" />
+        <span v-else>{{ userInitial(conversation?.targetUser) }}</span>
+      </button>
       <div class="head-main">
         <div class="chat-name">{{ conversation?.targetUser?.username || '私信' }}</div>
         <div v-if="conversation?.relatedDemandTitle" class="chat-context">{{ conversation.relatedDemandTitle }}</div>
@@ -126,6 +129,7 @@ import { useAuthStore } from '@/stores/auth'
 import { chatAPI } from '@/api/chat'
 import { uploadImage } from '@/api/upload'
 import { errorMessage } from '@/utils/errors'
+import { userInitial } from '@/utils/userDisplay'
 import { useModal } from '@/composables/useModal'
 
 const route = useRoute()
@@ -419,7 +423,11 @@ onUnmounted(() => {
   font-weight: 800;
   flex-shrink: 0;
   border: 2px solid black;
+  padding: 0;
+  overflow: hidden;
 }
+.avatar.hasAvatar { background: #fff; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .head-main { flex: 1; min-width: 0; }
 .chat-name { font-size: 16px; font-weight: 900; }
 .chat-context, .state { margin-top: 2px; color: var(--text-muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

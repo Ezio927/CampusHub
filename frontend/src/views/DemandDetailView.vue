@@ -16,7 +16,20 @@
         <button type="button" class="viewer-close" @click="imgViewer=''">关闭</button>
         <img :src="imgViewer" alt="查看大图" />
       </div>
-      <div class="pub"><div class="av" :style="{background:avColor}">{{ d.publisher?.username?.[0]?.toUpperCase() }}</div><div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div></div>
+      <div class="pub">
+        <div class="pub-avatar-wrap">
+          <button type="button" class="av" :class="{hasAvatar:d.publisher?.avatarUrl}" :style="d.publisher?.avatarUrl?{}:{background:avColor}" @click="openPublisherAvatar">
+            <img v-if="d.publisher?.avatarUrl" :src="d.publisher.avatarUrl" alt="发布者头像" />
+            <span v-else>{{ userInitial(d.publisher) }}</span>
+          </button>
+          <div class="profile-popover">
+            <div class="popover-name">{{ d.publisher?.realName || d.publisher?.username || '发布者' }}</div>
+            <div class="popover-row"><span>信用分</span><strong>{{ d.publisher?.creditScore ?? '-' }}</strong></div>
+            <div class="popover-row"><span>性别</span><strong>{{ genderText(d.publisher) }}</strong></div>
+          </div>
+        </div>
+        <div><div class="text-bold">{{ d.publisher?.username }}</div><div class="text-sm text-muted">信用 {{ d.publisher?.creditScore }}</div></div>
+      </div>
     </div>
     <div v-if="auth.isLoggedIn&&d.publisherId!==auth.user?.id" class="act-list">
       <button class="btn-outline btn-block act-btn" @click="messagePublisher">联系发布者</button>
@@ -36,6 +49,7 @@ import { demandAPI } from '@/api/demands'
 import { orderAPI } from '@/api/orders'
 import { chatAPI } from '@/api/chat'
 import { errorMessage } from '@/utils/errors'
+import { genderText, userInitial } from '@/utils/userDisplay'
 import { useModal } from '@/composables/useModal'
 const r=useRoute(); const ro=useRouter(); const auth=useAuthStore(); const d=ref(null)
 const modal = useModal()
@@ -46,6 +60,7 @@ function catTxt(c){return{ERRAND:'跑腿代办',SKILL:'技能求助',STUDY:'学�
 function catBg(c){return{ERRAND:'#fef08a',SKILL:'#c7d2fe',STUDY:'#bbf7d0',SECONDHAND:'#fecdd3',OTHER:'#e9d5ff'}[c]||'#e5e7eb'}
 function statusTxt(s){return{OPEN:'开放中',ACCEPTED:'已接单',IN_PROGRESS:'进行中',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function statusBg(s){return{OPEN:'#3b82f6',ACCEPTED:'#06b6d4',IN_PROGRESS:'#f97316',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
+function openPublisherAvatar(){if(d.value?.publisher?.avatarUrl)imgViewer.value=d.value.publisher.avatarUrl}
 async function accept(){try{await orderAPI.accept({demandId:d.value.id});ro.push('/orders')}catch(e){modal.alert('接单失败', errorMessage(e))}}
 async function deleteDemand(){const ok=await modal.confirm('删除需求','确定删除该需求？删除后不可恢复。');if(!ok)return;try{await demandAPI.delete(d.value.id);ro.push('/orders')}catch(e){modal.alert('删除失败', errorMessage(e))}}
 async function messagePublisher(){
@@ -67,7 +82,15 @@ h1{font-size:22px;font-weight:900;flex:1;margin-right:12px}
 .val{font-size:16px;font-weight:700}
 .desc{white-space:pre-wrap;line-height:1.8;color:var(--text-secondary);padding:16px;background:#f8fafc;border-radius:10px;margin:16px 0;border:2px solid black}
 .pub{display:flex;align-items:center;gap:12px;padding:16px;background:#f8fafc;border-radius:10px;border:2px solid black}
-.av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;border:2px solid black}
+.pub-avatar-wrap{position:relative;flex-shrink:0}
+.av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;border:2px solid black;padding:0;overflow:hidden}
+.av.hasAvatar{background:#fff;cursor:zoom-in}
+.av img{width:100%;height:100%;object-fit:cover}
+.profile-popover{position:absolute;left:0;top:54px;z-index:20;width:220px;padding:12px;border:2px solid black;border-radius:10px;background:#fff;box-shadow:6px 6px 0 rgba(0,0,0,1);opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease .45s,transform .14s ease .45s}
+.pub-avatar-wrap:hover .profile-popover{opacity:1;transform:translateY(0);pointer-events:auto}
+.popover-name{font-size:15px;font-weight:900;margin-bottom:8px;word-break:break-word}
+.popover-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--text-muted);margin-top:5px}
+.popover-row strong{color:var(--text)}
 .act-list{display:flex;flex-direction:column;gap:8px;max-width:680px;margin-left:auto;margin-right:auto}
 .act-btn{padding:14px;border-radius:10px;font-size:16px}
 .btn-del{background:#dc2626;color:#fff;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1)}

@@ -3,6 +3,7 @@ package com.example.backend.user.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
 
@@ -21,6 +22,7 @@ public class User {
     private String studentId;
     private String realName;
     private String avatarUrl;
+    private UserGender gender;
     private Integer creditScore = 100;
     private Integer quotaAvailable = 0;
     private Integer quotaFrozen = 0;
@@ -97,6 +99,8 @@ public class User {
     public void setRealName(String realName) { this.realName = realName; }
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    public UserGender getGender() { return gender; }
+    public void setGender(UserGender gender) { this.gender = gender; }
     public Integer getCreditScore() { return creditScore == null ? 0 : creditScore; }
     public void setCreditScore(Integer creditScore) { this.creditScore = creditScore; }
     public Integer getQuotaAvailable() { return quotaAvailable == null ? 0 : quotaAvailable; }
