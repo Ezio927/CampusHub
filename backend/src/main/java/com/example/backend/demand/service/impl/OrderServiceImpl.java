@@ -5,6 +5,9 @@ import com.example.backend.chat.dto.ConversationDto;
 import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
+import com.example.backend.common.ratelimit.RateLimitProperties;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.UserStatus;
@@ -57,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
     private final CreditService creditService;
     private final QuotaService quotaService;
     private final ConversationService conversationService;
+    private final ActionRateLimitService actionRateLimitService;
 
     @Autowired
     public OrderServiceImpl(
@@ -68,7 +72,8 @@ public class OrderServiceImpl implements OrderService {
             UserRepository userRepository,
             CreditService creditService,
             QuotaService quotaService,
-            ConversationService conversationService) {
+            ConversationService conversationService,
+            ActionRateLimitService actionRateLimitService) {
         this.orderRepository = orderRepository;
         this.orderStatusLogRepository = orderStatusLogRepository;
         this.orderStateContext = orderStateContext;
@@ -78,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
         this.creditService = creditService;
         this.quotaService = quotaService;
         this.conversationService = conversationService;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     // [Human-written] 兼容旧测试构造签名：把 DemandRepository 适配成最小 DemandService 能力。
@@ -100,12 +106,14 @@ public class OrderServiceImpl implements OrderService {
                 userRepository,
                 creditService,
                 quotaService,
-                conversationService);
+                conversationService,
+                new ActionRateLimitService(new RateLimitProperties()));
     }
 
     @Override
     @Transactional
     public OrderDto acceptDemand(Long userId, AcceptOrderDto req) {
+        actionRateLimitService.checkAndRecord(userId, RateLimitAction.ORDER_ACCEPT);
         User acceptor = requireActiveUser(userId);
         if (req == null || req.getDemandId() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "需求ID不能为空");
