@@ -7,6 +7,10 @@ app:
   upload-dir: uploads
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 4MB
   datasource:
     url: jdbc:mysql://localhost:3307/campushub?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -36,6 +36,7 @@ build/
 
 # 后端
 backend/target/
+backend/uploads/
 target/
 *.class
 *.jar
