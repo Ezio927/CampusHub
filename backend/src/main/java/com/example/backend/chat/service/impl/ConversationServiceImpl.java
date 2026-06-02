@@ -11,6 +11,8 @@ import com.example.backend.chat.repository.MessageRepository;
 import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
 import com.example.backend.common.enums.ConversationStatus;
 import com.example.backend.common.enums.MessageStatus;
 import com.example.backend.common.enums.MessageType;
@@ -44,19 +46,22 @@ public class ConversationServiceImpl implements ConversationService {
     private final DemandRepository demandRepository;
     private final NotificationService notificationService;
     private final ContentModerationService contentModerationService;
+    private final ActionRateLimitService actionRateLimitService;
 
     public ConversationServiceImpl(ConversationRepository conversationRepository,
                                    MessageRepository messageRepository,
                                    UserRepository userRepository,
                                    DemandRepository demandRepository,
                                    NotificationService notificationService,
-                                   ContentModerationService contentModerationService) {
+                                   ContentModerationService contentModerationService,
+                                   ActionRateLimitService actionRateLimitService) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.demandRepository = demandRepository;
         this.notificationService = notificationService;
         this.contentModerationService = contentModerationService;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     @Override
@@ -140,6 +145,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public MessageDto sendMessage(Long conversationId, Long senderId, SendMessageDto req) {
+        actionRateLimitService.checkAndRecord(senderId, RateLimitAction.MESSAGE_SEND);
         Conversation conversation = requireConversation(conversationId);
         ensureParticipant(conversation, senderId);
         requireCanSend(senderId);
