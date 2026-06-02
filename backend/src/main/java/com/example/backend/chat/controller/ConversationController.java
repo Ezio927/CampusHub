@@ -58,6 +58,12 @@ public class ConversationController {
         return ApiResponse.success(conversationService.countUnread(AuthContext.requireUserId()));
     }
 
+    @Operation(summary = "查看我的黑名单")
+    @GetMapping("/blocked")
+    public ApiResponse<List<ConversationDto>> blockedList() {
+        return ApiResponse.success(conversationService.listBlockedConversations(AuthContext.requireUserId()));
+    }
+
     @Operation(summary = "会话详情")
     @GetMapping("/{id}")
     public ApiResponse<ConversationDto> detail(

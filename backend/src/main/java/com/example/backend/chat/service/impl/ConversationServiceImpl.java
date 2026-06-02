@@ -121,6 +121,15 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public List<ConversationDto> listBlockedConversations(Long userId) {
+        requireUser(userId);
+        return conversationRepository.findBlockedByUserIdOrderByLastMessageAtDesc(userId)
+                .stream()
+                .map(conversation -> toDto(conversation, userId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public long countUnread(Long userId) {
         return listConversations(userId).stream()
                 .map(ConversationDto::getUnreadCount)
