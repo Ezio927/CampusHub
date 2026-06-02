@@ -49,7 +49,7 @@ watch(() => route.fullPath, fetchMessageUnread)
 </script>
 <style scoped>
 .nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 3px solid black; }
-.nav-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 56px; }
+.nav-inner { width: 80%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 56px; }
 .nav-logo { font-size: 20px; font-weight: 900; color: var(--primary) !important; flex-shrink: 0; }
 .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
 .nav-link {
