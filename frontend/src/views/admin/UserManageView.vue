@@ -1,6 +1,6 @@
 <template>
   <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
-    <h1 class="page-title">👥 用户管理</h1>
+    <h1 class="page-title">用户管理</h1>
     <input v-model="kw" placeholder="搜索用户名/姓名/学号" class="mb-md" @input="search" />
     <div v-for="u in list" :key="u.id" class="card flex-between">
       <div><div class="text-bold">{{ u.username }}</div><div class="text-sm text-muted">{{ u.realName }} · {{ u.studentId }} · {{ u.status }} · 信用{{ u.creditScore }} · 额度{{ u.quotaAvailable || 0 }}/冻结{{ u.quotaFrozen || 0 }}</div></div>

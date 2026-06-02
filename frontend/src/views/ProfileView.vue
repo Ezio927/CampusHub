@@ -4,15 +4,15 @@
       <div class="pav">{{ auth.user?.username?.[0]?.toUpperCase() }}</div>
       <div class="pn">{{ auth.user?.username }}</div>
       <div class="pi">学号 {{ auth.user?.studentId }}</div>
-      <div class="pc">⭐ {{ auth.user?.creditScore }} 信用分</div>
+      <div class="pc">信用分 {{ auth.user?.creditScore }}</div>
       <div class="pc">额度分 {{ auth.user?.quotaAvailable || 0 }} 可用 · {{ auth.user?.quotaFrozen || 0 }} 冻结</div>
       <div v-if="appeal" class="appeal-status" :class="'appeal-'+appeal.status">
-        <span v-if="appeal.status==='PENDING'">⏳ 申诉审核中</span>
-        <span v-else-if="appeal.status==='APPROVED'">✅ 申诉已通过，信用分已恢复</span>
-        <span v-else-if="appeal.status==='REJECTED'">❌ 申诉已被驳回</span>
+        <span v-if="appeal.status==='PENDING'">申诉审核中</span>
+        <span v-else-if="appeal.status==='APPROVED'">申诉已通过，信用分已恢复</span>
+        <span v-else-if="appeal.status==='REJECTED'">申诉已被驳回</span>
       </div>
       <button v-if="auth.user?.creditScore < 60 && (!appeal || appeal.status==='REJECTED')" class="btn-appeal" @click="submitAppeal">信用分低于60，申请恢复</button>
-      <button v-if="checkedInToday" type="button" class="btn-checkin btn-checked-in" disabled>✅ 今日已签到</button>
+      <button v-if="checkedInToday" type="button" class="btn-checkin btn-checked-in" disabled>今日已签到</button>
       <button v-else type="button" class="btn-checkin" @click="checkIn">每日签到 +3 额度分</button>
     </div>
     <div class="grid-2 mb-md">
@@ -53,12 +53,12 @@
         </section>
       </div>
     </div>
-    <div class="card"><h3 class="mb-sm">✏️ 编辑资料</h3>
+    <div class="card"><h3 class="mb-sm">编辑资料</h3>
       <div class="rr"><div class="form-group"><label>用户名</label><input v-model="e.username" :placeholder="auth.user?.username" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
       <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
-    <div class="card"><h3 class="mb-sm">🪪 实名认证</h3>
+    <div class="card"><h3 class="mb-sm">实名认证</h3>
       <div v-if="cert" class="cert-state">
         状态：<span :style="{color:cert.status==='APPROVED'?'var(--success)':cert.status==='REJECTED'?'var(--danger)':'var(--warning)'}" class="text-bold">{{ cert.status }}</span>
         <p v-if="cert.status==='REJECTED' && cert.rejectReason" class="text-sm text-muted">原因：{{ cert.rejectReason }}</p>
@@ -86,7 +86,7 @@
         <img :src="cert.cardImageUrl" alt="认证图片" />
       </button>
     </div>
-    <div class="card" v-if="creditList.length"><h3 class="mb-sm">📋 信用记录</h3>
+    <div class="card" v-if="creditList.length"><h3 class="mb-sm">信用记录</h3>
       <div v-for="r in creditList" :key="r.id" class="cr">
         <div class="flex-between">
           <span class="text-sm">{{ r.reason }}</span>

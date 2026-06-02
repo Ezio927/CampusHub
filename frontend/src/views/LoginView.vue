@@ -1,7 +1,7 @@
 <template>
   <div class="lp">
     <div class="lb"><div class="lc">
-      <div class="li">🏫</div><h1>欢迎回来</h1>
+      <h1>欢迎回来</h1>
       <p class="ls">登录 CampusHub 校园互助平台</p>
       <form @submit.prevent="login">
         <input class="inp" v-model="username" placeholder="用户名" required />

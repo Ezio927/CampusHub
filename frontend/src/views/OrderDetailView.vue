@@ -23,7 +23,7 @@
       <button v-for="a in acts" :key="a.k" class="btn-primary btn-block" @click="doAct(a.k)">{{ a.l }}</button>
     </div>
   </div>
-  <div v-else class="empty">⏳ 加载中...</div>
+  <div v-else class="empty">加载中...</div>
 </template>
 <script setup>
 import { ref,computed,onMounted } from 'vue'
@@ -43,7 +43,7 @@ const reviewErr=ref('')
 const reviewSubmitting=ref(false)
 function st(s){return{PENDING_ACCEPT:'待接单',ACCEPTED:'已接单',PENDING_CONFIRM:'待确认',COMPLETED:'已完成',CANCELLED:'已取消'}[s]||s}
 function sb(s){return{PENDING_ACCEPT:'#3b82f6',ACCEPTED:'#06b6d4',PENDING_CONFIRM:'#eab308',COMPLETED:'#10b981',CANCELLED:'#9ca3af'}[s]||'#888'}
-const acts=computed(()=>{if(!o.value)return[];const uid=a.user?.id;const s=o.value.status;const as=[];if(s==='ACCEPTED'&&o.value.acceptorId===uid)as.push({k:'deliver',l:'📦 标记已送达'});if(s==='PENDING_CONFIRM'&&o.value.publisherId===uid)as.push({k:'confirm',l:'✅ 确认完成'});if(['PENDING_ACCEPT','ACCEPTED','PENDING_CONFIRM'].includes(s))as.push({k:'cancel',l:'❌ 取消订单'});return as})
+const acts=computed(()=>{if(!o.value)return[];const uid=a.user?.id;const s=o.value.status;const as=[];if(s==='ACCEPTED'&&o.value.acceptorId===uid)as.push({k:'deliver',l:'标记已送达'});if(s==='PENDING_CONFIRM'&&o.value.publisherId===uid)as.push({k:'confirm',l:'确认完成'});if(['PENDING_ACCEPT','ACCEPTED','PENDING_CONFIRM'].includes(s))as.push({k:'cancel',l:'取消订单'});return as})
 const targetUserId=computed(()=>{if(!o.value)return null;const uid=a.user?.id;if(o.value.publisherId===uid)return o.value.acceptorId;if(o.value.acceptorId===uid)return o.value.publisherId;return null})
 async function doAct(key){try{if(key==='deliver'){await orderAPI.deliver(o.value.id);await refresh()}else if(key==='confirm'){await orderAPI.confirm(o.value.id);showReview.value=true;await refresh()}else if(key==='cancel'){const r=await modal.prompt('取消订单','请输入取消原因（必填）','请输入取消原因');if(!r||!r.trim()){await modal.alert('原因不能为空','请填写取消原因');return}else{await orderAPI.cancel(o.value.id,{reason:r.trim()})};ro.go(0)}}catch(e){modal.alert('操作失败', errorMessage(e))}}
 async function submitReviewAction(){

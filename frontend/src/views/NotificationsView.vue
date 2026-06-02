@@ -4,7 +4,7 @@
       <h1 class="page-title" style="margin:0">通知</h1>
       <button v-if="list.length" class="btn-outline btn-sm" @click="markAll">全部已读</button>
     </div>
-    <div v-if="list.length===0" class="empty">🔔<p class="mt-sm">暂无通知</p></div>
+    <div v-if="list.length===0" class="empty"><p class="mt-sm">暂无通知</p></div>
     <div v-for="n in list" :key="n.id" class="ni" :class="{unread:!n.read,expanded:expandedId===n.id}" @click="toggle(n)">
       <div class="ni-head">
         <span class="ni-title">{{ n.title }}</span>

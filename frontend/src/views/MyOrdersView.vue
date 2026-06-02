@@ -6,7 +6,7 @@
     <template v-if="role==='PUBLISHER'">
       <!-- 我发布的需求（未接单） -->
       <div class="section-title">我发布的需求</div>
-      <div v-if="demands.length===0" class="empty">📋<p class="mt-sm">暂无发布的需求</p></div>
+      <div v-if="demands.length===0" class="empty"><p class="mt-sm">暂无发布的需求</p></div>
       <div v-else class="card-grid">
       <div v-for="d in demands" :key="'d'+d.id" class="oc" @click="goDemand(d.id)">
         <div class="flex-between">
@@ -18,7 +18,7 @@
 
       <!-- 已生成的订单 -->
       <div class="section-title" style="margin-top:20px">已生成的订单</div>
-      <div v-if="orders.length===0" class="empty">📋<p class="mt-sm">暂无订单</p></div>
+      <div v-if="orders.length===0" class="empty"><p class="mt-sm">暂无订单</p></div>
       <div v-else class="card-grid">
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">
@@ -30,7 +30,7 @@
     </template>
 
     <template v-else>
-      <div v-if="orders.length===0" class="empty">📋<p class="mt-sm">暂无订单</p></div>
+      <div v-if="orders.length===0" class="empty"><p class="mt-sm">暂无订单</p></div>
       <div v-else class="card-grid">
       <div v-for="o in orders" :key="'o'+o.id" class="oc" @click="goOrder(o.id)">
         <div class="flex-between">

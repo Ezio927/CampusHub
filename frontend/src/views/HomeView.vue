@@ -16,7 +16,7 @@
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
       <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
-    <div v-if="store.list.length===0" class="empty">📭<p class="mt-sm">暂无需求</p></div>
+    <div v-if="store.list.length===0" class="empty"><p class="mt-sm">暂无需求</p></div>
     <div v-else class="card-grid">
     <div v-for="d in store.list" :key="d.id" class="dc" @click="goDetail(d.id)">
       <div class="dt"><span class="dtl">{{ d.title }}</span><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
@@ -25,7 +25,7 @@
         <span class="text-muted text-sm">{{ d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
         <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
-      <div v-if="d.urgent" class="mt-sm"><span class="du">🔥 紧急</span></div>
+      <div v-if="d.urgent" class="mt-sm"><span class="du">紧急</span></div>
     </div>
     </div>
   </div>

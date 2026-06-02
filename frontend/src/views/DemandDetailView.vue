@@ -26,7 +26,7 @@
       <button class="btn-del btn-block act-btn" @click="deleteDemand">删除需求</button>
     </div>
   </div>
-  <div v-else class="empty">⏳ 加载中...</div>
+  <div v-else class="empty">加载中...</div>
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
