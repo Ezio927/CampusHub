@@ -50,6 +50,7 @@ public class DemandFactory {
         demand.setUrgent(Boolean.TRUE.equals(param.getUrgent()));
         demand.setUrgentDeadline(param.getUrgentDeadline());
         demand.setLocationTag(param.getLocationTag());
+        demand.setCampus(isBlank(param.getCampus()) ? null : param.getCampus().trim());
         return demand;
     }
 

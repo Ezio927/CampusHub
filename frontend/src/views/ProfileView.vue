@@ -93,6 +93,16 @@
         <label>邮箱</label>
         <input v-model="form.email" :placeholder="auth.user?.email || '未填写'" />
       </div>
+      <div class="form-group">
+        <label>校区</label>
+        <select v-model="form.campus">
+          <option value="">未选择</option>
+          <option value="鼓楼校区">鼓楼校区</option>
+          <option value="仙林校区">仙林校区</option>
+          <option value="浦口校区">浦口校区</option>
+          <option value="苏州校区">苏州校区</option>
+        </select>
+      </div>
       <button class="btn-primary btn-sm" @click="update">保存修改</button>
     </div>
 
@@ -253,7 +263,7 @@ const modal = useModal()
 const router = useRouter()
 const auth = useAuthStore()
 
-const form = reactive({ username: '', phone: '', email: '' })
+const form = reactive({ username: '', phone: '', email: '', campus: '' })
 const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
 
 const cert = ref(null)
@@ -315,6 +325,7 @@ async function update() {
     if (form.username) payload.username = normalizeUsername(form.username)
     if (form.phone) payload.phone = normalizePhone(form.phone)
     if (form.email) payload.email = normalizeEmail(form.email)
+    payload.campus = form.campus
     await userAPI.update(payload)
     await auth.fetchUser()
     await loadQuota()
@@ -499,6 +510,7 @@ function goMyReviews() {
 
 onMounted(async () => {
   await auth.fetchUser()
+  if (auth.user?.campus) form.campus = auth.user.campus
   await loadCert()
   await loadCredit()
   await loadQuota()

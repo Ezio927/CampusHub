@@ -10,25 +10,21 @@ import java.util.Map;
 
 class DemandScorer {
 
-    private static final double W_CATEGORY = 0.40;
-    private static final double W_LOCATION = 0.30;
-    private static final double W_CREDIT = 0.10;
-    private static final double W_FRESHNESS = 0.20;
+    private static final double W_CATEGORY = 0.55;
+    private static final double W_CREDIT = 0.15;
+    private static final double W_FRESHNESS = 0.30;
 
     private final Map<DemandCategory, Double> categoryPref;
-    private final String userCampus;
     private final int userCredit;
 
     DemandScorer(Map<DemandCategory, Double> categoryPref, User user) {
         this.categoryPref = categoryPref;
-        this.userCampus = user != null ? normalize(user.getCampus()) : null;
         this.userCredit = user != null ? user.getCreditScore() : 0;
     }
 
     double score(Demand demand) {
         if (demand == null) return 0;
         return categoryScore(demand) * W_CATEGORY
-                + locationScore(demand) * W_LOCATION
                 + creditScore(demand) * W_CREDIT
                 + freshnessScore(demand) * W_FRESHNESS;
     }
@@ -40,17 +36,6 @@ class DemandScorer {
         if (pref == null) return 50;
         double max = categoryPref.values().stream().mapToDouble(Double::doubleValue).max().orElse(1);
         return max > 0 ? (pref / max) * 100 : 50;
-    }
-
-    private double locationScore(Demand demand) {
-        String demandLoc = normalize(demand.getLocationTag());
-        if (isBlank(demandLoc) && isBlank(userCampus)) return 50;
-        if (isBlank(demandLoc) || isBlank(userCampus)) return 50;
-        if (demandLoc.equals(userCampus)) return 100;
-        for (String token : demandLoc.split(" ")) {
-            if (token.length() >= 2 && userCampus.contains(token)) return 80;
-        }
-        return 20;
     }
 
     private double creditScore(Demand demand) {
@@ -71,13 +56,5 @@ class DemandScorer {
         if (hours < 72) return 70;
         if (hours < 168) return 50;
         return 25;
-    }
-
-    static boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
-
-    static String normalize(String value) {
-        return isBlank(value) ? null : value.trim().toLowerCase(java.util.Locale.ROOT);
     }
 }

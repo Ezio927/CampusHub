@@ -7,7 +7,9 @@ import com.example.backend.demand.entity.Demand;
 import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.demand.repository.OrderRepository;
+import com.example.backend.user.dto.UserPublicDto;
 import com.example.backend.user.entity.User;
+import com.example.backend.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,10 +24,14 @@ class RecommendationService {
 
     private final DemandRepository demandRepository;
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
-    RecommendationService(DemandRepository demandRepository, OrderRepository orderRepository) {
+    RecommendationService(DemandRepository demandRepository,
+                          OrderRepository orderRepository,
+                          UserRepository userRepository) {
         this.demandRepository = demandRepository;
         this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
     }
 
     PageResult<DemandDto> recommend(User user, int page, int size) {
@@ -46,7 +52,7 @@ class RecommendationService {
         sorted = applyDiversity(sorted);
 
         List<DemandDto> dtos = sorted.stream()
-                .map(DemandDto::from)
+                .map(this::toDto)
                 .collect(Collectors.toList());
 
         int total = dtos.size();
@@ -54,6 +60,15 @@ class RecommendationService {
         int to = Math.min(from + size, total);
         List<DemandDto> pageContent = from < total ? dtos.subList(from, to) : new ArrayList<>();
         return PageResult.of(pageContent, page, size, total);
+    }
+
+    private DemandDto toDto(Demand demand) {
+        DemandDto dto = DemandDto.from(demand);
+        if (demand != null && demand.getPublisherId() != null) {
+            userRepository.findById(demand.getPublisherId())
+                    .ifPresent(u -> dto.setPublisher(UserPublicDto.from(u)));
+        }
+        return dto;
     }
 
     private Map<DemandCategory, Double> buildCategoryPreference(User user) {

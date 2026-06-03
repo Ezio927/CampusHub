@@ -17,6 +17,7 @@ public class DemandCreateDto {
     private Boolean urgent;
     private LocalDateTime urgentDeadline;
     private String locationTag;
+    private String campus;
     private List<Long> tagIds = new ArrayList<Long>();
     private List<String> imageUrls = new ArrayList<String>();
 
@@ -82,6 +83,14 @@ public class DemandCreateDto {
 
     public void setLocationTag(String locationTag) {
         this.locationTag = locationTag;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 
     public List<Long> getTagIds() {

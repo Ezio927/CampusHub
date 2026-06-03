@@ -18,6 +18,13 @@
         <option value="recommended">推荐排序</option>
         <option value="rewardAmount">报酬高低</option>
       </select>
+      <select v-model="store.filters.campus" @change="store.fetch()" class="sel">
+        <option value="">全部校区</option>
+        <option value="鼓楼校区">鼓楼校区</option>
+        <option value="仙林校区">仙林校区</option>
+        <option value="浦口校区">浦口校区</option>
+        <option value="苏州校区">苏州校区</option>
+      </select>
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
       <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
@@ -27,7 +34,7 @@
       <div class="dt"><span class="dtl">{{ d.title }}</span><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
       <p class="dd">{{ d.description }}</p>
       <div class="df">
-        <span class="text-muted text-sm">{{ d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
+        <span class="text-muted text-sm">{{ d.campus || d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
         <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
       <div v-if="d.urgent" class="mt-sm"><span class="du">紧急</span></div>

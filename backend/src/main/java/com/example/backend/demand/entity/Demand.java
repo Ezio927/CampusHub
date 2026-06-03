@@ -24,6 +24,7 @@ public class Demand {
     private Boolean urgent = Boolean.FALSE;
     private LocalDateTime urgentDeadline;
     private String locationTag;
+    private String campus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -66,6 +67,8 @@ public class Demand {
     public void setUrgentDeadline(LocalDateTime urgentDeadline) { this.urgentDeadline = urgentDeadline; }
     public String getLocationTag() { return locationTag; }
     public void setLocationTag(String locationTag) { this.locationTag = locationTag; }
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

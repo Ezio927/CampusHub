@@ -51,6 +51,7 @@ public class DemandController {
             @RequestParam(value = "status", required = false) String status,
             @Parameter(description = "关键词模糊搜索") @RequestParam(value = "keyword", required = false) String keyword,
             @Parameter(description = "位置标签") @RequestParam(value = "locationTag", required = false) String locationTag,
+            @Parameter(description = "校区筛选") @RequestParam(value = "campus", required = false) String campus,
             @Parameter(description = "是否紧急") @RequestParam(value = "isUrgent", required = false) Boolean urgent,
             @Parameter(description = "排序字段：rewardAmount/urgentDeadline/createdAt/recommended")
             @RequestParam(value = "sortBy", required = false) String sortBy,
@@ -67,6 +68,7 @@ public class DemandController {
         }
         criteria.setKeyword(keyword);
         criteria.setLocationTag(locationTag);
+        criteria.setCampus(campus);
         criteria.setUrgent(urgent);
         criteria.setSortBy(sortBy);
         criteria.setSortDir(sortDir);

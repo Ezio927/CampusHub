@@ -156,6 +156,9 @@ public class DemandServiceImpl implements DemandService {
             if (req.getLocationTag() != null) {
                 demand.setLocationTag(req.getLocationTag());
             }
+            if (req.getCampus() != null) {
+                demand.setCampus(req.getCampus().trim().isEmpty() ? null : req.getCampus().trim());
+            }
             if (req.getImageUrls() != null || req.getTagIds() != null) {
                 updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());
             }

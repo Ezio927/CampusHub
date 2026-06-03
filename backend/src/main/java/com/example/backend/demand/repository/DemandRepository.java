@@ -83,6 +83,10 @@ public class DemandRepository {
             if (!isBlank(criteria.getLocationTag())) {
                 q.like(Demand::getLocationTag, criteria.getLocationTag());
             }
+            if (!isBlank(criteria.getCampus())) {
+                q.and(w -> w.eq(Demand::getCampus, criteria.getCampus())
+                        .or().isNull(Demand::getCampus));
+            }
             if (!isBlank(criteria.getKeyword())) {
                 q.and(w -> w.like(Demand::getTitle, criteria.getKeyword())
                         .or().like(Demand::getDescription, criteria.getKeyword()));

@@ -26,6 +26,7 @@ public class DemandDto {
     private Boolean urgent;
     private LocalDateTime urgentDeadline;
     private String locationTag;
+    private String campus;
     private List<Tag> tags = new ArrayList<Tag>();
     private List<DemandImage> images = new ArrayList<DemandImage>();
     private List<String> riskWarnings = new ArrayList<String>();
@@ -48,6 +49,7 @@ public class DemandDto {
         dto.setUrgent(demand.getUrgent());
         dto.setUrgentDeadline(demand.getUrgentDeadline());
         dto.setLocationTag(demand.getLocationTag());
+        dto.setCampus(demand.getCampus());
         dto.setCreatedAt(demand.getCreatedAt());
         dto.setUpdatedAt(demand.getUpdatedAt());
         return dto;
@@ -147,6 +149,14 @@ public class DemandDto {
 
     public void setLocationTag(String locationTag) {
         this.locationTag = locationTag;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 
     public List<Tag> getTags() {
