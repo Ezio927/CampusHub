@@ -49,8 +49,8 @@ public class CertificationServiceImpl implements CertificationService {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
         }
-        if (req == null || req.getCertType() == null || isBlank(req.getStudentId())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "认证类型和学号不能为空");
+        if (req == null || req.getCertType() == null || isBlank(req.getStudentId()) || req.getGender() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "认证类型、学号和性别不能为空");
         }
         String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
         if (user.getStudentId() == null || !studentId.equalsIgnoreCase(user.getStudentId())) {
@@ -71,6 +71,7 @@ public class CertificationServiceImpl implements CertificationService {
         certification.setUserId(userId);
         certification.setCertType(req.getCertType());
         certification.setStudentId(studentId);
+        certification.setGender(req.getGender());
         certification.setCardImageUrl(cardImageUrl);
         certification.setStatus(CertStatus.PENDING);
         certification.setRejectReason(null);
@@ -113,6 +114,7 @@ public class CertificationServiceImpl implements CertificationService {
         if (approve) {
             certification.approve(reviewerId);
             applicant.setStatus(UserStatus.ACTIVE);
+            applicant.setGender(certification.getGender());
             quotaService.grantCertificationReward(applicant.getId(), reviewerId);
         } else {
             if (isBlank(reason)) {

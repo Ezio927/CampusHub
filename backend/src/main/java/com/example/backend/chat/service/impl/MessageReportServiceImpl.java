@@ -12,6 +12,8 @@ import com.example.backend.chat.repository.MessageRepository;
 import com.example.backend.chat.service.MessageReportService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.ReportStatus;
 import com.example.backend.common.enums.UserRole;
@@ -33,21 +35,25 @@ public class MessageReportServiceImpl implements MessageReportService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final ActionRateLimitService actionRateLimitService;
 
     public MessageReportServiceImpl(MessageReportRepository messageReportRepository,
                                     ConversationRepository conversationRepository,
                                     MessageRepository messageRepository,
                                     UserRepository userRepository,
-                                    NotificationService notificationService) {
+                                    NotificationService notificationService,
+                                    ActionRateLimitService actionRateLimitService) {
         this.messageReportRepository = messageReportRepository;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     @Override
     public MessageReportDto createReport(Long reporterId, Long conversationId, Long messageId, MessageReportCreateDto req) {
+        actionRateLimitService.checkAndRecord(reporterId, RateLimitAction.MESSAGE_REPORT);
         if (req == null || req.getCategory() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请选择举报类型");
         }

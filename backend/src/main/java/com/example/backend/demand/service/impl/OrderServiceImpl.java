@@ -5,6 +5,9 @@ import com.example.backend.chat.dto.ConversationDto;
 import com.example.backend.chat.service.ConversationService;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
+import com.example.backend.common.ratelimit.RateLimitProperties;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.OrderStatus;
 import com.example.backend.common.enums.UserStatus;
@@ -20,6 +23,7 @@ import com.example.backend.demand.pattern.strategy.OrderStateContext;
 import com.example.backend.demand.repository.DemandRepository;
 import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.repository.OrderStatusLogRepository;
+import com.example.backend.demand.repository.ReviewRepository;
 import com.example.backend.demand.service.DemandService;
 import com.example.backend.demand.service.OrderService;
 import com.example.backend.notification.service.NotificationService;
@@ -53,10 +57,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderStateContext orderStateContext;
     private final OrderEventPublisher orderEventPublisher;
     private final DemandService demandService;
+    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final CreditService creditService;
     private final QuotaService quotaService;
     private final ConversationService conversationService;
+    private final ActionRateLimitService actionRateLimitService;
 
     @Autowired
     public OrderServiceImpl(
@@ -65,19 +71,23 @@ public class OrderServiceImpl implements OrderService {
             OrderStateContext orderStateContext,
             OrderEventPublisher orderEventPublisher,
             DemandService demandService,
+            ReviewRepository reviewRepository,
             UserRepository userRepository,
             CreditService creditService,
             QuotaService quotaService,
-            ConversationService conversationService) {
+            ConversationService conversationService,
+            ActionRateLimitService actionRateLimitService) {
         this.orderRepository = orderRepository;
         this.orderStatusLogRepository = orderStatusLogRepository;
         this.orderStateContext = orderStateContext;
         this.orderEventPublisher = orderEventPublisher;
         this.demandService = demandService;
+        this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.creditService = creditService;
         this.quotaService = quotaService;
         this.conversationService = conversationService;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     // [Human-written] 兼容旧测试构造签名：把 DemandRepository 适配成最小 DemandService 能力。
@@ -97,15 +107,18 @@ public class OrderServiceImpl implements OrderService {
                 new OrderEventPublisher(event -> {
                 }),
                 new DemandRepositoryDemandServiceAdapter(demandRepository),
+                null,
                 userRepository,
                 creditService,
                 quotaService,
-                conversationService);
+                conversationService,
+                new ActionRateLimitService(new RateLimitProperties()));
     }
 
     @Override
     @Transactional
     public OrderDto acceptDemand(Long userId, AcceptOrderDto req) {
+        actionRateLimitService.checkAndRecord(userId, RateLimitAction.ORDER_ACCEPT);
         User acceptor = requireActiveUser(userId);
         if (req == null || req.getDemandId() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "需求ID不能为空");
@@ -178,6 +191,14 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "角色参数无效");
         }
         return orders.stream().map(this::enrichDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDto> history(Long userId) {
+        return orderRepository.findHistoryByUserId(userId)
+                .stream()
+                .map(this::enrichDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -455,11 +476,26 @@ public class OrderServiceImpl implements OrderService {
         }
         if (order.getPublisherId() != null) {
             userRepository.findById(order.getPublisherId())
-                    .ifPresent(u -> dto.setPublisherName(u.getUsername()));
+                    .ifPresent(u -> {
+                        dto.setPublisherName(u.getUsername());
+                        dto.setPublisherAvatarUrl(u.getAvatarUrl());
+                    });
         }
         if (order.getAcceptorId() != null) {
             userRepository.findById(order.getAcceptorId())
-                    .ifPresent(u -> dto.setAcceptorName(u.getUsername()));
+                    .ifPresent(u -> {
+                        dto.setAcceptorName(u.getUsername());
+                        dto.setAcceptorAvatarUrl(u.getAvatarUrl());
+                    });
+        }
+        if (reviewRepository != null && order.getId() != null) {
+            dto.setPublisherReviewed(order.getPublisherId() != null
+                    && reviewRepository.findByOrderIdAndReviewerId(order.getId(), order.getPublisherId()).isPresent());
+            dto.setAcceptorReviewed(order.getAcceptorId() != null
+                    && reviewRepository.findByOrderIdAndReviewerId(order.getId(), order.getAcceptorId()).isPresent());
+        } else {
+            dto.setPublisherReviewed(false);
+            dto.setAcceptorReviewed(false);
         }
         return dto;
     }

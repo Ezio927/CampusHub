@@ -6,6 +6,7 @@ import com.example.backend.common.ErrorCode;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.common.moderation.ContentModerationService;
+import com.example.backend.common.validation.ImageDataUrlValidator;
 import com.example.backend.user.dto.UserCreateDto;
 import com.example.backend.user.dto.UserDto;
 import com.example.backend.user.dto.UserPublicDto;
@@ -104,7 +105,8 @@ public class UserServiceImpl implements UserService {
             user.setEmail(UserProfileValidator.normalizeOptionalEmail(req.getEmail()));
         }
         if (req.getAvatarUrl() != null) {
-            user.setAvatarUrl(req.getAvatarUrl());
+            String avatarUrl = req.getAvatarUrl().trim();
+            user.setAvatarUrl(avatarUrl.isEmpty() ? null : ImageDataUrlValidator.requireValidUploadedImagePath(avatarUrl, "头像"));
         }
         userRepository.save(user);
         grantProfileRewards(userId, user.getPhone(), user.getEmail(), hadPhone, hadEmail);

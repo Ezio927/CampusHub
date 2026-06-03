@@ -19,6 +19,14 @@ class ImageDataUrlValidatorTest {
     }
 
     @Test
+    void uploadedImagePathShouldOnlyAllowLocalUploads() {
+        String avatar = "/uploads/avatar-1.webp";
+        Assertions.assertEquals(avatar, ImageDataUrlValidator.requireValidUploadedImagePath(avatar, "头像"));
+        Assertions.assertThrows(BusinessException.class,
+                () -> ImageDataUrlValidator.requireValidUploadedImagePath("data:image/png;base64,iVBORw0KGgo=", "头像"));
+    }
+
+    @Test
     void imageDataUrlShouldRejectUnsupportedOrBrokenPayload() {
         Assertions.assertThrows(BusinessException.class,
                 () -> ImageDataUrlValidator.requireValidImageDataUrl("https://example.com/a.png", "图片"));

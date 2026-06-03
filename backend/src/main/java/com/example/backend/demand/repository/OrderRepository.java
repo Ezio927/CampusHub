@@ -93,6 +93,17 @@ public class OrderRepository {
                         .lt(Order::getAutoConfirmDeadline, deadline));
     }
 
+    public List<Order> findHistoryByUserId(Long userId) {
+        return mapper.selectList(
+                new LambdaQueryWrapper<Order>()
+                        .and(q -> q.eq(Order::getPublisherId, userId)
+                                .or()
+                                .eq(Order::getAcceptorId, userId))
+                        .in(Order::getStatus, OrderStatus.COMPLETED, OrderStatus.CANCELLED)
+                        .orderByDesc(Order::getUpdatedAt)
+                        .orderByDesc(Order::getCreatedAt));
+    }
+
     public List<Order> findAll() {
         return mapper.selectList(null);
     }

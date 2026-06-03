@@ -2,6 +2,8 @@ package com.example.backend.demand.service.impl;
 
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.ratelimit.ActionRateLimitService;
+import com.example.backend.common.ratelimit.RateLimitAction;
 import com.example.backend.common.enums.ArbitrationStatus;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.UserRole;
@@ -30,21 +32,25 @@ public class ArbitrationServiceImpl implements ArbitrationService {
     private final NotificationService notificationService;
     private final CreditService creditService;
     private final OrderRepository orderRepository;
+    private final ActionRateLimitService actionRateLimitService;
 
     public ArbitrationServiceImpl(ArbitrationTicketRepository arbitrationTicketRepository,
                                   UserRepository userRepository,
                                   NotificationService notificationService,
                                   CreditService creditService,
-                                  OrderRepository orderRepository) {
+                                  OrderRepository orderRepository,
+                                  ActionRateLimitService actionRateLimitService) {
         this.arbitrationTicketRepository = arbitrationTicketRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.creditService = creditService;
         this.orderRepository = orderRepository;
+        this.actionRateLimitService = actionRateLimitService;
     }
 
     @Override
     public ArbitrationDto createTicket(Long reporterId, Long orderId, Long reviewId, String reason, List<String> evidenceUrls) {
+        actionRateLimitService.checkAndRecord(reporterId, RateLimitAction.ARBITRATION_CREATE);
         ArbitrationTicket ticket = new ArbitrationTicket();
         ticket.setReporterId(reporterId);
         ticket.setOrderId(orderId);
