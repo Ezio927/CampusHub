@@ -1,6 +1,6 @@
 <template>
   <div class="page"><a href="#" class="back" @click.prevent="$router.back()">←</a>
-    <h1 class="page-title">🪪 认证审核</h1>
+    <h1 class="page-title">认证审核</h1>
     <div v-if="list.length===0" class="empty">暂无待审核认证</div>
     <div v-for="c in list" :key="c.id" class="card cert-item">
       <div class="cert-main">

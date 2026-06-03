@@ -10,6 +10,7 @@ const routes = [
   { path: '/orders/:id', name: 'order-detail', component: () => import('@/views/OrderDetailView.vue'), meta: { auth: true } },
   { path: '/profile', name: 'profile', component: () => import('@/views/ProfileView.vue'), meta: { auth: true } },
   { path: '/reviews/:userId', name: 'reviews', component: () => import('@/views/ReviewsView.vue') },
+  { path: '/notifications', name: 'notifications', component: () => import('@/views/NotificationsView.vue'), meta: { auth: true } },
   { path: '/messages', name: 'messages', component: () => import('@/views/MessagesView.vue'), meta: { auth: true } },
   { path: '/chat/:id', name: 'chat', component: () => import('@/views/ChatView.vue'), meta: { auth: true } },
   { path: '/admin', name: 'admin', component: () => import('@/views/admin/DashboardView.vue'), meta: { auth: true, admin: true } },
@@ -19,7 +20,8 @@ const routes = [
   { path: '/admin/arbitrations', name: 'admin-arbs', component: () => import('@/views/admin/ArbitrationView.vue'), meta: { auth: true, admin: true } },
   { path: '/admin/message-reports', name: 'admin-message-reports', component: () => import('@/views/admin/MessageReportView.vue'), meta: { auth: true, admin: true } },
   { path: '/admin/credit-appeals', name: 'admin-credit-appeals', component: () => import('@/views/admin/CreditAppealView.vue'), meta: { auth: true, admin: true } },
-  { path: '/admin/ban-appeals', name: 'admin-ban-appeals', component: () => import('@/views/admin/BanAppealView.vue'), meta: { auth: true, admin: true } }
+  { path: '/admin/notifications', name: 'admin-notifications', component: () => import('@/views/admin/NotificationsSendView.vue'), meta: { auth: true, admin: true } },
+  { path: '/admin/ban-appeals', name: 'admin-ban-appeals', component: () => import('@/views/admin/BanAppealView.vue'), meta: { auth: true, admin: true } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })

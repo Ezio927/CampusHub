@@ -8,7 +8,7 @@
 
     <template v-if="role === 'PUBLISHER'">
       <div class="section-title">我发布的需求</div>
-      <div v-if="demands.length === 0" class="empty">暂无发布的需求</div>
+      <div v-if="demands.length===0" class="empty"><p class="mt-sm">暂无发布的需求</p></div>
       <div v-else class="card-grid">
         <div v-for="item in demands" :key="'d' + item.id" class="oc" @click="goDemand(item.id)">
           <div class="flex-between">
@@ -25,7 +25,7 @@
       </div>
 
       <div class="section-title" style="margin-top:20px">已生成的订单</div>
-      <div v-if="orders.length === 0" class="empty">暂无订单</div>
+      <div v-if="orders.length===0" class="empty"><p class="mt-sm">暂无订单</p></div>
       <div v-else class="card-grid">
         <div v-for="item in orders" :key="'o' + item.id" class="oc" @click="goOrder(item.id)">
           <div class="flex-between">
@@ -43,7 +43,7 @@
     </template>
 
     <template v-else>
-      <div v-if="orders.length === 0" class="empty">暂无订单</div>
+      <div v-if="orders.length===0" class="empty"><p class="mt-sm">暂无订单</p></div>
       <div v-else class="card-grid">
         <div v-for="item in orders" :key="'o' + item.id" class="oc" @click="goOrder(item.id)">
           <div class="flex-between">

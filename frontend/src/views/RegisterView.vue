@@ -1,6 +1,6 @@
 <template>
   <div class="rp"><div class="rb"><div class="rc">
-    <div class="ri">📝</div><h1>创建账号</h1>
+    <h1>创建账号</h1>
     <form @submit.prevent="reg">
       <div class="rr"><input class="inp" v-model="f.username" placeholder="用户名" required /><input class="inp" v-model="f.password" type="password" placeholder="密码" required /></div>
       <div class="rr"><input class="inp" v-model="f.studentId" placeholder="学号" required /><input class="inp" v-model="f.realName" placeholder="真实姓名" required /></div>

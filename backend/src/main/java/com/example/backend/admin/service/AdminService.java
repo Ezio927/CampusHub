@@ -4,6 +4,7 @@ import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.admin.dto.SendNotificationRequest;
 import com.example.backend.admin.dto.RatingUpdateDto;
 import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
@@ -33,4 +34,6 @@ public interface AdminService {
     void deleteOrder(Long orderId, Long adminId);
 
     void deleteDemand(Long demandId, Long adminId);
+
+    void sendNotification(SendNotificationRequest request, Long adminId);
 }

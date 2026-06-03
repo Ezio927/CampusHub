@@ -10,7 +10,7 @@
     <div class="nav-cards">
       <router-link to="/admin/users" class="nc">
         <div class="nc-icon" style="background:#eef2ff">用</div>
-        <div class="nc-info"><div class="nc-title">用户管理</div><div class="nc-desc">查看、封禁、解封用户</div></div>
+        <div class="nc-info"><div class="nc-title">用户管理</div><div class="nc-desc">查看、封禁、解封用户，调整评分</div></div>
         <span class="nc-arrow">></span>
       </router-link>
       <router-link to="/admin/orders" class="nc">
@@ -20,12 +20,12 @@
       </router-link>
       <router-link to="/admin/certifications" class="nc">
         <div class="nc-icon" style="background:#ecfdf5">证</div>
-        <div class="nc-info"><div class="nc-title">实名认证审核</div><div class="nc-desc">审核学生实名认证</div></div>
+        <div class="nc-info"><div class="nc-title">认证审核</div><div class="nc-desc">审核学生实名认证</div></div>
         <span class="nc-arrow">></span>
       </router-link>
       <router-link to="/admin/arbitrations" class="nc">
         <div class="nc-icon" style="background:#fffbeb">诉</div>
-        <div class="nc-info"><div class="nc-title">订单与评价申诉</div><div class="nc-desc">处理订单纠纷和评价申诉</div></div>
+        <div class="nc-info"><div class="nc-title">仲裁处理</div><div class="nc-desc">处理订单纠纷与评价申诉</div></div>
         <span class="nc-arrow">></span>
       </router-link>
       <router-link to="/admin/message-reports" class="nc">
@@ -35,12 +35,17 @@
       </router-link>
       <router-link to="/admin/credit-appeals" class="nc">
         <div class="nc-icon" style="background:#eef2ff">信</div>
-        <div class="nc-info"><div class="nc-title">信用分申诉</div><div class="nc-desc">处理信用分恢复申请</div></div>
+        <div class="nc-info"><div class="nc-title">信用申诉</div><div class="nc-desc">处理信用分恢复申请</div></div>
         <span class="nc-arrow">></span>
       </router-link>
       <router-link to="/admin/ban-appeals" class="nc">
         <div class="nc-icon" style="background:#fee2e2">封</div>
         <div class="nc-info"><div class="nc-title">封禁申诉</div><div class="nc-desc">处理账号封禁后的申诉</div></div>
+        <span class="nc-arrow">></span>
+      </router-link>
+      <router-link to="/admin/notifications" class="nc">
+        <div class="nc-icon" style="background:#f0fdf4">通</div>
+        <div class="nc-info"><div class="nc-title">发送通知</div><div class="nc-desc">向用户发送系统通知或公告</div></div>
         <span class="nc-arrow">></span>
       </router-link>
     </div>

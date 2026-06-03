@@ -1,7 +1,7 @@
 <template>
   <div class="lp">
     <div class="lb"><div class="lc">
-      <div class="li">🏫</div><h1>欢迎回来</h1>
+      <h1>欢迎回来</h1>
       <p class="ls">登录 CampusHub 校园互助平台</p>
       <form @submit.prevent="login">
         <input class="inp" v-model="username" placeholder="用户名" required />
@@ -10,7 +10,8 @@
         <button type="submit" class="btn-primary btn-block lbn" :disabled="ing">{{ ing? '登录中...' : '登 录' }}</button>
       </form>
     </div>
-    <p class="lf">还没有账号？<a href="/register">立即注册</a></p></div>
+    <p class="lf">还没有账号？<a href="/register">立即注册</a></p>
+    <p class="le">无法登录？联系管理员：<a href="mailto:admin@campushub.cn">admin@campushub.cn</a></p></div>
   </div>
 </template>
 <script setup>
@@ -41,4 +42,6 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px}
 .lbn{padding:14px;border-radius:10px;font-size:16px;font-weight:700;margin-top:8px}
 .lf{margin-top:20px;text-align:center;font-size:14px;color:var(--text-secondary)}
 .lf a{color:var(--primary);font-weight:700}
+.le{margin-top:10px;text-align:center;font-size:13px;color:var(--text-muted)}
+.le a{color:var(--text-secondary);font-weight:500}
 </style>
