@@ -338,6 +338,7 @@ async function checkIn() {
 
 async function submitCreditAppeal() {
   const reason = await modal.prompt('信用分申诉', '请填写申诉理由（必填）', '请说明具体情况，管理员会据此审核。')
+  if (reason === false) return
   if (!reason || !reason.trim()) {
     await modal.alert('理由不能为空', '请填写申诉理由。')
     return
@@ -354,6 +355,7 @@ async function submitCreditAppeal() {
 
 async function submitBanAppeal() {
   const reason = await modal.prompt('封禁申诉', '请填写申诉理由（必填）', '请说明你认为被误封或希望解封的原因。')
+  if (reason === false) return
   if (!reason || !reason.trim()) {
     await modal.alert('理由不能为空', '请填写申诉理由。')
     return

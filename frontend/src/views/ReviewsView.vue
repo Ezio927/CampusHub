@@ -38,6 +38,7 @@ async function load() {
 
 async function submitReviewAppeal(item) {
   const reason = await modal.prompt('评价申诉', '请填写申诉理由（必填）', '请说明你对这条评价有异议的原因。')
+  if (reason === false) return
   if (!reason || !reason.trim()) {
     await modal.alert('理由不能为空', '请填写申诉理由。')
     return

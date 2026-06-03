@@ -148,6 +148,7 @@ async function doAction(key) {
     }
     if (key === 'cancel') {
       const reason = await modal.prompt('取消订单', '请输入取消原因（必填）', '请填写取消原因')
+      if (reason === false) return
       if (!reason || !reason.trim()) {
         await modal.alert('原因不能为空', '请填写取消原因。')
         return
@@ -205,6 +206,7 @@ async function messagePeer() {
 
 async function submitOrderAppeal() {
   const reason = await modal.prompt('订单纠纷申诉', '请填写申诉理由（必填）', '请说明订单争议情况，管理员会进行处理。')
+  if (reason === false) return
   if (!reason || !reason.trim()) {
     await modal.alert('理由不能为空', '请填写申诉理由。')
     return
