@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <a href="#" class="back" @click.prevent="$router.back()">< 返回</a>
+    <a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">封禁申诉</h1>
     <div v-if="list.length===0" class="empty">暂无待处理的封禁申诉</div>
     <div v-for="item in list" :key="item.id" class="card">

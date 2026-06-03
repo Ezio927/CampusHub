@@ -2,7 +2,7 @@ package com.example.backend.admin.controller;
 
 import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.AdminUserDto;
-import com.example.backend.admin.dto.AdminUserDto;
+import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.admin.dto.RatingUpdateDto;

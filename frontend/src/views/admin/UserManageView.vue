@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <a href="#" class="back" @click.prevent="$router.back()">返回</a>
+    <a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">用户管理</h1>
     <input v-model="keyword" placeholder="搜索用户名/姓名/学号" class="mb-md" @input="search" />
 
