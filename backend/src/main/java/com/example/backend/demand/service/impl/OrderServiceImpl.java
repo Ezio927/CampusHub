@@ -11,6 +11,7 @@ import com.example.backend.common.ratelimit.RateLimitProperties;
 import com.example.backend.common.enums.DemandStatus;
 import com.example.backend.common.enums.NotificationType;
 import com.example.backend.common.enums.OrderStatus;
+import com.example.backend.common.enums.RewardType;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.demand.dto.AcceptOrderDto;
 import com.example.backend.demand.dto.DemandDto;
@@ -251,8 +252,13 @@ public class OrderServiceImpl implements OrderService {
         settleCompletedOrder(order);
 
         appendLogAndPublish(order, fromStatus, userId, "confirm");
-        postOrderSystemMessage(order, "平台消息：发布者已确认需求「"
-                + demandTitle(order.getDemandId()) + "」完成。", userId);
+        String confirmMsg = "平台消息：发布者已确认需求「" + demandTitle(order.getDemandId()) + "」完成。";
+        DemandDto demandDto = demandService.getDetail(order.getDemandId());
+        if (demandDto != null && demandDto.getRewardType() == RewardType.MONEY) {
+            confirmMsg += " 报酬为 ¥" + (demandDto.getRewardAmount() != null ? demandDto.getRewardAmount() : 0)
+                    + "（现金），请双方在聊天中自行沟通付款方式。";
+        }
+        postOrderSystemMessage(order, confirmMsg, userId);
         notificationService.createNotification(order.getAcceptorId(), NotificationType.ORDER_COMPLETED,
                 "订单已完成", "发布者已确认需求「" + demandTitle(order.getDemandId()) + "」完成", order.getId());
         return enrichDto(order);
