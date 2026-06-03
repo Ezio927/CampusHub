@@ -57,6 +57,17 @@ public final class ImageDataUrlValidator {
         return requireValidImageDataUrl(normalized, fieldName);
     }
 
+    public static String requireValidUploadedImagePath(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, fieldName + "不能为空");
+        }
+        String normalized = value.trim();
+        if (LOCAL_UPLOAD_IMAGE.matcher(normalized).matches()) {
+            return normalized;
+        }
+        throw invalidImage(fieldName);
+    }
+
     private static BusinessException invalidImage(String fieldName) {
         return new BusinessException(ErrorCode.INVALID_PARAM,
                 fieldName + "格式仅支持png、jpg、gif、webp图片");

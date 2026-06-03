@@ -5,7 +5,10 @@
       <p class="mt-sm">暂无私信</p>
     </div>
     <button v-for="c in list" :key="c.id" class="conv" @click="open(c.id)">
-      <div class="avatar">{{ c.targetUser?.username?.[0]?.toUpperCase() || '?' }}</div>
+      <span class="avatar" :class="{hasAvatar:c.targetUser?.avatarUrl}" @click="handleAvatarClick($event,c.targetUser?.avatarUrl)">
+        <img v-if="c.targetUser?.avatarUrl" :src="c.targetUser.avatarUrl" alt="对方头像" />
+        <span v-else>{{ userInitial(c.targetUser) }}</span>
+      </span>
       <div class="conv-main">
         <div class="flex-between">
           <span class="conv-name">{{ c.targetUser?.username || '用户 #' + c.id }}</span>
@@ -18,6 +21,10 @@
       </div>
       <span v-if="c.unreadCount" class="unread">{{ c.unreadCount }}</span>
     </button>
+    <div v-if="avatarViewer" class="image-viewer" @click.self="avatarViewer=''">
+      <button type="button" class="viewer-close" @click="avatarViewer=''">关闭</button>
+      <img :src="avatarViewer" alt="头像" />
+    </div>
   </div>
 </template>
 
@@ -25,9 +32,11 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { chatAPI } from '@/api/chat'
+import { userInitial } from '@/utils/userDisplay'
 
 const router = useRouter()
 const list = ref([])
+const avatarViewer = ref('')
 
 async function load() {
   const res = await chatAPI.list()
@@ -36,6 +45,16 @@ async function load() {
 
 function open(id) {
   router.push('/chat/' + id)
+}
+
+function handleAvatarClick(event, src) {
+  if (!src) return
+  event.stopPropagation()
+  openAvatar(src)
+}
+
+function openAvatar(src) {
+  if (src) avatarViewer.value = src
 }
 
 function formatTime(value) {
@@ -77,7 +96,10 @@ onMounted(load)
   font-weight: 800;
   flex-shrink: 0;
   border: 2px solid black;
+  overflow: hidden;
 }
+.avatar.hasAvatar { background: #fff; cursor: zoom-in; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .conv-main {
   flex: 1;
   min-width: 0;
@@ -126,4 +148,7 @@ onMounted(load)
   align-items: center;
   justify-content: center;
 }
+.image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
+.image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:12px;background:#fff;border:2px solid black}
+.viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text);padding:8px 16px;border-radius:8px;font-weight:700}
 </style>

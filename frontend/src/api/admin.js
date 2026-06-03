@@ -8,6 +8,7 @@ export const adminAPI = {
   deleteDemand: id => c.delete(`/admin/demands/${id}`),
   ban: (id, d) => c.put(`/admin/users/${id}/ban`, d || {}),
   unban: id => c.put(`/admin/users/${id}/unban`),
+  adjustRating: (id, d) => c.put(`/admin/users/${id}/rating`, d),
   adjustCredit: (id, d) => c.put(`/admin/users/${id}/credit`, d),
   adjustQuota: (id, d) => c.put(`/admin/users/${id}/quota`, d),
   reviewCert: (id, d) => c.put(`/admin/certifications/${id}/review`, d),

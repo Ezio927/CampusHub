@@ -1,10 +1,11 @@
 package com.example.backend.admin.controller;
 
-import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.AdminOrderManageDto;
+import com.example.backend.admin.dto.AdminUserDto;
 import com.example.backend.admin.dto.AdjustBalanceDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
+import com.example.backend.admin.dto.RatingUpdateDto;
 import com.example.backend.admin.service.AdminService;
 import com.example.backend.auth.security.AuthContext;
 import com.example.backend.chat.dto.MessageReportDto;
@@ -39,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @SecurityRequirement(name = "BearerAuth")
-@Tag(name = "管理后台", description = "数据看板、用户管理、审核认证、解决仲裁（均需管理员权限）")
+@Tag(name = "管理后台", description = "数据看板、用户管理、认证审核、仲裁和举报审核")
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -78,7 +79,7 @@ public class AdminController {
     @Operation(summary = "管理员订单列表")
     @GetMapping("/orders")
     public ApiResponse<List<AdminOrderManageDto>> listOrders(
-            @Parameter(description = "订单状态筛选") @RequestParam(value = "status", required = false) String status) {
+            @Parameter(description = "订单或需求状态筛选") @RequestParam(value = "status", required = false) String status) {
         requireAdmin();
         return ApiResponse.success(adminService.listOrders(status));
     }
@@ -118,6 +119,15 @@ public class AdminController {
         requireAdmin();
         adminService.unbanUser(id, AuthContext.requireUserId());
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "管理员调整用户评分")
+    @PutMapping("/users/{id}/rating")
+    public ApiResponse<AdminUserDto> updateUserRating(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @RequestBody RatingUpdateDto request) {
+        requireAdmin();
+        return ApiResponse.success(adminService.updateUserRating(id, AuthContext.requireUserId(), request));
     }
 
     @Operation(summary = "管理员调整用户信用分")
