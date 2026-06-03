@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS order_status_logs (
 
 CREATE TABLE IF NOT EXISTS arbitration_tickets (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    review_id BIGINT NOT NULL,
+    review_id BIGINT,
     order_id BIGINT NOT NULL,
     reporter_id BIGINT NOT NULL,
     reason TEXT,

@@ -15,5 +15,7 @@ export const adminAPI = {
   messageReports: () => c.get('/admin/message-reports'),
   reviewMessageReport: (id, d) => c.put(`/admin/message-reports/${id}/review`, d),
   creditAppeals: () => c.get('/admin/credit-appeals'),
-  reviewCreditAppeal: (id, approved) => c.put(`/admin/credit-appeals/${id}/review`, { approved })
+  reviewCreditAppeal: (id, approved) => c.put(`/admin/credit-appeals/${id}/review`, { approved }),
+  banAppeals: () => c.get('/admin/ban-appeals'),
+  reviewBanAppeal: (id, approved) => c.put(`/admin/ban-appeals/${id}/review`, { approved })
 }

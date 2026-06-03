@@ -9,7 +9,6 @@ import com.example.backend.demand.dto.ArbitrationCreateDto;
 import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.demand.entity.ArbitrationTicket;
-import com.example.backend.demand.entity.Order;
 import com.example.backend.demand.repository.ArbitrationTicketRepository;
 import com.example.backend.demand.repository.OrderRepository;
 import com.example.backend.demand.service.ArbitrationService;
@@ -54,17 +53,30 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         ticket.setEvidenceUrls(evidenceUrls);
         ticket.setStatus(ArbitrationStatus.PENDING);
         arbitrationTicketRepository.save(ticket);
-        notificationService.createNotification(reporterId, NotificationType.ARBITRATION_UPDATE,
-                "仲裁工单已创建", "您的仲裁申请已提交，管理员会尽快处理。", ticket.getId());
+        notificationService.createNotification(
+                reporterId,
+                NotificationType.ARBITRATION_UPDATE,
+                "Appeal created",
+                "Your appeal has been submitted and will be reviewed soon.",
+                ticket.getId()
+        );
         return ArbitrationDto.from(ticket);
     }
 
     @Override
     public ArbitrationDto createTicket(Long reporterId, ArbitrationCreateDto req) {
         if (req == null || req.getOrderId() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "订单ID不能为空");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Order ID cannot be empty");
         }
         return createTicket(reporterId, req.getOrderId(), req.getReviewId(), req.getReason(), req.getEvidenceUrls());
+    }
+
+    @Override
+    public List<ArbitrationDto> listMine(Long reporterId) {
+        return arbitrationTicketRepository.findByReporterIdOrderByCreatedAtDesc(reporterId)
+                .stream()
+                .map(ArbitrationDto::from)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -82,11 +94,13 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         if (admin.getRole() != UserRole.ADMIN) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+
         ArbitrationTicket ticket = arbitrationTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         if (ticket.getStatus() != ArbitrationStatus.PENDING && ticket.getStatus() != ArbitrationStatus.PROCESSING) {
-            throw new BusinessException(ErrorCode.CONFLICT, "仲裁工单已处理");
+            throw new BusinessException(ErrorCode.CONFLICT, "Ticket already processed");
         }
+
         String action = req == null ? null : req.getAction();
         if ("DISMISS".equalsIgnoreCase(action)) {
             ticket.setStatus(ArbitrationStatus.DISMISSED);
@@ -99,17 +113,19 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         arbitrationTicketRepository.save(ticket);
 
         if ("RESOLVED".equalsIgnoreCase(action) && ticket.getOrderId() != null) {
-            orderRepository.findById(ticket.getOrderId()).ifPresent(order -> {
-                creditService.deductCredit(order.getAcceptorId(), 10,
-                        "仲裁判定违约", order.getId());
-            });
+            orderRepository.findById(ticket.getOrderId()).ifPresent(order ->
+                    creditService.deductCredit(order.getAcceptorId(), 10, "Arbitration marked breach", order.getId()));
         } else if ("DISMISS".equalsIgnoreCase(action)) {
-            creditService.deductCredit(ticket.getReporterId(), 10,
-                    "恶意差评", ticket.getOrderId());
+            creditService.deductCredit(ticket.getReporterId(), 10, "Malicious appeal", ticket.getOrderId());
         }
 
-        notificationService.createNotification(ticket.getReporterId(), NotificationType.ARBITRATION_UPDATE,
-                "仲裁已处理", req == null ? "" : req.getResolution(), ticket.getId());
+        notificationService.createNotification(
+                ticket.getReporterId(),
+                NotificationType.ARBITRATION_UPDATE,
+                "Appeal resolved",
+                req == null ? "" : req.getResolution(),
+                ticket.getId()
+        );
         return ArbitrationDto.from(ticket);
     }
 }

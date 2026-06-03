@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @SecurityRequirement(name = "BearerAuth")
-@Tag(name = "仲裁", description = "创建仲裁工单、查看待处理列表、解决仲裁")
+@Tag(name = "仲裁", description = "创建申诉工单、查看本人申诉、管理员处理仲裁")
 @RestController
 @RequestMapping("/api/arbitrations")
 public class ArbitrationController {
@@ -35,10 +35,16 @@ public class ArbitrationController {
         this.arbitrationService = arbitrationService;
     }
 
-    @Operation(summary = "创建仲裁工单")
+    @Operation(summary = "创建申诉工单")
     @PostMapping
     public ApiResponse<ArbitrationDto> create(@RequestBody ArbitrationCreateDto request) {
         return ApiResponse.success(arbitrationService.createTicket(AuthContext.requireUserId(), request));
+    }
+
+    @Operation(summary = "查看我的申诉")
+    @GetMapping("/mine")
+    public ApiResponse<List<ArbitrationDto>> listMine() {
+        return ApiResponse.success(arbitrationService.listMine(AuthContext.requireUserId()));
     }
 
     @Operation(summary = "查看待处理仲裁列表（管理员）")
