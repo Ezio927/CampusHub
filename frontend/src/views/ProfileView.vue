@@ -6,12 +6,6 @@
       <div class="pi">学号 {{ auth.user?.studentId }}</div>
       <div class="pc">信用分 {{ auth.user?.creditScore }}</div>
       <div class="pc">额度分 {{ auth.user?.quotaAvailable || 0 }} 可用 · {{ auth.user?.quotaFrozen || 0 }} 冻结</div>
-      <div v-if="appeal" class="appeal-status" :class="'appeal-'+appeal.status">
-        <span v-if="appeal.status==='PENDING'">申诉审核中</span>
-        <span v-else-if="appeal.status==='APPROVED'">申诉已通过，信用分已恢复</span>
-        <span v-else-if="appeal.status==='REJECTED'">申诉已被驳回</span>
-      </div>
-      <button v-if="auth.user?.creditScore < 60 && (!appeal || appeal.status==='REJECTED')" class="btn-appeal" @click="submitAppeal">信用分低于60，申请恢复</button>
 
       <div v-if="creditAppeal" class="appeal-status" :class="'appeal-' + creditAppeal.status">
         <span v-if="creditAppeal.status === 'PENDING'">信用分申诉审核中</span>
@@ -82,12 +76,6 @@
         </section>
       </div>
     </div>
-    <div class="card"><h3 class="mb-sm">编辑资料</h3>
-      <div class="rr"><div class="form-group"><label>用户名</label><input v-model="e.username" :placeholder="auth.user?.username" /></div><div class="form-group"><label>手机</label><input v-model="e.phone" :placeholder="auth.user?.phone||'未填写'" /></div></div>
-      <div class="form-group"><label>邮箱</label><input v-model="e.email" :placeholder="auth.user?.email||'未填写'" /></div>
-      <button class="btn-primary btn-sm" @click="update">保存修改</button>
-    </div>
-    <div class="card"><h3 class="mb-sm">实名认证</h3>
 
     <div class="card">
       <h3 class="mb-sm">编辑资料</h3>
@@ -170,6 +158,7 @@
         <img :src="cert.cardImageUrl" alt="认证图片" />
       </button>
     </div>
+
     <div class="card">
       <div class="flex-between mb-sm">
         <h3>我的评价</h3>
