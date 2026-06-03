@@ -18,6 +18,27 @@ spring:
 
 app:
   upload-dir: uploads
+  rate-limit:
+    demand-create:
+      min-interval-seconds: 10
+      max-per-hour: 10
+      max-per-day: 30
+    message-send:
+      min-interval-seconds: 2
+      max-per-hour: 120
+      max-per-day: 500
+    message-report:
+      min-interval-seconds: 30
+      max-per-hour: 5
+      max-per-day: 10
+    order-accept:
+      min-interval-seconds: 5
+      max-per-hour: 20
+      max-per-day: 50
+    arbitration-create:
+      min-interval-seconds: 60
+      max-per-hour: 3
+      max-per-day: 5
 
 server:
   port: 8080

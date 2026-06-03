@@ -93,6 +93,16 @@ public class ConversationRepository {
                         .orderByDesc(Conversation::getCreatedAt));
     }
 
+    public List<Conversation> findBlockedByUserIdOrderByLastMessageAtDesc(Long userId) {
+        return mapper.selectList(
+                new LambdaQueryWrapper<Conversation>()
+                        .and(w -> w.eq(Conversation::getUser1Id, userId).or().eq(Conversation::getUser2Id, userId))
+                        .eq(Conversation::getStatus, ConversationStatus.BLOCKED)
+                        .eq(Conversation::getBlockedByUserId, userId)
+                        .orderByDesc(Conversation::getLastMessageAt)
+                        .orderByDesc(Conversation::getCreatedAt));
+    }
+
     public static String buildKey(Long user1Id, Long user2Id) {
         Long left = Math.min(user1Id, user2Id);
         Long right = Math.max(user1Id, user2Id);

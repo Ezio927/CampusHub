@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.backend.common.enums.CertStatus;
 import com.example.backend.common.enums.CertType;
+import com.example.backend.common.enums.UserGender;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ public class Certification {
     private Long userId;
     private CertType certType;
     private String studentId;
+    private UserGender gender;
     private String cardImageUrl;
     private CertStatus status = CertStatus.PENDING;
     private String rejectReason;
@@ -47,6 +49,8 @@ public class Certification {
     public void setCertType(CertType certType) { this.certType = certType; }
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
+    public UserGender getGender() { return gender; }
+    public void setGender(UserGender gender) { this.gender = gender; }
     public String getCardImageUrl() { return cardImageUrl; }
     public void setCardImageUrl(String cardImageUrl) { this.cardImageUrl = cardImageUrl; }
     public CertStatus getStatus() { return status; }

@@ -40,6 +40,13 @@ public class ArbitrationTicketRepository {
                         .orderByAsc(ArbitrationTicket::getCreatedAt));
     }
 
+    public List<ArbitrationTicket> findByReporterIdOrderByCreatedAtDesc(Long reporterId) {
+        return mapper.selectList(
+                new LambdaQueryWrapper<ArbitrationTicket>()
+                        .eq(ArbitrationTicket::getReporterId, reporterId)
+                        .orderByDesc(ArbitrationTicket::getCreatedAt));
+    }
+
     public List<ArbitrationTicket> findAll() {
         return mapper.selectList(null);
     }

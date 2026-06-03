@@ -8,6 +8,7 @@ export const adminAPI = {
   deleteDemand: id => c.delete(`/admin/demands/${id}`),
   ban: (id, d) => c.put(`/admin/users/${id}/ban`, d || {}),
   unban: id => c.put(`/admin/users/${id}/unban`),
+  adjustRating: (id, d) => c.put(`/admin/users/${id}/rating`, d),
   adjustCredit: (id, d) => c.put(`/admin/users/${id}/credit`, d),
   adjustQuota: (id, d) => c.put(`/admin/users/${id}/quota`, d),
   reviewCert: (id, d) => c.put(`/admin/certifications/${id}/review`, d),
@@ -16,5 +17,7 @@ export const adminAPI = {
   reviewMessageReport: (id, d) => c.put(`/admin/message-reports/${id}/review`, d),
   creditAppeals: () => c.get('/admin/credit-appeals'),
   reviewCreditAppeal: (id, approved) => c.put(`/admin/credit-appeals/${id}/review`, { approved }),
-  sendNotification: d => c.post('/admin/notifications/send', d)
+  sendNotification: d => c.post('/admin/notifications/send', d),
+  banAppeals: () => c.get('/admin/ban-appeals'),
+  reviewBanAppeal: (id, approved) => c.put(`/admin/ban-appeals/${id}/review`, { approved })
 }

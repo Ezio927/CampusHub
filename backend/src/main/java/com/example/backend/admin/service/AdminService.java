@@ -5,6 +5,7 @@ import com.example.backend.admin.dto.AdminOrderManageDto;
 import com.example.backend.admin.dto.BanUserDto;
 import com.example.backend.admin.dto.DashboardDto;
 import com.example.backend.admin.dto.SendNotificationRequest;
+import com.example.backend.admin.dto.RatingUpdateDto;
 import com.example.backend.demand.dto.ArbitrationDto;
 import com.example.backend.demand.dto.ArbitrationResolveDto;
 import com.example.backend.user.dto.CertificationDto;
@@ -23,6 +24,8 @@ public interface AdminService {
     void banUser(Long userId, Long adminId, BanUserDto req);
 
     void unbanUser(Long userId, Long adminId);
+
+    AdminUserDto updateUserRating(Long userId, Long adminId, RatingUpdateDto req);
 
     CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req);
 

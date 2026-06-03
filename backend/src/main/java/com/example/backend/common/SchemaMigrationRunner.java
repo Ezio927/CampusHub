@@ -34,6 +34,12 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("CREATE UNIQUE INDEX uk_messages_sender_client ON messages(sender_id, client_message_id)");
         executeIgnoreDuplicate("ALTER TABLE certifications MODIFY card_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE certifications ALTER COLUMN card_image_url CLOB");
+        executeIgnoreDuplicate("ALTER TABLE certifications ADD COLUMN gender VARCHAR(20)");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN gender VARCHAR(20)");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN publisher_rating DECIMAL(3,2) NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN publisher_rating_count INT NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN acceptor_rating DECIMAL(3,2) NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN acceptor_rating_count INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_available INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_frozen INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN type VARCHAR(30)");
@@ -46,6 +52,8 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_type VARCHAR(20)");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE message_reports ADD COLUMN message_image_url CLOB");
+        executeIgnoreDuplicate("ALTER TABLE arbitration_tickets MODIFY review_id BIGINT NULL");
+        executeIgnoreDuplicate("ALTER TABLE arbitration_tickets ALTER COLUMN review_id BIGINT");
         jdbcTemplate.execute("""
                 CREATE TABLE IF NOT EXISTS message_reports (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -68,6 +76,17 @@ public class SchemaMigrationRunner implements CommandLineRunner {
                 """);
         jdbcTemplate.execute("""
                 CREATE TABLE IF NOT EXISTS credit_appeals (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    reason VARCHAR(500),
+                    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+                    reviewed_by BIGINT,
+                    reviewed_at TIMESTAMP,
+                    created_at TIMESTAMP
+                )
+                """);
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS ban_appeals (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     user_id BIGINT NOT NULL,
                     reason VARCHAR(500),

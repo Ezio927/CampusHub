@@ -12,6 +12,8 @@ public interface ArbitrationService {
 
     ArbitrationDto createTicket(Long reporterId, ArbitrationCreateDto req);
 
+    List<ArbitrationDto> listMine(Long reporterId);
+
     List<ArbitrationDto> listPending();
 
     ArbitrationDto resolve(Long ticketId, Long adminId, ArbitrationResolveDto req);

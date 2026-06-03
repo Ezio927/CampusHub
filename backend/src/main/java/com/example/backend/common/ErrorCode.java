@@ -17,6 +17,7 @@ public enum ErrorCode {
     DEMAND_NOT_FOUND(40402, "需求不存在"),
     ORDER_NOT_FOUND(40403, "订单不存在"),
     CERTIFICATION_NOT_FOUND(40404, "认证记录不存在"),
+    RATE_LIMITED(42900, "操作过于频繁，请稍后再试"),
     CONFLICT(40900, "操作冲突"),
     DEMAND_ALREADY_ACCEPTED(40901, "该需求已被接单"),
     ORDER_CANCELLED(40902, "订单已取消"),

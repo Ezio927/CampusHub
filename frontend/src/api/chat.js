@@ -2,6 +2,7 @@ import c from './client'
 export const chatAPI = {
   create: d => c.post('/conversations', d),
   list: () => c.get('/conversations'),
+  blockedList: () => c.get('/conversations/blocked'),
   detail: id => c.get(`/conversations/${id}`),
   unread: () => c.get('/conversations/unread-count'),
   send: (id, d) => c.post(`/conversations/${id}/messages`, d),

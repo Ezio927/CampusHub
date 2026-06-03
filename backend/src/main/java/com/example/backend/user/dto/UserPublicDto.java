@@ -1,6 +1,7 @@
 package com.example.backend.user.dto;
 
 import com.example.backend.common.enums.UserRole;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.user.entity.User;
 
@@ -14,7 +15,12 @@ public class UserPublicDto {
     private String phone;
     private String email;
     private String avatarUrl;
+    private UserGender gender;
     private Integer creditScore;
+    private Double publisherRating;
+    private Integer publisherRatingCount;
+    private Double acceptorRating;
+    private Integer acceptorRatingCount;
     private Integer quotaAvailable;
     private UserRole role;
     private UserStatus status;
@@ -35,7 +41,12 @@ public class UserPublicDto {
         dto.setPhone(maskPhone(user.getPhone()));
         dto.setEmail(maskEmail(user.getEmail()));
         dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setGender(user.getGender());
         dto.setCreditScore(user.getCreditScore());
+        dto.setPublisherRating(user.getPublisherRating());
+        dto.setPublisherRatingCount(user.getPublisherRatingCount());
+        dto.setAcceptorRating(user.getAcceptorRating());
+        dto.setAcceptorRatingCount(user.getAcceptorRatingCount());
         dto.setQuotaAvailable(user.getQuotaAvailable());
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
@@ -53,6 +64,10 @@ public class UserPublicDto {
         dto.setUsername(user.getUsername());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setCreditScore(user.getCreditScore());
+        dto.setPublisherRating(user.getPublisherRating());
+        dto.setPublisherRatingCount(user.getPublisherRatingCount());
+        dto.setAcceptorRating(user.getAcceptorRating());
+        dto.setAcceptorRatingCount(user.getAcceptorRatingCount());
         return dto;
     }
 
@@ -125,12 +140,52 @@ public class UserPublicDto {
         this.avatarUrl = avatarUrl;
     }
 
+    public UserGender getGender() {
+        return gender;
+    }
+
+    public void setGender(UserGender gender) {
+        this.gender = gender;
+    }
+
     public Integer getCreditScore() {
         return creditScore;
     }
 
     public void setCreditScore(Integer creditScore) {
         this.creditScore = creditScore;
+    }
+
+    public Double getPublisherRating() {
+        return publisherRating;
+    }
+
+    public void setPublisherRating(Double publisherRating) {
+        this.publisherRating = publisherRating;
+    }
+
+    public Integer getPublisherRatingCount() {
+        return publisherRatingCount;
+    }
+
+    public void setPublisherRatingCount(Integer publisherRatingCount) {
+        this.publisherRatingCount = publisherRatingCount;
+    }
+
+    public Double getAcceptorRating() {
+        return acceptorRating;
+    }
+
+    public void setAcceptorRating(Double acceptorRating) {
+        this.acceptorRating = acceptorRating;
+    }
+
+    public Integer getAcceptorRatingCount() {
+        return acceptorRatingCount;
+    }
+
+    public void setAcceptorRatingCount(Integer acceptorRatingCount) {
+        this.acceptorRatingCount = acceptorRatingCount;
     }
 
     public Integer getQuotaAvailable() {
