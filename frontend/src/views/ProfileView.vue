@@ -170,12 +170,6 @@
         <img :src="cert.cardImageUrl" alt="认证图片" />
       </button>
     </div>
-    <div class="card" v-if="creditList.length"><h3 class="mb-sm">信用记录</h3>
-      <div v-for="r in creditList" :key="r.id" class="cr">
-        <div class="flex-between">
-          <span class="text-sm">{{ r.reason }}</span>
-          <span class="text-bold" :style="{color:amountColor(r.changeAmount)}">{{ r.changeAmount>0?'+'+r.changeAmount:r.changeAmount }}</span>
-
     <div class="card">
       <div class="flex-between mb-sm">
         <h3>我的评价</h3>
