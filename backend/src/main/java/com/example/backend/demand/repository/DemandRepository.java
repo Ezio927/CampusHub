@@ -113,12 +113,14 @@ public class DemandRepository {
             } else {
                 q.orderByDesc(Demand::getRewardAmount);
             }
+            q.orderByDesc(Demand::getCreatedAt);
         } else if ("urgentDeadline".equalsIgnoreCase(sortBy)) {
             if (asc) {
                 q.orderByAsc(Demand::getUrgentDeadline);
             } else {
                 q.orderByDesc(Demand::getUrgentDeadline);
             }
+            q.orderByDesc(Demand::getCreatedAt);
         } else {
             q.orderByDesc(Demand::getCreatedAt);
         }
