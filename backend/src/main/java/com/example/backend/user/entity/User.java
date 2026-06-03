@@ -22,6 +22,7 @@ public class User {
     private String studentId;
     private String realName;
     private String avatarUrl;
+    private String campus;
     private UserGender gender;
     private Integer creditScore = 100;
     private Double publisherRating = 0.0;
@@ -119,6 +120,8 @@ public class User {
     public void setRealName(String realName) { this.realName = realName; }
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
     public UserGender getGender() { return gender; }
     public void setGender(UserGender gender) { this.gender = gender; }
     public Integer getCreditScore() { return creditScore == null ? 0 : creditScore; }

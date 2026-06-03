@@ -66,6 +66,11 @@ class DemandStatusListenerTest {
         }
 
         @Override
+        public PageResult<DemandDto> recommend(Long userId, int page, int size) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public DemandDto getDetail(Long demandId) {
             throw new UnsupportedOperationException();
         }

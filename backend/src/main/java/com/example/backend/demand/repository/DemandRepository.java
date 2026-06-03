@@ -94,6 +94,13 @@ public class DemandRepository {
         return mapper.selectPage(new Page<>(page + 1, size), q);
     }
 
+    public List<Demand> findAllOpen() {
+        return mapper.selectList(
+                new LambdaQueryWrapper<Demand>()
+                        .eq(Demand::getStatus, DemandStatus.OPEN)
+                        .orderByDesc(Demand::getCreatedAt));
+    }
+
     public void deleteById(Long id) {
         mapper.deleteById(id);
     }

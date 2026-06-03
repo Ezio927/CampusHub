@@ -1,6 +1,6 @@
 <template>
   <div class="page" v-if="demand">
-    <a href="#" class="back" @click.prevent="$router.back()">返回</a>
+    <a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div class="detail-card">
       <div class="flex-between mb-md gap-sm">
         <h1>{{ demand.title }}</h1>

@@ -11,8 +11,12 @@ export const useDemandStore = defineStore('demands', () => {
     if (filters.category) p.category = filters.category
     if (filters.keyword) p.keyword = filters.keyword
     if (filters.openOnly) p.status = 'OPEN'
-    p.sortBy = filters.sortBy
-    p.sortDir = filters.sortDir
+    if (filters.sortBy === 'recommended') {
+      p.sortBy = 'recommended'
+    } else {
+      p.sortBy = filters.sortBy
+      p.sortDir = filters.sortDir
+    }
     const r = await demandAPI.search(p)
     list.value = r.data?.content || []
   }

@@ -15,7 +15,7 @@ export const useNotifStore = defineStore('notifications', () => {
     }
   }
 
-  async function fetchList() { const r = await notifAPI.list({ page:0, size:20 }); list.value = r.data || [] }
+  async function fetchList() { const r = await notifAPI.list({ page:0, size:20 }); list.value = r.data?.content || [] }
 
   async function markRead(id) { await notifAPI.read(id); const item = list.value.find(n => n.id === id); if (item) item.read = true; await fetchUnread() }
   async function markAllRead() { await notifAPI.readAll(); list.value.forEach(n => n.read = true); unread.value = 0 }

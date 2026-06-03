@@ -15,6 +15,8 @@ public interface DemandService {
 
     PageResult<DemandDto> search(DemandSearchCriteria criteria, int page, int size);
 
+    PageResult<DemandDto> recommend(Long userId, int page, int size);
+
     DemandDto getDetail(Long demandId);
 
     default void updateStatus(Long demandId, DemandStatus status) {

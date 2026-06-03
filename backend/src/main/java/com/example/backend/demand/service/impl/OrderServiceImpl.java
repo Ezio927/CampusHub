@@ -537,6 +537,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
+        public com.example.backend.common.PageResult<DemandDto> recommend(Long userId, int page, int size) {
+            throw new UnsupportedOperationException("recommend is not supported in adapter");
+        }
+
+        @Override
         public DemandDto getDetail(Long demandId) {
             return DemandDto.from(demandRepository.findById(demandId).orElse(null));
         }

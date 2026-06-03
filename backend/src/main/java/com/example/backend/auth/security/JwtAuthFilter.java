@@ -37,10 +37,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return true;
         }
 
-        // Public GET: demand search & detail (not /api/users/{id} — requires login)
+        // Public GET: demand search & detail — allow without token but still parse if present
         if ("GET".equalsIgnoreCase(method)) {
-            if (path.equals("/api/demands") || path.startsWith("/api/demands/")) {
-                if (request.getParameter("my") == null) return true;
+            if ((path.equals("/api/demands") || path.startsWith("/api/demands/"))
+                    && request.getParameter("my") == null) {
+                return false;
             }
         }
 
@@ -52,19 +53,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String token = resolveToken(request);
-            if (token == null || token.isEmpty()) {
-                writeUnauthorized(response, ErrorCode.UNAUTHORIZED);
-                return;
+            if (token != null && !token.isEmpty()) {
+                if (!jwtTokenProvider.validate(token)) {
+                    writeUnauthorized(response, ErrorCode.TOKEN_INVALID);
+                    return;
+                }
+                AuthContext.setCurrentUser(new AuthContext.AuthUser(
+                        jwtTokenProvider.parseUserId(token),
+                        jwtTokenProvider.parseUsername(token),
+                        jwtTokenProvider.parseRole(token)
+                ));
             }
-            if (!jwtTokenProvider.validate(token)) {
-                writeUnauthorized(response, ErrorCode.TOKEN_INVALID);
-                return;
-            }
-            AuthContext.setCurrentUser(new AuthContext.AuthUser(
-                    jwtTokenProvider.parseUserId(token),
-                    jwtTokenProvider.parseUsername(token),
-                    jwtTokenProvider.parseRole(token)
-            ));
             filterChain.doFilter(request, response);
         } finally {
             AuthContext.clear();

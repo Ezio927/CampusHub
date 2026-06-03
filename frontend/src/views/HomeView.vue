@@ -13,6 +13,11 @@
         <option value="SECONDHAND">二手交易</option>
         <option value="OTHER">其他</option>
       </select>
+      <select v-model="store.filters.sortBy" @change="store.fetch()" class="sel">
+        <option value="createdAt">最新发布</option>
+        <option value="recommended">推荐排序</option>
+        <option value="rewardAmount">报酬高低</option>
+      </select>
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
       <label class="open-only"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
