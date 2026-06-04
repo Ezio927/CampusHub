@@ -32,7 +32,7 @@ async function login() {
 }
 </script>
 <style scoped>
-.lp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC}
+.lp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
 .lb{width:100%;max-width:400px}
 .lc{background:#fff;border-radius:12px;padding:40px 32px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);text-align:center}
 .li{width:56px;height:56px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;border:2px solid black}

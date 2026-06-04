@@ -46,7 +46,7 @@ async function reg() {
 }
 </script>
 <style scoped>
-.rp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC}
+.rp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
 .rb{width:100%;max-width:440px}
 .rc{background:#fff;border-radius:12px;padding:36px 32px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);text-align:center}
 .ri{width:52px;height:52px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;border:2px solid black}
