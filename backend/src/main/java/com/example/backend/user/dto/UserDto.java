@@ -16,6 +16,7 @@ public class UserDto {
     private String phone;
     private String email;
     private String avatarUrl;
+    private String campus;
     private UserGender gender;
     private Integer creditScore;
     private Double publisherRating;
@@ -43,6 +44,7 @@ public class UserDto {
         dto.setPhone(user.getPhone());
         dto.setEmail(user.getEmail());
         dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setCampus(user.getCampus());
         dto.setGender(user.getGender());
         dto.setCreditScore(user.getCreditScore());
         dto.setPublisherRating(user.getPublisherRating());
@@ -111,6 +113,14 @@ public class UserDto {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 
     public UserGender getGender() {

@@ -9,6 +9,7 @@ public class DemandSearchCriteria {
     private DemandStatus status;
     private String keyword;
     private String locationTag;
+    private String campus;
     private Boolean urgent;
     private String sortBy;
     private String sortDir;
@@ -44,6 +45,14 @@ public class DemandSearchCriteria {
 
     public void setLocationTag(String locationTag) {
         this.locationTag = locationTag;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 
     public Boolean getUrgent() {

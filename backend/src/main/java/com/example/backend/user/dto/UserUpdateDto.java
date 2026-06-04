@@ -6,6 +6,7 @@ public class UserUpdateDto {
     private String phone;
     private String email;
     private String avatarUrl;
+    private String campus;
 
     public UserUpdateDto() {
     }
@@ -40,5 +41,13 @@ public class UserUpdateDto {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 }

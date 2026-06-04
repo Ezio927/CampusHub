@@ -1,6 +1,6 @@
 <template>
   <div class="page" v-if="demand">
-    <a href="#" class="back" @click.prevent="$router.back()">返回</a>
+    <a href="#" class="back" @click.prevent="$router.back()">←</a>
     <div class="detail-card">
       <div class="flex-between mb-md gap-sm">
         <h1>{{ demand.title }}</h1>
@@ -8,6 +8,7 @@
       </div>
       <div class="info-grid mb-md">
         <div class="info-item"><span class="label">报酬</span><span class="value reward">{{ rewardText(demand) }}</span></div>
+        <div class="info-item"><span class="label">校区</span><span class="value">{{ demand.campus || '不限' }}</span></div>
         <div class="info-item"><span class="label">位置</span><span class="value">{{ demand.locationTag || '不限' }}</span></div>
         <div class="info-item"><span class="label">状态</span><span class="value"><span class="badge" :style="{ background: statusColor(demand.status) }">{{ statusText(demand.status) }}</span></span></div>
         <div class="info-item"><span class="label">时间</span><span class="value text-sm">{{ demand.createdAt?.substring(0, 10) }}</span></div>

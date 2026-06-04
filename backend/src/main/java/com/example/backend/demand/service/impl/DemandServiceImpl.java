@@ -47,6 +47,7 @@ public class DemandServiceImpl implements DemandService {
     private final ContentModerationService contentModerationService;
     private final QuotaService quotaService;
     private final ActionRateLimitService actionRateLimitService;
+    private final RecommendationService recommendationService;
 
     public DemandServiceImpl(DemandFactory demandFactory,
                              DemandRepository demandRepository,
@@ -55,7 +56,8 @@ public class DemandServiceImpl implements DemandService {
                              UserRepository userRepository,
                              ContentModerationService contentModerationService,
                              QuotaService quotaService,
-                             ActionRateLimitService actionRateLimitService) {
+                             ActionRateLimitService actionRateLimitService,
+                             RecommendationService recommendationService) {
         this.demandFactory = demandFactory;
         this.demandRepository = demandRepository;
         this.demandImageRepository = demandImageRepository;
@@ -64,6 +66,7 @@ public class DemandServiceImpl implements DemandService {
         this.contentModerationService = contentModerationService;
         this.quotaService = quotaService;
         this.actionRateLimitService = actionRateLimitService;
+        this.recommendationService = recommendationService;
     }
 
     @Override
@@ -89,6 +92,15 @@ public class DemandServiceImpl implements DemandService {
                 demandRepository.searchByCriteria(criteria, page, safeSize);
         List<DemandDto> content = mpPage.getRecords().stream().map(this::toDto).collect(Collectors.toList());
         return PageResult.of(content, page, safeSize, (int) mpPage.getTotal());
+    }
+
+    @Override
+    public PageResult<DemandDto> recommend(Long userId, int page, int size) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return PageResult.of(new ArrayList<>(), page, size, 0);
+        }
+        return recommendationService.recommend(user, page, size);
     }
 
     @Override
@@ -143,6 +155,9 @@ public class DemandServiceImpl implements DemandService {
             }
             if (req.getLocationTag() != null) {
                 demand.setLocationTag(req.getLocationTag());
+            }
+            if (req.getCampus() != null) {
+                demand.setCampus(req.getCampus().trim().isEmpty() ? null : req.getCampus().trim());
             }
             if (req.getImageUrls() != null || req.getTagIds() != null) {
                 updateImagesAndTags(demand.getId(), req.getTagIds(), req.getImageUrls());

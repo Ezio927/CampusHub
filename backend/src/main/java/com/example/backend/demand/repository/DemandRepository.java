@@ -83,6 +83,10 @@ public class DemandRepository {
             if (!isBlank(criteria.getLocationTag())) {
                 q.like(Demand::getLocationTag, criteria.getLocationTag());
             }
+            if (!isBlank(criteria.getCampus())) {
+                q.and(w -> w.eq(Demand::getCampus, criteria.getCampus())
+                        .or().isNull(Demand::getCampus));
+            }
             if (!isBlank(criteria.getKeyword())) {
                 q.and(w -> w.like(Demand::getTitle, criteria.getKeyword())
                         .or().like(Demand::getDescription, criteria.getKeyword()));
@@ -92,6 +96,13 @@ public class DemandRepository {
             q.orderByDesc(Demand::getCreatedAt);
         }
         return mapper.selectPage(new Page<>(page + 1, size), q);
+    }
+
+    public List<Demand> findAllOpen() {
+        return mapper.selectList(
+                new LambdaQueryWrapper<Demand>()
+                        .eq(Demand::getStatus, DemandStatus.OPEN)
+                        .orderByDesc(Demand::getCreatedAt));
     }
 
     public void deleteById(Long id) {
@@ -106,12 +117,14 @@ public class DemandRepository {
             } else {
                 q.orderByDesc(Demand::getRewardAmount);
             }
+            q.orderByDesc(Demand::getCreatedAt);
         } else if ("urgentDeadline".equalsIgnoreCase(sortBy)) {
             if (asc) {
                 q.orderByAsc(Demand::getUrgentDeadline);
             } else {
                 q.orderByDesc(Demand::getUrgentDeadline);
             }
+            q.orderByDesc(Demand::getCreatedAt);
         } else {
             q.orderByDesc(Demand::getCreatedAt);
         }

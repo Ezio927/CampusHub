@@ -51,8 +51,9 @@ public class DemandController {
             @RequestParam(value = "status", required = false) String status,
             @Parameter(description = "关键词模糊搜索") @RequestParam(value = "keyword", required = false) String keyword,
             @Parameter(description = "位置标签") @RequestParam(value = "locationTag", required = false) String locationTag,
+            @Parameter(description = "校区筛选") @RequestParam(value = "campus", required = false) String campus,
             @Parameter(description = "是否紧急") @RequestParam(value = "isUrgent", required = false) Boolean urgent,
-            @Parameter(description = "排序字段：rewardAmount/urgentDeadline/createdAt")
+            @Parameter(description = "排序字段：rewardAmount/urgentDeadline/createdAt/recommended")
             @RequestParam(value = "sortBy", required = false) String sortBy,
             @Parameter(description = "排序方向：asc/desc") @RequestParam(value = "sortDir", required = false) String sortDir,
             @Parameter(description = "仅查我发布的") @RequestParam(value = "my", required = false) Boolean my,
@@ -67,11 +68,18 @@ public class DemandController {
         }
         criteria.setKeyword(keyword);
         criteria.setLocationTag(locationTag);
+        criteria.setCampus(campus);
         criteria.setUrgent(urgent);
         criteria.setSortBy(sortBy);
         criteria.setSortDir(sortDir);
         if (Boolean.TRUE.equals(my)) {
             criteria.setPublisherId(AuthContext.requireUserId());
+        }
+        if ("recommended".equalsIgnoreCase(sortBy)) {
+            AuthContext.AuthUser user = AuthContext.getCurrentUser();
+            if (user != null) {
+                return ApiResponse.success(demandService.recommend(user.getUserId(), page, size));
+            }
         }
         return ApiResponse.success(demandService.search(criteria, page, size));
     }

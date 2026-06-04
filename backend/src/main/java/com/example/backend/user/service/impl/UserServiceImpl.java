@@ -108,6 +108,9 @@ public class UserServiceImpl implements UserService {
             String avatarUrl = req.getAvatarUrl().trim();
             user.setAvatarUrl(avatarUrl.isEmpty() ? null : ImageDataUrlValidator.requireValidUploadedImagePath(avatarUrl, "头像"));
         }
+        if (req.getCampus() != null) {
+            user.setCampus(req.getCampus().trim().isEmpty() ? null : req.getCampus().trim());
+        }
         userRepository.save(user);
         grantProfileRewards(userId, user.getPhone(), user.getEmail(), hadPhone, hadEmail);
         return UserDto.from(findUser(userId));

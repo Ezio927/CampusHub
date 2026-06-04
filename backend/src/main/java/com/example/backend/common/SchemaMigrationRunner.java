@@ -42,6 +42,8 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN acceptor_rating_count INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_available INT NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN quota_frozen INT NOT NULL DEFAULT 0");
+        executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN campus VARCHAR(100)");
+        executeIgnoreDuplicate("ALTER TABLE demands ADD COLUMN campus VARCHAR(100)");
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN type VARCHAR(30)");
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN before_score INT");
         executeIgnoreDuplicate("ALTER TABLE credit_records ADD COLUMN after_score INT");

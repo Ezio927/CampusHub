@@ -20,6 +20,7 @@
         </div>
       </div>
       <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="POINT">额度分</option></select></div>
+      <div class="form-group"><label>校区</label><select v-model="f.campus"><option value="">不限</option><option value="鼓楼校区">鼓楼校区</option><option value="仙林校区">仙林校区</option><option value="浦口校区">浦口校区</option><option value="苏州校区">苏州校区</option></select></div>
 
       <!-- 跑腿：必填位置 -->
       <div v-if="f.category==='ERRAND'" class="form-group"><label>位置 *</label><input v-model="f.locationTag" placeholder="如：图书馆、校门口、3号宿舍楼" required /></div>
@@ -67,7 +68,7 @@ import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
 const ro=useRouter()
 const modal = useModal()
-const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
+const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',campus:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
 const tagInput=ref('')
 const err=ref('');const ing=ref(false)
 

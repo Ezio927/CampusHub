@@ -64,6 +64,7 @@ async function unban(id) {
 
 async function askAdjust(title) {
   const raw = await modal.prompt(title, '请输入调整值，正数增加，负数扣除', '例如：10 或 -5')
+  if (raw === false) return null
   if (raw === null || raw === undefined || !String(raw).trim()) return null
   const amount = Number.parseInt(String(raw).trim(), 10)
   if (Number.isNaN(amount) || amount === 0) {
@@ -101,6 +102,7 @@ async function adjustRating(user, role) {
   const currentAverage = role === 'PUBLISHER' ? user.publisherRating : user.acceptorRating
   const currentCount = role === 'PUBLISHER' ? user.publisherRatingCount : user.acceptorRatingCount
   const rawAverage = await modal.prompt(`调整${label}`, '请输入新的平均分，范围 0-5', String(Number(currentAverage || 0).toFixed(1)))
+  if (rawAverage === false) return
   if (rawAverage === null || rawAverage === undefined || !String(rawAverage).trim()) return
   const averageRating = Number.parseFloat(String(rawAverage).trim())
   if (Number.isNaN(averageRating) || averageRating < 0 || averageRating > 5) {
@@ -108,6 +110,7 @@ async function adjustRating(user, role) {
     return
   }
   const rawCount = await modal.prompt(`调整${label}`, '请输入评分次数，0 表示暂无评分', String(currentCount || 0))
+  if (rawCount === false) return
   if (rawCount === null || rawCount === undefined || !String(rawCount).trim()) return
   const ratingCount = Number.parseInt(String(rawCount).trim(), 10)
   if (Number.isNaN(ratingCount) || ratingCount < 0) {
@@ -115,6 +118,7 @@ async function adjustRating(user, role) {
     return
   }
   const reason = await modal.prompt(`调整${label}`, '请输入调整原因', '评分申诉处理')
+  if (reason === false) return
   try {
     await adminAPI.adjustRating(user.id, {
       role,

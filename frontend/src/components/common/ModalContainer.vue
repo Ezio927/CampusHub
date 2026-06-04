@@ -33,7 +33,7 @@ function onConfirm() {
 }
 
 function onCancel() {
-  close(state.type === 'prompt' ? null : false)
+  close(false)
 }
 </script>
 
