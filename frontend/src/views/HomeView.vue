@@ -4,6 +4,10 @@
       <h1 class="page-title" style="margin:0">需求大厅</h1>
       <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="btn-primary btn-sm">+ 发布需求</router-link>
     </div>
+    <div v-if="!auth.isLoggedIn" class="login-banner">
+      <span>登录后即可发布需求、接单赚钱</span>
+      <router-link to="/login" class="btn-primary btn-sm">去登录</router-link>
+    </div>
     <div class="flex gap-sm mb-md flex-wrap">
       <select v-model="store.filters.category" @change="store.fetch()" class="sel">
         <option value="">全部分类</option>
@@ -58,6 +62,7 @@ function goDetail(id) { router.push('/demands/' + id) }
 onMounted(() => store.fetch())
 </script>
 <style scoped>
+.login-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:14px;background:var(--primary-light);border-radius:10px;border:2px solid var(--primary);font-size:14px;color:var(--primary);font-weight:700}
 .sel{width:auto;min-width:100px;border-radius:10px;padding:10px 14px;font-weight:500}
 .kw{flex:1;min-width:140px;border-radius:10px;padding:10px 14px}
 .open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
