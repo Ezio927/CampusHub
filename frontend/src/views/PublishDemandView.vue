@@ -107,7 +107,7 @@ async function pub(){
 }
 </script>
 <style scoped>
-.pc{background:#fff;border-radius:12px;padding:28px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.pc{background:var(--card);border-radius:12px;padding:28px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .hint{font-size:12px;color:var(--text-muted);margin-top:4px}
 .pbn{padding:14px;border-radius:10px;font-size:16px;font-weight:700;margin-top:8px}

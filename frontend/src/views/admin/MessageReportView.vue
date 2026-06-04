@@ -46,15 +46,18 @@ const labels = {
 }
 
 async function load() {
-  const res = await adminAPI.messageReports()
-  list.value = res.data || []
+  try { const res = await adminAPI.messageReports(); list.value = res.data || [] } catch { list.value = [] }
 }
 
 async function review(id, approve) {
   const resolution = await modal.prompt('审核举报', '请输入审核说明', '选填')
   if (resolution === false) return
-  await adminAPI.reviewMessageReport(id, { approve, resolution: resolution || '' })
-  await load()
+  try {
+    await adminAPI.reviewMessageReport(id, { approve, resolution: resolution || '' })
+    await load()
+  } catch (e) {
+    modal.alert('操作失败', e.message)
+  }
 }
 
 function categoryText(value) {
@@ -79,7 +82,7 @@ onMounted(load)
   margin-top: 12px;
   padding: 12px;
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface);
   white-space: pre-wrap;
   word-break: break-word;
   border: 2px solid black;
@@ -92,7 +95,7 @@ onMounted(load)
   border: 2px solid black;
   border-radius: 10px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
 }
 .snapshot-image img {
   display: block;

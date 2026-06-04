@@ -17,7 +17,7 @@
               <div class="text-sm text-muted">{{ categoryText(item.category) }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: demandStatusColor(item.status) }">{{ demandStatusText(item.status) }}</span>
             </div>
           </div>
@@ -34,7 +34,7 @@
               <div class="text-sm text-muted">{{ item.publisherName }} → {{ item.acceptorName }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: orderStatusColor(item.status) }">{{ orderStatusText(item.status) }}</span>
             </div>
           </div>
@@ -52,7 +52,7 @@
               <div class="text-sm text-muted">{{ item.publisherName }} → {{ item.acceptorName }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: orderStatusColor(item.status) }">{{ orderStatusText(item.status) }}</span>
             </div>
           </div>
@@ -152,8 +152,7 @@ async function load() {
       ? (orderRes.value.data?.content || orderRes.value.data || [])
       : []
   } else {
-    const res = await orderAPI.list({ role: 'ACCEPTOR' })
-    orders.value = res.data?.content || res.data || []
+    try { const res = await orderAPI.list({ role: 'ACCEPTOR' }); orders.value = res.data?.content || res.data || [] } catch { orders.value = [] }
     demands.value = []
   }
 }
@@ -165,12 +164,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.tabs{display:flex;background:#fff;border-radius:10px;padding:4px;margin-bottom:16px;border:2px solid black}
+.tabs{display:flex;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px;border:2px solid black}
 .tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:all .2s ease}
 .tab.on{background:var(--primary);color:#fff}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
 .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.oc{background:#fff;border-radius:12px;padding:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
+.oc{background:var(--card);border-radius:12px;padding:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
 .oc:hover{transform:scale(1.03);box-shadow:8px 8px 0 rgba(0,0,0,1)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

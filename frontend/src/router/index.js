@@ -26,9 +26,15 @@ const routes = [
 
 const router = createRouter({ history: createWebHistory(), routes })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const token = localStorage.getItem('token')
   if (to.meta.auth && !token) return '/login'
+  if (to.meta.admin) {
+    const { useAuthStore } = await import('@/stores/auth')
+    const store = useAuthStore()
+    if (!store.user) await store.restoreSession()
+    if (store.user?.role !== 'ADMIN') return '/'
+  }
 })
 
 export default router

@@ -32,8 +32,7 @@ function canAppeal(item) {
 }
 
 async function load() {
-  const res = await reviewAPI.byUser(route.params.userId)
-  list.value = res.data || []
+  try { const res = await reviewAPI.byUser(route.params.userId); list.value = res.data || [] } catch { list.value = [] }
 }
 
 async function submitReviewAppeal(item) {

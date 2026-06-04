@@ -17,7 +17,7 @@ import {ref,onMounted} from 'vue';import {arbAPI} from '@/api/arbitrations'
 import { useModal } from '@/composables/useModal'
 const modal = useModal()
 const list=ref([])
-async function resolve(id,action){const resolution=await modal.prompt('仲裁处理','请输入处理说明','选填');if(resolution===false)return;await arbAPI.resolve(id,{action,resolution:resolution||''});load()}
-async function load(){const r=await arbAPI.pending();list.value=r.data||[]}
+async function resolve(id,action){const resolution=await modal.prompt('仲裁处理','请输入处理说明','选填');if(resolution===false)return;try{await arbAPI.resolve(id,{action,resolution:resolution||''});load()}catch(e){modal.alert('操作失败',e.message)}}
+async function load(){try{const r=await arbAPI.pending();list.value=r.data||[]}catch{list.value=[]}}
 onMounted(load)
 </script>

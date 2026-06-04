@@ -49,7 +49,7 @@ function onCancel() {
   padding: 20px;
 }
 .modal-card {
-  background: #fff;
+  background: var(--card);
   border-radius: 16px;
   padding: 28px 24px 20px;
   max-width: 380px;
@@ -99,11 +99,11 @@ function onCancel() {
   border: 2px solid black;
 }
 .modal-btn-cancel {
-  background: #f1f5f9;
+  background: var(--surface);
   color: var(--text-secondary);
   box-shadow: 4px 4px 0px rgba(0,0,0,1);
 }
-.modal-btn-cancel:hover { background: #e2e8f0; transform: translate(1px,1px); box-shadow: none; }
+.modal-btn-cancel:hover { background: var(--border); transform: translate(1px,1px); box-shadow: none; }
 .modal-btn-ok {
   background: var(--primary);
   color: #fff;
