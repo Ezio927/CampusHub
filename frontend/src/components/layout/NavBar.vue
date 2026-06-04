@@ -1,7 +1,7 @@
 <template>
   <header class="nav">
     <div class="nav-inner">
-      <a href="/" class="nav-logo" @click.prevent="goHome">CampusHub</a>
+      <a href="/" class="nav-logo" @click.prevent="goHome"><img src="/logo.png" alt="" class="logo-img" />CampusHub</a>
       <nav class="nav-links">
         <router-link to="/" class="nav-link" exact-active-class="active">需求大厅</router-link>
         <router-link v-if="auth.isLoggedIn" to="/demands/publish" class="nav-link" active-class="active">发布需求</router-link>
@@ -57,7 +57,8 @@ watch(() => route.fullPath, () => { fetchMessageUnread(); if (auth.isLoggedIn) n
 <style scoped>
 .nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 3px solid black; }
 .nav-inner { width: 80%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 56px; }
-.nav-logo { font-size: 20px; font-weight: 900; color: var(--primary) !important; flex-shrink: 0; }
+.nav-logo { font-size: 20px; font-weight: 900; color: var(--primary) !important; flex-shrink: 0; display:flex; align-items:center; gap:8px; }
+.logo-img { width:28px; height:28px; object-fit:contain; }
 .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
 .nav-link {
   color: var(--text-secondary); font-size: 15px; font-weight: 700;
