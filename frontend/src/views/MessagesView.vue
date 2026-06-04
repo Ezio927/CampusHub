@@ -73,7 +73,7 @@ onMounted(load)
   width: 100%;
   padding: 16px;
   margin-bottom: 10px;
-  background: #fff;
+  background: var(--card);
   border: 3px solid black;
   border-radius: 12px;
   box-shadow: 6px 6px 0px rgba(0,0,0,1);

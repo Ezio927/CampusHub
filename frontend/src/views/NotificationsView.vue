@@ -41,7 +41,7 @@ onMounted(() => store.fetchList())
 </script>
 <style scoped>
 .page{max-width:680px}
-.ni{padding:16px 20px;background:#fff;border-radius:12px;margin-bottom:10px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.ni{padding:16px 20px;background:var(--card);border-radius:12px;margin-bottom:10px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
 .ni:hover{transform:translateY(-2px)}
 .ni.expanded{box-shadow:8px 8px 0px rgba(0,0,0,1)}
 .ni.unread{border-left:5px solid var(--primary)}

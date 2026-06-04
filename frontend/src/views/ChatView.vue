@@ -408,7 +408,7 @@ onUnmounted(() => {
   margin-bottom: 10px;
   border: 2px solid black;
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
 }
 .avatar {
   width: 44px;
@@ -449,7 +449,7 @@ onUnmounted(() => {
   padding: 8px 10px;
   border: 2px solid black;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   text-align: left;
 }
 .search-results span { color: var(--text-muted); font-size: 12px; }
@@ -461,7 +461,7 @@ onUnmounted(() => {
   padding: 16px;
   border: 2px solid black;
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
 }
 .compact { padding: 120px 20px; }
 .msg-row {
@@ -475,14 +475,14 @@ onUnmounted(() => {
   max-width: min(76%, 520px);
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f1f5f9;
+  background: var(--surface);
   color: var(--text);
   border: 2px solid black;
 }
 .mine .msg-bubble { background: var(--primary); color: #fff; }
 .system .msg-bubble {
   max-width: min(88%, 560px);
-  background: #f8fafc;
+  background: var(--card);
   color: var(--text-secondary);
   border: 2px solid black;
   text-align: center;
@@ -540,12 +540,12 @@ onUnmounted(() => {
   padding: 12px;
   border: 2px solid black;
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
 }
 .report-target {
   padding: 10px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--surface);
   color: var(--text-secondary);
   word-break: break-word;
   border: 2px solid black;
@@ -558,7 +558,7 @@ onUnmounted(() => {
   border: 2px solid black;
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
 }
 .report-image img {
   display: block;
@@ -599,7 +599,7 @@ onUnmounted(() => {
   padding: 0;
   border: 2px solid black;
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   line-height: 26px;
   font-size: 16px;
 }

@@ -82,7 +82,7 @@ onMounted(load)
   margin-top: 12px;
   padding: 12px;
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface);
   white-space: pre-wrap;
   word-break: break-word;
   border: 2px solid black;
@@ -95,7 +95,7 @@ onMounted(load)
   border: 2px solid black;
   border-radius: 10px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
 }
 .snapshot-image img {
   display: block;

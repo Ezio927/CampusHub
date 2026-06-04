@@ -6,7 +6,20 @@
   --bg: #FEF9F0; --card: #FFFFFF;
   --text: #111827; --text-secondary: #6B7280; --text-muted: #9CA3AF;
   --border: #e2e8f0;
+  --surface: #FFFFFF;
   --radius: 12px; --radius-sm: 10px; --radius-modal: 16px;
+}
+
+[data-theme="dark"] {
+  --primary: #60a5fa; --primary-dark: #3b82f6; --primary-light: #1e3a5f;
+  --ph-bg: #2563eb;
+  --danger: #f87171; --danger-light: #3b1c1c;
+  --success: #4ade80; --success-light: #1a3a1a;
+  --warning: #fbbf24; --warning-light: #3a2e0a;
+  --bg: #1a1a2e; --card: #252540;
+  --text: #e2e8f0; --text-secondary: #94a3b8; --text-muted: #64748b;
+  --border: #334155;
+  --surface: #303050;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -24,7 +37,7 @@ textarea,select{
   padding:10px 14px;
   border:2px solid black;
   border-radius:var(--radius-sm);width:100%;
-  background:#fff;color:var(--text);
+  background:var(--surface);color:var(--text);
   transition:all 0.2s ease
 }
 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
@@ -43,7 +56,7 @@ button{
 .btn-primary:hover{transform:translate(1px,1px);box-shadow:none}
 .btn-danger{background:var(--danger);color:#fff;box-shadow:4px 4px 0px rgba(0,0,0,1)}
 .btn-danger:hover{transform:translate(1px,1px);box-shadow:none}
-.btn-outline{background:#fff;color:var(--text);box-shadow:4px 4px 0px rgba(0,0,0,1)}
+.btn-outline{background:var(--surface);color:var(--text);box-shadow:4px 4px 0px rgba(0,0,0,1)}
 .btn-outline:hover{background:#111;color:#fff;transform:translate(1px,1px);box-shadow:none}
 .btn-sm{padding:6px 16px;font-size:13px;border-radius:8px}
 .btn-block{width:100%;justify-content:center;display:flex}
@@ -69,7 +82,7 @@ button{
 .badge{
   display:inline-flex;padding:3px 12px;
   border-radius:var(--radius-sm);
-  font-size:12px;font-weight:700;color:#111;
+  font-size:12px;font-weight:700;color:var(--text);
   border:2px solid black
 }
 
@@ -79,7 +92,7 @@ button{
 .back{
   display:inline-flex;align-items:center;justify-content:center;
   width:36px;height:36px;border-radius:var(--radius-sm);
-  background:#fff;border:2px solid black;
+  background:var(--surface);border:2px solid black;
   box-shadow:4px 4px 0px rgba(0,0,0,1);
   font-size:18px;color:var(--text-secondary);
   margin-bottom:16px;transition:all 0.2s ease

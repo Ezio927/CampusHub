@@ -523,7 +523,7 @@ onMounted(async () => {
 
 <style scoped>
 .page{max-width:680px}
-.ph{background:var(--primary);border-radius:12px;padding:28px;color:#fff;text-align:center;margin-bottom:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
+.ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:28px;color:#fff;text-align:center;margin-bottom:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .pav{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)}
 .pn{font-size:22px;font-weight:900}
 .pi{font-size:13px;opacity:.75;margin-top:4px}
@@ -531,7 +531,7 @@ onMounted(async () => {
 .btn-appeal{display:block;margin:10px auto 0;padding:8px 18px;border-radius:10px;background:rgba(255,255,255,.3);color:#fff;font-size:13px;font-weight:700;border:2px solid rgba(255,255,255,.5)}
 .btn-appeal:hover{background:rgba(255,255,255,.45)}
 .danger-appeal{background:rgba(239,68,68,.22);border-color:rgba(255,255,255,.55)}
-.btn-checkin{display:block;margin:10px auto 0;padding:8px 18px;border-radius:10px;background:#fff;color:var(--primary);font-size:13px;font-weight:700;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
+.btn-checkin{display:block;margin:10px auto 0;padding:8px 18px;border-radius:10px;background:var(--surface);color:var(--primary);font-size:13px;font-weight:700;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
 .btn-checkin:hover{transform:translate(1px,1px);box-shadow:none}
 .btn-checked-in{background:rgba(255,255,255,.35);color:#fff;cursor:default;box-shadow:none;border:2px solid rgba(255,255,255,.3)}
 .btn-checked-in:hover{transform:none;box-shadow:none}
@@ -539,7 +539,7 @@ onMounted(async () => {
 .appeal-PENDING{background:rgba(251,191,36,.2);color:#fef3c7}
 .appeal-APPROVED{background:rgba(16,185,129,.2);color:#d1fae5}
 .appeal-REJECTED{background:rgba(239,68,68,.2);color:#fee2e2}
-.sc{background:#fff;border-radius:12px;padding:16px;text-align:center;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
+.sc{background:var(--card);border-radius:12px;padding:16px;text-align:center;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .sv{font-size:22px;font-weight:900;color:var(--primary)}
 .sl{font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -559,7 +559,7 @@ onMounted(async () => {
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .file-btn{position:relative;overflow:hidden;cursor:pointer}
 .file-btn input{position:absolute;inset:0;opacity:0;pointer-events:none}
-.cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:#fff}
+.cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:var(--surface)}
 .compact-preview{width:220px;height:150px}
 .cert-preview img{display:block;width:100%;height:100%;object-fit:cover}
 .image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
