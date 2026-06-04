@@ -46,8 +46,7 @@ const labels = {
 }
 
 async function load() {
-  const res = await adminAPI.messageReports()
-  list.value = res.data || []
+  try { const res = await adminAPI.messageReports(); list.value = res.data || [] } catch { list.value = [] }
 }
 
 async function review(id, approve) {

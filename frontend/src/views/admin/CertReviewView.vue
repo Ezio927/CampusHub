@@ -30,7 +30,7 @@ const modal = useModal()
 const list=ref([])
 const imageViewer=ref('')
 async function load(){try{const r=await certAPI.pending();list.value=r.data||[]}catch{list.value=[]}}
-async function review(id,approve){const reason=approve?null:await modal.prompt('驳回认证','请输入驳回原因','请填写驳回原因');if(reason===false)return;await certAPI.review(id,{approve,reason});load()}
+async function review(id,approve){const reason=approve?null:await modal.prompt('驳回认证','请输入驳回原因','请填写驳回原因');if(reason===false)return;try{await certAPI.review(id,{approve,reason});load()}catch(e){modal.alert('操作失败',e.message)}}
 function genderText(value){return{MALE:'男',FEMALE:'女',UNDISCLOSED:'不愿透露'}[value]||'未选择'}
 load()
 </script>

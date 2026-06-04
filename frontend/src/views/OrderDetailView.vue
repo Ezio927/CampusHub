@@ -119,8 +119,7 @@ const canAppeal = computed(() => {
 })
 
 async function refresh() {
-  const res = await orderAPI.detail(route.params.id)
-  order.value = res.data
+  try { const res = await orderAPI.detail(route.params.id); order.value = res.data } catch { order.value = null }
   await loadReviews()
 }
 

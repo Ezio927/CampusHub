@@ -152,8 +152,7 @@ async function load() {
       ? (orderRes.value.data?.content || orderRes.value.data || [])
       : []
   } else {
-    const res = await orderAPI.list({ role: 'ACCEPTOR' })
-    orders.value = res.data?.content || res.data || []
+    try { const res = await orderAPI.list({ role: 'ACCEPTOR' }); orders.value = res.data?.content || res.data || [] } catch { orders.value = [] }
     demands.value = []
   }
 }

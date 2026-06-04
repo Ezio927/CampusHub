@@ -134,8 +134,7 @@ async function messagePublisher() {
 }
 
 onMounted(async () => {
-  const res = await demandAPI.detail(route.params.id)
-  demand.value = res.data
+  try { const res = await demandAPI.detail(route.params.id); demand.value = res.data } catch { demand.value = null }
 })
 </script>
 

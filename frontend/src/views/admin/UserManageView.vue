@@ -71,6 +71,7 @@ async function askAdjust(title) {
     return null
   }
   const reason = await modal.prompt(title, '请输入调整原因', '管理员手动调整')
+  if (reason === false) return null
   return { amount, reason: reason || '管理员手动调整' }
 }
 

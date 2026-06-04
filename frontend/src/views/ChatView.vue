@@ -389,8 +389,7 @@ async function scrollBottom() {
 }
 
 onMounted(async () => {
-  await loadConversation()
-  await loadMessages()
+  try { await loadConversation(); await loadMessages() } catch { /* page shows empty state */ }
   syncTimer = window.setInterval(syncNewMessages, 5000)
 })
 
