@@ -17,7 +17,7 @@
               <div class="text-sm text-muted">{{ categoryText(item.category) }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: demandStatusColor(item.status) }">{{ demandStatusText(item.status) }}</span>
             </div>
           </div>
@@ -34,7 +34,7 @@
               <div class="text-sm text-muted">{{ item.publisherName }} → {{ item.acceptorName }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: orderStatusColor(item.status) }">{{ orderStatusText(item.status) }}</span>
             </div>
           </div>
@@ -52,7 +52,7 @@
               <div class="text-sm text-muted">{{ item.publisherName }} → {{ item.acceptorName }}</div>
             </div>
             <div style="text-align:right">
-              <div class="dp">{{ item.rewardType === 'MONEY' ? '￥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
+              <div class="dp">{{ item.rewardType === 'MONEY' ? '¥' + item.rewardAmount : item.rewardAmount + '额度分' }}</div>
               <span class="badge" :style="{ background: orderStatusColor(item.status) }">{{ orderStatusText(item.status) }}</span>
             </div>
           </div>

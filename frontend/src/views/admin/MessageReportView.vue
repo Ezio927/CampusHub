@@ -53,8 +53,12 @@ async function load() {
 async function review(id, approve) {
   const resolution = await modal.prompt('审核举报', '请输入审核说明', '选填')
   if (resolution === false) return
-  await adminAPI.reviewMessageReport(id, { approve, resolution: resolution || '' })
-  await load()
+  try {
+    await adminAPI.reviewMessageReport(id, { approve, resolution: resolution || '' })
+    await load()
+  } catch (e) {
+    modal.alert('操作失败', e.message)
+  }
 }
 
 function categoryText(value) {

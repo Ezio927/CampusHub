@@ -40,8 +40,7 @@ const list = ref([])
 const keyword = ref('')
 
 async function search() {
-  const res = await adminAPI.users({ keyword: keyword.value })
-  list.value = res.data || []
+  try { const res = await adminAPI.users({ keyword: keyword.value }); list.value = res.data || [] } catch { list.value = [] }
 }
 
 async function ban(id) {

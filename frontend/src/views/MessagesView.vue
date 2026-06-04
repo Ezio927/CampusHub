@@ -39,8 +39,7 @@ const list = ref([])
 const avatarViewer = ref('')
 
 async function load() {
-  const res = await chatAPI.list()
-  list.value = res.data || []
+  try { const res = await chatAPI.list(); list.value = res.data || [] } catch { list.value = [] }
 }
 
 function open(id) {
