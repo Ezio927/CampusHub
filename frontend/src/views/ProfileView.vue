@@ -45,8 +45,13 @@
     </div>
 
     <div class="card rules-card">
-      <h3 class="mb-sm">信用分与额度分规则</h3>
-      <div class="rules-grid">
+      <div class="flex-between mb-sm">
+        <h3>信用分与额度分规则</h3>
+        <button type="button" class="btn-outline btn-sm fold-btn" @click="toggleSection('rules')">
+          {{ isExpanded('rules') ? '收起' : '展开' }}
+        </button>
+      </div>
+      <div v-show="isExpanded('rules')" class="rules-grid">
         <section class="rule-section">
           <h4>信用分</h4>
           <ul>
@@ -196,45 +201,66 @@
     <div class="card">
       <div class="flex-between mb-sm">
         <h3>我的申诉</h3>
-        <span class="text-sm text-muted">{{ arbitrationList.length }} 条</span>
+        <div class="section-tools">
+          <span class="text-sm text-muted">{{ arbitrationList.length }} 条</span>
+          <button type="button" class="btn-outline btn-sm fold-btn" @click="toggleSection('appeals')">
+            {{ isExpanded('appeals') ? '收起' : '展开' }}
+          </button>
+        </div>
       </div>
-      <div v-if="arbitrationList.length === 0" class="text-sm text-muted">暂无订单纠纷或评价申诉记录</div>
-      <div v-for="item in arbitrationList" :key="item.id" class="appeal-row">
-        <div class="appeal-main">
-          <div class="blocked-name">{{ item.reviewId ? '评价申诉' : '订单纠纷申诉' }} #{{ item.id }}</div>
-          <div class="blocked-desc">
-            订单 #{{ item.orderId }} · 状态：{{ arbitrationStatusText(item.status) }}
+      <div v-show="isExpanded('appeals')">
+        <div v-if="arbitrationList.length === 0" class="text-sm text-muted">暂无订单纠纷或评价申诉记录</div>
+        <div v-for="item in arbitrationList" :key="item.id" class="appeal-row">
+          <div class="appeal-main">
+            <div class="blocked-name">{{ item.reviewId ? '评价申诉' : '订单纠纷申诉' }} #{{ item.id }}</div>
+            <div class="blocked-desc">
+              订单 #{{ item.orderId }} · 状态：{{ arbitrationStatusText(item.status) }}
+            </div>
+            <div v-if="item.reason" class="blocked-demand text-xs text-muted">申诉理由：{{ item.reason }}</div>
+            <div v-if="item.resolution" class="blocked-demand text-xs">处理结果：{{ item.resolution }}</div>
           </div>
-          <div v-if="item.reason" class="blocked-demand text-xs text-muted">申诉理由：{{ item.reason }}</div>
-          <div v-if="item.resolution" class="blocked-demand text-xs">处理结果：{{ item.resolution }}</div>
         </div>
       </div>
     </div>
 
     <div class="card" v-if="creditList.length">
-      <h3 class="mb-sm">信用分记录</h3>
-      <div v-for="item in creditList" :key="item.id" class="cr">
-        <div class="flex-between">
-          <span class="text-sm">{{ item.reason }}</span>
-          <span class="text-bold" :style="{ color: amountColor(item.changeAmount) }">
-            {{ item.changeAmount > 0 ? '+' + item.changeAmount : item.changeAmount }}
-          </span>
+      <div class="flex-between mb-sm">
+        <h3>信用分记录</h3>
+        <button type="button" class="btn-outline btn-sm fold-btn" @click="toggleSection('creditRecords')">
+          {{ isExpanded('creditRecords') ? '收起' : '展开' }}
+        </button>
+      </div>
+      <div v-show="isExpanded('creditRecords')">
+        <div v-for="item in creditList" :key="item.id" class="cr">
+          <div class="flex-between">
+            <span class="text-sm">{{ item.reason }}</span>
+            <span class="text-bold" :style="{ color: amountColor(item.changeAmount) }">
+              {{ item.changeAmount > 0 ? '+' + item.changeAmount : item.changeAmount }}
+            </span>
+          </div>
+          <div class="text-xs text-muted">{{ item.createdAt?.substring(0,16)?.replace('T',' ') }}</div>
         </div>
-        <div class="text-xs text-muted">{{ item.createdAt?.substring(0,16)?.replace('T',' ') }}</div>
       </div>
     </div>
 
     <div class="card" v-if="quotaList.length">
-      <h3 class="mb-sm">额度分记录</h3>
-      <div v-for="item in quotaList" :key="item.id" class="cr">
-        <div class="flex-between">
-          <span class="text-sm">{{ item.reason }}</span>
-          <span class="text-bold" :style="{ color: amountColor(item.changeAmount) }">
-            {{ item.changeAmount > 0 ? '+' + item.changeAmount : item.changeAmount }}
-          </span>
-        </div>
-        <div class="text-xs text-muted">
-          可用 {{ item.availableAfter }} · 冻结 {{ item.frozenAfter }} · {{ item.createdAt?.substring(0,16)?.replace('T',' ') }}
+      <div class="flex-between mb-sm">
+        <h3>额度分记录</h3>
+        <button type="button" class="btn-outline btn-sm fold-btn" @click="toggleSection('quotaRecords')">
+          {{ isExpanded('quotaRecords') ? '收起' : '展开' }}
+        </button>
+      </div>
+      <div v-show="isExpanded('quotaRecords')">
+        <div v-for="item in quotaList" :key="item.id" class="cr">
+          <div class="flex-between">
+            <span class="text-sm">{{ item.reason }}</span>
+            <span class="text-bold" :style="{ color: amountColor(item.changeAmount) }">
+              {{ item.changeAmount > 0 ? '+' + item.changeAmount : item.changeAmount }}
+            </span>
+          </div>
+          <div class="text-xs text-muted">
+            可用 {{ item.availableAfter }} · 冻结 {{ item.frozenAfter }} · {{ item.createdAt?.substring(0,16)?.replace('T',' ') }}
+          </div>
         </div>
       </div>
     </div>
@@ -276,6 +302,12 @@ const creditAppeal = ref(null)
 const banAppeal = ref(null)
 const blockedList = ref([])
 const arbitrationList = ref([])
+const sectionExpanded = reactive({
+  rules: true,
+  appeals: true,
+  creditRecords: true,
+  quotaRecords: true
+})
 
 const statusText = computed(() => ({
   ACTIVE: '正常',
@@ -317,6 +349,14 @@ function amountColor(amount) {
   if (amount > 0) return 'var(--success)'
   if (amount < 0) return 'var(--danger)'
   return 'var(--text-muted)'
+}
+
+function toggleSection(key) {
+  sectionExpanded[key] = !sectionExpanded[key]
+}
+
+function isExpanded(key) {
+  return !!sectionExpanded[key]
 }
 
 async function update() {
@@ -543,8 +583,10 @@ onMounted(async () => {
 .sv{font-size:22px;font-weight:900;color:var(--primary)}
 .sl{font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.section-tools{display:flex;align-items:center;gap:8px}
 .rules-card{margin-bottom:18px}
 .rules-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.fold-btn{min-width:64px}
 .rule-section{min-width:0}
 .rule-section h4{font-size:14px;font-weight:900;color:var(--text);margin:0 0 8px}
 .rule-section ul{margin:0;padding-left:18px;color:var(--text-muted);font-size:13px;line-height:1.75}
@@ -574,5 +616,6 @@ onMounted(async () => {
   .rr{grid-template-columns:1fr}
   .blocked-row{align-items:flex-start;flex-direction:column}
   .blocked-row .btn-sm{width:100%}
+  .section-tools{width:100%;justify-content:space-between}
 }
 </style>

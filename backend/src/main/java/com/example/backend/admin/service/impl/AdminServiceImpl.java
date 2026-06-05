@@ -164,7 +164,7 @@ public class AdminServiceImpl implements AdminService {
         user.setStatus(UserStatus.BANNED);
         userRepository.save(user);
         notificationService.createNotification(userId, NotificationType.SYSTEM_ANNOUNCEMENT,
-                "Account banned", req == null ? "Your account has been banned." : req.getReason(), null);
+                "账号已封禁", req == null ? "你的账号已被封禁。" : req.getReason(), null);
         log(adminId, "BAN_USER", "user", userId, req == null ? null : req.getReason());
     }
 
@@ -174,7 +174,7 @@ public class AdminServiceImpl implements AdminService {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         notificationService.createNotification(userId, NotificationType.SYSTEM_ANNOUNCEMENT,
-                "Account unbanned", "Your account has been restored.", null);
+                "账号已解封", "你的账号已恢复正常。", null);
         log(adminId, "UNBAN_USER", "user", userId, null);
     }
 
@@ -273,7 +273,7 @@ public class AdminServiceImpl implements AdminService {
         demandRepository.deleteById(demandId);
         if (quotaService != null && demand.getStatus() != DemandStatus.CANCELLED && demand.getStatus() != DemandStatus.COMPLETED) {
             quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
-                    demand.getRewardType(), demand.getRewardAmount(), "Admin deleted demand");
+                    demand.getRewardType(), demand.getRewardAmount(), "管理员删除需求");
         }
         log(adminId, "DELETE_DEMAND", "demand", demandId, demand.getStatus().name());
     }
