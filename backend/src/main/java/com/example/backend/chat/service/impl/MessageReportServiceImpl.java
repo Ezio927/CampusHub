@@ -115,7 +115,7 @@ public class MessageReportServiceImpl implements MessageReportService {
         report.setReviewedAt(LocalDateTime.now());
         messageReportRepository.save(report);
         notificationService.createNotification(report.getReporterId(), NotificationType.SYSTEM_ANNOUNCEMENT,
-                "Message report reviewed", "Your message report has been reviewed.", report.getId());
+                "私信举报处理结果", "你的私信举报已处理完成。", report.getId());
         return MessageReportDto.from(report);
     }
 
@@ -125,8 +125,8 @@ public class MessageReportServiceImpl implements MessageReportService {
                 .forEach(admin -> notificationService.createNotification(
                         admin.getId(),
                         NotificationType.SYSTEM_ANNOUNCEMENT,
-                        "New message report",
-                        "A private message report is waiting for review.",
+                        "新的私信举报",
+                        "有一条私信举报等待处理。",
                         report.getId()));
     }
 

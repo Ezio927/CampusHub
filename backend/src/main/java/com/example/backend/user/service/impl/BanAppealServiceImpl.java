@@ -93,16 +93,16 @@ public class BanAppealServiceImpl implements BanAppealService {
             notificationService.createNotification(
                     user.getId(),
                     NotificationType.SYSTEM_ANNOUNCEMENT,
-                    "Ban appeal approved",
-                    "Your ban appeal has been approved and your account is active again.",
+                    "封禁申诉已通过",
+                    "你的封禁申诉已通过，账号已恢复正常。",
                     null
             );
         } else {
             notificationService.createNotification(
                     user.getId(),
                     NotificationType.SYSTEM_ANNOUNCEMENT,
-                    "Ban appeal rejected",
-                    "Your ban appeal has been rejected.",
+                    "封禁申诉已驳回",
+                    "你的封禁申诉已被驳回。",
                     null
             );
         }

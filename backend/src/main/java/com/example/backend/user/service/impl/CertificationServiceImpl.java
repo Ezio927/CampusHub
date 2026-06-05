@@ -82,7 +82,7 @@ public class CertificationServiceImpl implements CertificationService {
         user.setStatus(UserStatus.PENDING_CERT);
         userRepository.save(user);
         notificationService.createNotification(userId, NotificationType.SYSTEM_ANNOUNCEMENT,
-                "Certification submitted", "Your certification request has been submitted.", certification.getId());
+                "实名认证已提交", "你的实名认证申请已提交，请等待审核。", certification.getId());
         return CertificationDto.from(certification);
     }
 
@@ -127,8 +127,8 @@ public class CertificationServiceImpl implements CertificationService {
         certificationRepository.save(certification);
         userRepository.save(applicant);
         notificationService.createNotification(applicant.getId(), NotificationType.SYSTEM_ANNOUNCEMENT,
-                approve ? "Certification approved" : "Certification rejected",
-                approve ? "Your certification has been approved." : "Your certification has been rejected.", certification.getId());
+                approve ? "实名认证已通过" : "实名认证已驳回",
+                approve ? "你的实名认证已通过。" : "你的实名认证已被驳回。", certification.getId());
         return CertificationDto.from(certification);
     }
 

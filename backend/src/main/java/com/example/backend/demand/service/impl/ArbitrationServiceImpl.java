@@ -62,8 +62,8 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         notificationService.createNotification(
                 reporterId,
                 NotificationType.ARBITRATION_UPDATE,
-                "Appeal created",
-                "Your appeal has been submitted and will be reviewed soon.",
+                "申诉已提交",
+                "你的申诉已提交，管理员将尽快审核。",
                 ticket.getId()
         );
         return ArbitrationDto.from(ticket);
@@ -128,7 +128,7 @@ public class ArbitrationServiceImpl implements ArbitrationService {
         notificationService.createNotification(
                 ticket.getReporterId(),
                 NotificationType.ARBITRATION_UPDATE,
-                "Appeal resolved",
+                "申诉处理结果",
                 req == null ? "" : req.getResolution(),
                 ticket.getId()
         );

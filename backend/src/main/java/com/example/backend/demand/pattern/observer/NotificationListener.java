@@ -21,22 +21,22 @@ public class NotificationListener {
             notificationService.createNotification(
                     event.getPublisherId(),
                     NotificationType.ORDER_ACCEPTED,
-                    "Demand accepted",
-                    "Your demand has been accepted.",
+                    "需求已被接单",
+                    "你的需求已被接单，请及时关注订单进度。",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.PENDING_CONFIRM) {
             notificationService.createNotification(
                     event.getPublisherId(),
                     NotificationType.ORDER_COMPLETED,
-                    "Order pending confirmation",
-                    "The order is delivered and waiting for your confirmation.",
+                    "订单待确认",
+                    "订单已完成，正在等待你确认。",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.COMPLETED) {
             notificationService.createNotification(
                     event.getAcceptorId(),
                     NotificationType.ORDER_COMPLETED,
-                    "Order completed",
-                    "The order has been confirmed by the publisher.",
+                    "订单已完成",
+                    "发布方已确认订单完成。",
                     event.getOrderId());
         } else if (event.getToStatus() == OrderStatus.CANCELLED) {
             Long receiverId = event.getOperatorId() != null && event.getOperatorId().equals(event.getPublisherId())
@@ -45,8 +45,8 @@ public class NotificationListener {
             notificationService.createNotification(
                     receiverId,
                     NotificationType.ORDER_CANCELLED,
-                    "Order cancelled",
-                    event.getRemark() == null ? "The order has been cancelled." : event.getRemark(),
+                    "订单已取消",
+                    event.getRemark() == null ? "订单已取消。" : event.getRemark(),
                     event.getOrderId());
         }
     }
