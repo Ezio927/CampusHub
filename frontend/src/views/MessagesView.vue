@@ -5,7 +5,7 @@
       <p class="mt-sm">暂无私信</p>
     </div>
     <button v-for="c in list" :key="c.id" class="conv" @click="open(c.id)">
-      <span class="avatar" :class="{hasAvatar:c.targetUser?.avatarUrl}" @click="handleAvatarClick($event,c.targetUser?.avatarUrl)">
+      <span class="avatar" :class="{hasAvatar:c.targetUser?.avatarUrl}" :style="c.targetUser?.avatarUrl ? {} : { background: avatarBg(c.targetUser) }" @click="handleAvatarClick($event,c.targetUser?.avatarUrl)">
         <img v-if="c.targetUser?.avatarUrl" :src="c.targetUser.avatarUrl" alt="对方头像" />
         <span v-else>{{ userInitial(c.targetUser) }}</span>
       </span>
@@ -37,6 +37,8 @@ import { userInitial } from '@/utils/userDisplay'
 const router = useRouter()
 const list = ref([])
 const avatarViewer = ref('')
+const clrs = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
+function avatarBg(user) { return clrs[(user?.username?.charCodeAt(0) || 0) % clrs.length] }
 
 async function load() {
   try { const res = await chatAPI.list(); list.value = res.data || [] } catch { list.value = [] }
@@ -87,7 +89,6 @@ onMounted(load)
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: var(--primary);
   color: #fff;
   display: flex;
   align-items: center;

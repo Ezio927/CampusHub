@@ -3,7 +3,7 @@
     <!-- ========== 1. 账户概览 ========== -->
     <div class="ph">
       <div class="ph-top">
-        <div class="pav" :class="{ 'has-avatar': auth.user?.avatarUrl }">
+        <div class="pav" :class="{ 'has-avatar': auth.user?.avatarUrl }" :style="auth.user?.avatarUrl ? {} : { background: avatarColor }">
           <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" alt="头像" />
           <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
         </div>
@@ -104,7 +104,7 @@
           <div class="form-group">
             <label>头像</label>
             <div class="avatar-upload">
-              <div class="avatar-preview" :class="{ 'has-img': avatarPreview }">
+              <div class="avatar-preview" :class="{ 'has-img': avatarPreview }" :style="avatarPreview ? {} : { background: avatarColor }">
                 <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
                 <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
               </div>
@@ -362,6 +362,8 @@ const auth = useAuthStore()
 
 const form = reactive({ username: '', phone: '', email: '', gender: '', campus: '' })
 const avatarPreview = ref('')
+const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
+const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0) || 0) % colors.length])
 const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
 
 const cert = ref(null)
@@ -563,7 +565,7 @@ onMounted(async () => {
 /* ---- 账户概览 ---- */
 .ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .ph-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.pav{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
+.pav{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
 .pav.has-avatar{background:#fff;padding:0}
 .pav img{width:100%;height:100%;object-fit:contain}
 .ph-info{min-width:0}
@@ -606,7 +608,7 @@ onMounted(async () => {
 
 /* ---- 头像上传 ---- */
 .avatar-upload{display:flex;align-items:center;gap:12px}
-.avatar-preview{width:56px;height:56px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:2px solid black;overflow:hidden;flex-shrink:0}
+.avatar-preview{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:2px solid black;overflow:hidden;flex-shrink:0}
 .avatar-preview.has-img{background:#fff}
 .avatar-preview img{width:100%;height:100%;object-fit:contain}
 

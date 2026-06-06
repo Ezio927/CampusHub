@@ -3,7 +3,7 @@
     <a href="#" class="back" @click.prevent="$router.back()">←</a>
 
     <div class="chat-head">
-      <button type="button" class="avatar" :class="{hasAvatar:conversation?.targetUser?.avatarUrl}" @click="openImageViewer(conversation?.targetUser?.avatarUrl)">
+      <button type="button" class="avatar" :class="{hasAvatar:conversation?.targetUser?.avatarUrl}" :style="conversation?.targetUser?.avatarUrl ? {} : { background: avatarColor }" @click="openImageViewer(conversation?.targetUser?.avatarUrl)">
         <img v-if="conversation?.targetUser?.avatarUrl" :src="conversation.targetUser.avatarUrl" alt="对方头像" />
         <span v-else>{{ userInitial(conversation?.targetUser) }}</span>
       </button>
@@ -147,6 +147,8 @@ const err = ref('')
 const imagePreview = ref('')
 const imageFile = ref(null)
 const imageViewer = ref('')
+const clrs = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
+const avatarColor = computed(() => clrs[(conversation.value?.targetUser?.username?.charCodeAt(0) || 0) % clrs.length])
 const searchKeyword = ref('')
 const searchResults = ref([])
 const reportForm = reactive({ category: 'ABUSE', reason: '', evidence: '' })
@@ -414,7 +416,6 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--primary);
   color: #fff;
   display: flex;
   align-items: center;
