@@ -181,7 +181,8 @@ async function submitReviewAction() {
       content: reviewContent.value.trim() || undefined,
       imageUrls: []
     })
-    router.push('/reviews/' + revieweeId)
+    showReview.value = false
+    await loadReviews()
   } catch (e) {
     reviewErr.value = errorMessage(e)
   } finally {
