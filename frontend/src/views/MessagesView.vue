@@ -83,7 +83,8 @@ onMounted(load)
   transition: all 0.2s ease;
 }
 .conv:hover {
-  transform: translateY(-2px);
+  transform: translate(-1px, -2px);
+  box-shadow: 6px 6px 0px rgba(0,0,0,1);
 }
 .avatar {
   width: 46px;
