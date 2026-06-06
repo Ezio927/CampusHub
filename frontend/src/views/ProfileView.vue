@@ -409,7 +409,8 @@ const creditAppealHint = computed(() => {
   return ''
 })
 const checkedInToday = computed(() => {
-  const today = new Date().toISOString().substring(0, 10)
+  const d = new Date()
+  const today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
   return quotaList.value.some(item => item.type === 'DAILY_CHECK_IN' && item.createdAt?.substring(0, 10) === today)
 })
 
