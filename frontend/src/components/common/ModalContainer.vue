@@ -54,8 +54,8 @@ function onCancel() {
   padding: 28px 24px 20px;
   max-width: 380px;
   width: 100%;
-  border: 3px solid black;
-  box-shadow: 6px 6px 0px rgba(0,0,0,1);
+  border: 2px solid black;
+  box-shadow: 4px 4px 0px rgba(0,0,0,1);
   animation: modalIn .18s ease-out;
 }
 @keyframes modalIn {

@@ -48,7 +48,7 @@ async function reg() {
 <style scoped>
 .rp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
 .rb{width:100%;max-width:440px}
-.rc{background:var(--card);border-radius:12px;padding:36px 32px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);text-align:center}
+.rc{background:var(--card);border-radius:12px;padding:36px 32px;border:3px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);text-align:center}
 .ri{width:52px;height:52px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;border:2px solid black}
 h1{font-size:22px;font-weight:900;margin-bottom:20px}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}

@@ -169,7 +169,7 @@ onMounted(async () => {
 .tab.on{background:var(--primary);color:#fff}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
 .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.oc{background:var(--card);border-radius:12px;padding:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
+.oc{background:var(--card);border-radius:12px;padding:18px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
 .oc:hover{transform:scale(1.03);box-shadow:8px 8px 0 rgba(0,0,0,1)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

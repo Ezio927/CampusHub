@@ -71,11 +71,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.sc{background:var(--card);border-radius:12px;padding:24px;text-align:center;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
+.sc{background:var(--card);border-radius:12px;padding:24px;text-align:center;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
 .sv{font-size:34px;font-weight:900;color:var(--primary)}
 .sl{font-size:13px;color:var(--text-muted);margin-top:4px;font-weight:500}
 .nav-cards{display:flex;flex-direction:column;gap:10px}
-.nc{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:12px;padding:18px 20px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);transition:all .2s ease}
+.nc{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:12px;padding:18px 20px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);transition:all .2s ease}
 .nc:hover{transform:translateY(-2px)}
 .nc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid black;font-weight:800}
 .nc-info{flex:1}

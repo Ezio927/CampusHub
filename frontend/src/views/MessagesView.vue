@@ -76,9 +76,9 @@ onMounted(load)
   padding: 16px;
   margin-bottom: 10px;
   background: var(--card);
-  border: 3px solid black;
+  border: 2px solid black;
   border-radius: 12px;
-  box-shadow: 6px 6px 0px rgba(0,0,0,1);
+  box-shadow: 4px 4px 0px rgba(0,0,0,1);
   text-align: left;
   transition: all 0.2s ease;
 }

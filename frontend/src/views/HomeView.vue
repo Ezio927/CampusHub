@@ -68,7 +68,7 @@ onMounted(() => store.fetch())
 .open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
 .open-only input{width:auto}
 .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.dc{background:var(--card);border-radius:12px;padding:20px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.dc{background:var(--card);border-radius:12px;padding:20px;border:3px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
 .dc:hover{transform:scale(1.03);box-shadow:8px 8px 0px rgba(0,0,0,1)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .dtl{font-size:17px;font-weight:700;flex:1;margin-right:10px}

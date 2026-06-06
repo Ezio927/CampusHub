@@ -563,7 +563,7 @@ onMounted(async () => {
 .page{max-width:680px}
 
 /* ---- 账户概览 ---- */
-.ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
+.ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
 .ph-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .pav{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
 .pav.has-avatar{background:#fff;padding:0}
@@ -593,7 +593,7 @@ onMounted(async () => {
 .danger-btn:hover{background:rgba(239,68,68,.4)}
 
 /* ---- 分区卡片 ---- */
-.section-card{background:var(--card);border-radius:12px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);margin-bottom:16px;overflow:hidden}
+.section-card{background:var(--card);border-radius:12px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);margin-bottom:16px;overflow:hidden}
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
 .section-header h3{margin:0;font-size:16px;font-weight:900}
 .section-card > div:not(.section-header){padding:0 20px 16px}
