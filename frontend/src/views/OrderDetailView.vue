@@ -65,7 +65,7 @@ const auth = useAuthStore()
 const modal = useModal()
 
 const order = ref(null)
-const showReview = ref(false)
+const myReview = ref(null)
 const reviewRating = ref(0)
 const reviewContent = ref('')
 const reviewErr = ref('')
@@ -112,6 +112,16 @@ const targetUserId = computed(() => {
   return null
 })
 
+const showReview = computed(() => {
+  if (!order.value || !auth.user?.id) return false
+  const uid = auth.user.id
+  const isParticipant = uid === order.value.publisherId || uid === order.value.acceptorId
+  if (!isParticipant) return false
+  if (!['COMPLETED', 'PENDING_CONFIRM'].includes(order.value.status)) return false
+  if (myReview.value) return false
+  return true
+})
+
 const canAppeal = computed(() => {
   if (!order.value) return false
   const uid = auth.user?.id
@@ -127,6 +137,7 @@ async function loadReviews() {
   try {
     const res = await reviewAPI.byOrder(route.params.id)
     reviews.value = res.data || []
+    myReview.value = reviews.value.find(r => r.reviewerId === auth.user?.id) || null
   } catch {
     reviews.value = []
   }
@@ -141,7 +152,6 @@ async function doAction(key) {
     }
     if (key === 'confirm') {
       await orderAPI.confirm(order.value.id)
-      showReview.value = true
       await refresh()
       return
     }
@@ -174,14 +184,14 @@ async function submitReviewAction() {
   try {
     const revieweeId = targetUserId.value
     if (!revieweeId) throw new Error('无法确定评价对象')
-    await reviewAPI.submit({
+    const res = await reviewAPI.submit({
       orderId: order.value.id,
       revieweeId,
       rating: reviewRating.value,
       content: reviewContent.value.trim() || undefined,
       imageUrls: []
     })
-    showReview.value = false
+    myReview.value = res.data
     await loadReviews()
   } catch (e) {
     reviewErr.value = errorMessage(e)
