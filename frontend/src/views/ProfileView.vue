@@ -3,7 +3,10 @@
     <!-- ========== 1. 账户概览 ========== -->
     <div class="ph">
       <div class="ph-top">
-        <div class="pav">{{ auth.user?.username?.[0]?.toUpperCase() }}</div>
+        <div class="pav" :class="{ 'has-avatar': auth.user?.avatarUrl }">
+          <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" alt="头像" />
+          <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
+        </div>
         <div class="ph-info">
           <div class="pn">{{ auth.user?.username }}</div>
           <div class="pi">学号 {{ auth.user?.studentId }} · {{ statusText }}</div>
@@ -98,6 +101,20 @@
         <!-- 编辑资料 -->
         <div class="sub-block">
           <h4 class="sub-title">编辑资料</h4>
+          <div class="form-group">
+            <label>头像</label>
+            <div class="avatar-upload">
+              <div class="avatar-preview" :class="{ 'has-img': avatarPreview }">
+                <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
+                <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
+              </div>
+              <label class="btn-outline btn-sm file-btn">
+                选择图片
+                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickAvatar" />
+              </label>
+              <button v-if="avatarPreview && avatarPreview !== auth.user?.avatarUrl" type="button" class="btn-outline btn-sm" @click="removeAvatar">移除</button>
+            </div>
+          </div>
           <div class="rr">
             <div class="form-group">
               <label>用户名</label>
@@ -331,6 +348,7 @@ import { userAPI } from '@/api/users'
 import { certAPI } from '@/api/certifications'
 import { chatAPI } from '@/api/chat'
 import { arbitrationAPI } from '@/api/arbitrations'
+import { uploadImage } from '@/api/upload'
 import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { useModal } from '@/composables/useModal'
 
@@ -339,6 +357,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const form = reactive({ username: '', phone: '', email: '', gender: '', campus: '' })
+const avatarPreview = ref('')
 const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
 
 const cert = ref(null)
@@ -410,6 +429,8 @@ async function update() {
     if (form.email) payload.email = normalizeEmail(form.email)
     payload.campus = form.campus
     if (form.gender) payload.gender = form.gender
+    if (avatarPreview.value && avatarPreview.value !== auth.user?.avatarUrl) payload.avatarUrl = avatarPreview.value
+    if (avatarPreview.value === 'removed') payload.avatarUrl = ''
     await userAPI.update(payload)
     await auth.fetchUser()
     await loadQuota()
@@ -471,6 +492,20 @@ function pickCertImage(event) {
   reader.onload = () => { certForm.cardImageUrl = String(reader.result || ''); certErr.value = '' }
   reader.readAsDataURL(file)
 }
+async function pickAvatar(event) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  if (!file.type.startsWith('image/')) { modal.alert('请选择图片文件'); return }
+  if (file.size > 500000) { modal.alert('图片需小于 500KB'); return }
+  try {
+    const res = await uploadImage(file)
+    avatarPreview.value = res.data?.url || ''
+  } catch (e) {
+    modal.alert('上传失败', e.message || '图片上传失败，请重试')
+  }
+}
+function removeAvatar() { avatarPreview.value = 'removed' }
 function clearCertImage() { certForm.cardImageUrl = '' }
 
 async function loadCert() {
@@ -513,6 +548,7 @@ onMounted(async () => {
   await auth.fetchUser()
   if (auth.user?.campus) form.campus = auth.user.campus
   if (auth.user?.gender) form.gender = auth.user.gender
+  if (auth.user?.avatarUrl) avatarPreview.value = auth.user.avatarUrl
   await Promise.all([loadCert(), loadCredit(), loadQuota(), loadCreditAppeal(), loadBanAppeal(), loadBlockedList(), loadArbitrations()])
 })
 </script>
@@ -523,7 +559,9 @@ onMounted(async () => {
 /* ---- 账户概览 ---- */
 .ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .ph-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.pav{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:3px solid rgba(255,255,255,.5)}
+.pav{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:3px solid rgba(255,255,255,.5);overflow:hidden}
+.pav.has-avatar{background:#fff;padding:0}
+.pav img{width:100%;height:100%;object-fit:cover}
 .ph-info{min-width:0}
 .pn{font-size:20px;font-weight:900}
 .pi{font-size:13px;opacity:.75;margin-top:2px}
@@ -561,6 +599,12 @@ onMounted(async () => {
 
 /* ---- 表单 ---- */
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ---- 头像上传 ---- */
+.avatar-upload{display:flex;align-items:center;gap:12px}
+.avatar-preview{width:56px;height:56px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:2px solid black;overflow:hidden;flex-shrink:0}
+.avatar-preview.has-img{background:#fff}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
 
 /* ---- 认证 ---- */
 .cert-state{margin-bottom:8px}

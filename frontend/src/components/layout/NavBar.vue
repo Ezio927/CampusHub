@@ -20,7 +20,10 @@
       <div class="nav-right">
         <button class="theme-btn" @click="theme.toggle()" :title="theme.isDark() ? '切换亮色' : '切换暗色'">{{ theme.isDark() ? '☾' : '☀' }}</button>
         <template v-if="auth.isLoggedIn">
-          <router-link to="/profile" class="nav-user" :style="{background:avatarColor}">{{ auth.user?.username?.[0]?.toUpperCase() }}</router-link>
+          <router-link to="/profile" class="nav-user" :class="{ 'has-avatar': auth.user?.avatarUrl }" :style="auth.user?.avatarUrl ? {} : {background:avatarColor}">
+            <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" alt="头像" />
+            <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
+          </router-link>
         </template>
         <template v-else>
           <router-link to="/login" class="btn-primary btn-sm">登录</router-link>
@@ -74,5 +77,7 @@ watch(() => route.fullPath, () => { fetchMessageUnread(); if (auth.isLoggedIn) n
 .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .theme-btn { width:34px; height:34px; padding:0; border-radius:50%; background:var(--surface); font-size:16px; display:flex; align-items:center; justify-content:center; box-shadow:2px 2px 0px rgba(0,0,0,1); }
 .theme-btn:hover { transform:translate(1px,1px); box-shadow:none; }
-.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; border: 2px solid black; flex-shrink: 0; }
+.nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; border: 2px solid black; flex-shrink: 0; overflow: hidden; }
+.nav-user.has-avatar { background: #fff; }
+.nav-user img { width: 100%; height: 100%; object-fit: cover; }
 </style>
