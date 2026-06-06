@@ -20,11 +20,11 @@
 
       <div class="publisher">
         <div class="publisher-avatar-wrap">
-          <button type="button" class="avatar" :class="{ hasAvatar: demand.publisher?.avatarUrl }" :style="demand.publisher?.avatarUrl ? {} : { background: avatarColor }" @click="openPublisherAvatar">
+          <button type="button" class="avatar" :class="{ hasAvatar: demand.publisher?.avatarUrl }" :style="demand.publisher?.avatarUrl ? {} : { background: avatarColor }" @click="openPublisherAvatar" @mouseenter="checkPopoverDir">
             <img v-if="demand.publisher?.avatarUrl" :src="demand.publisher.avatarUrl" alt="发布者头像" />
             <span v-else>{{ userInitial(demand.publisher) }}</span>
           </button>
-          <div class="profile-popover">
+          <div class="profile-popover" :class="{ 'popover-top': popoverAbove }">
             <div class="popover-name">{{ demand.publisher?.realName || demand.publisher?.username || '发布者' }}</div>
             <div class="popover-row"><span>信用分</span><strong>{{ demand.publisher?.creditScore ?? '-' }}</strong></div>
             <div class="popover-row"><span>性别</span><strong>{{ genderText(demand.publisher) }}</strong></div>
@@ -72,6 +72,7 @@ const auth = useAuthStore()
 const modal = useModal()
 const demand = ref(null)
 const imgViewer = ref('')
+const popoverAbove = ref(false)
 const colors = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c']
 const avatarColor = computed(() => colors[(demand.value?.publisher?.username?.charCodeAt(0) || 0) % colors.length])
 
@@ -93,6 +94,22 @@ function statusColor(status) {
 
 function rewardText(item) {
   return item.rewardType === 'MONEY' ? `¥${item.rewardAmount || 0}` : `${item.rewardAmount || 0}额度分`
+}
+
+function checkPopoverDir(e) {
+  const btn = e.currentTarget
+  const popover = btn.nextElementSibling
+  if (!popover) return
+  const btnRect = btn.getBoundingClientRect()
+  const spaceBelow = window.innerHeight - btnRect.bottom
+  popover.style.visibility = 'hidden'
+  popover.style.position = 'fixed'
+  popover.style.left = '0'
+  const popoverHeight = popover.offsetHeight
+  popover.style.visibility = ''
+  popover.style.position = ''
+  popover.style.left = ''
+  popoverAbove.value = spaceBelow < popoverHeight + 12
 }
 
 function openPublisherAvatar() {
@@ -158,6 +175,7 @@ h1 { font-size: 22px; font-weight: 900; flex: 1; margin-right: 12px; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .profile-popover { position: absolute; left: 0; top: 54px; z-index: 20; width: 260px; padding: 12px; border: 2px solid black; border-radius: 10px; background: var(--card); box-shadow: 6px 6px 0 rgba(0,0,0,1); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .14s ease .45s, transform .14s ease .45s; }
 .publisher-avatar-wrap:hover .profile-popover { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.profile-popover.popover-top { top: auto; bottom: 54px; }
 .popover-name { font-size: 15px; font-weight: 900; margin-bottom: 8px; word-break: break-word; }
 .popover-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
 .popover-row strong { color: var(--text); text-align: right; }
