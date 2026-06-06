@@ -426,7 +426,7 @@ onUnmounted(() => {
   overflow: hidden;
 }
 .avatar.hasAvatar { background: #fff; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: contain; }
 .head-main { flex: 1; min-width: 0; }
 .chat-name { font-size: 16px; font-weight: 900; }
 .chat-context, .state { margin-top: 2px; color: var(--text-muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -502,7 +502,7 @@ onUnmounted(() => {
   max-width: 220px;
   max-height: 180px;
   border-radius: 6px;
-  object-fit: cover;
+  object-fit: contain;
   border: 2px solid black;
 }
 .quote-in-msg {
@@ -564,7 +564,7 @@ onUnmounted(() => {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 .quote-preview, .image-preview {
   display: flex;
@@ -587,7 +587,7 @@ onUnmounted(() => {
   color: var(--primary);
   border: none;
 }
-.image-preview img { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; border: 2px solid black; }
+.image-preview img { width: 56px; height: 42px; border-radius: 6px; object-fit: contain; border: 2px solid black; }
 .emoji-row {
   display: flex;
   gap: 4px;

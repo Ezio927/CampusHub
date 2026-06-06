@@ -166,13 +166,13 @@ h1 { font-size: 22px; font-weight: 900; flex: 1; margin-right: 12px; }
 .reward { color: var(--danger); }
 .description { white-space: pre-wrap; line-height: 1.8; color: var(--text-secondary); padding: 16px; background: var(--surface); border-radius: 10px; margin: 16px 0; border: 2px solid black; }
 .detail-images { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.detail-images img { width: 100px; height: 100px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid black; }
+.detail-images img { width: 100px; height: 100px; border-radius: 10px; object-fit: contain; cursor: pointer; border: 2px solid black; }
 .detail-images img:hover { opacity: .85; }
 .publisher { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--surface); border-radius: 10px; border: 2px solid black; }
 .publisher-avatar-wrap { position: relative; flex-shrink: 0; }
 .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 18px; border: 2px solid black; padding: 0; overflow: hidden; }
 .avatar.hasAvatar { background: #fff; cursor: zoom-in; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: contain; }
 .profile-popover { position: absolute; left: 0; top: 54px; z-index: 20; width: 260px; padding: 12px; border: 2px solid black; border-radius: 10px; background: var(--card); box-shadow: 6px 6px 0 rgba(0,0,0,1); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .14s ease .45s, transform .14s ease .45s; }
 .publisher-avatar-wrap:hover .profile-popover { opacity: 1; transform: translateY(0); pointer-events: auto; }
 .profile-popover.popover-top { top: auto; bottom: 54px; }

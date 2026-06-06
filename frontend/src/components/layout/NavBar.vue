@@ -79,5 +79,5 @@ watch(() => route.fullPath, () => { fetchMessageUnread(); if (auth.isLoggedIn) n
 .theme-btn:hover { transform:translate(1px,1px); box-shadow:none; }
 .nav-user { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 15px; border: 2px solid black; flex-shrink: 0; overflow: hidden; }
 .nav-user.has-avatar { background: #fff; }
-.nav-user img { width: 100%; height: 100%; object-fit: cover; }
+.nav-user img { width: 100%; height: 100%; object-fit: contain; }
 </style>

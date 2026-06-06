@@ -176,6 +176,10 @@
               <input :value="auth.user?.studentId" readonly />
             </div>
             <div class="form-group">
+              <label>姓名</label>
+              <input :value="auth.user?.realName" readonly />
+            </div>
+            <div class="form-group">
               <label>认证图片</label>
               <div class="upload-row">
                 <label class="btn-outline btn-sm file-btn">
@@ -559,9 +563,9 @@ onMounted(async () => {
 /* ---- 账户概览 ---- */
 .ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .ph-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.pav{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:3px solid rgba(255,255,255,.5);overflow:hidden}
+.pav{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
 .pav.has-avatar{background:#fff;padding:0}
-.pav img{width:100%;height:100%;object-fit:cover}
+.pav img{width:100%;height:100%;object-fit:contain}
 .ph-info{min-width:0}
 .pn{font-size:20px;font-weight:900}
 .pi{font-size:13px;opacity:.75;margin-top:2px}
@@ -604,7 +608,7 @@ onMounted(async () => {
 .avatar-upload{display:flex;align-items:center;gap:12px}
 .avatar-preview{width:56px;height:56px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:2px solid black;overflow:hidden;flex-shrink:0}
 .avatar-preview.has-img{background:#fff}
-.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-preview img{width:100%;height:100%;object-fit:contain}
 
 /* ---- 认证 ---- */
 .cert-state{margin-bottom:8px}
@@ -613,7 +617,7 @@ onMounted(async () => {
 .file-btn input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:var(--surface)}
 .compact-preview{width:220px;height:150px}
-.cert-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.cert-preview img{display:block;width:100%;height:100%;object-fit:contain}
 
 /* ---- 记录行 ---- */
 .record-row{padding:8px 0;border-bottom:1px solid var(--border)}
