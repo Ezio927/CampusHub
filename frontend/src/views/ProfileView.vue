@@ -26,7 +26,7 @@
           <div class="stat-lbl">冻结额度</div>
         </div>
         <div class="stat-item">
-          <div class="stat-val" :style="{ color: auth.user?.status === 'BANNED' ? '#fecaca' : '' }">{{ statusText }}</div>
+          <div class="stat-val" :style="auth.user?.status === 'BANNED' ? { color: 'var(--danger)' } : {}">{{ statusText }}</div>
           <div class="stat-lbl">账户状态</div>
         </div>
       </div>
@@ -564,30 +564,31 @@ onMounted(async () => {
 .page{max-width:680px}
 
 /* ---- 账户概览 ---- */
-.ph{background:var(--ph-bg,var(--primary));border-radius:12px;padding:24px;color:#fff;margin-bottom:16px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
-.ph-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.ph{background:var(--card);border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
+.ph-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .pav{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
 .pav.has-avatar{background:#fff;padding:0}
 .pav img{width:100%;height:100%;object-fit:contain}
 .ph-info{min-width:0}
-.pn{font-size:20px;font-weight:900}
-.pi{font-size:13px;opacity:.75;margin-top:2px}
+.pn{font-size:20px;font-weight:900;color:var(--text)}
+.pi{font-size:13px;color:var(--text-muted);margin-top:4px}
 
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
-.stat-item{text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:10px 6px}
-.stat-val{font-size:20px;font-weight:900}
-.stat-lbl{font-size:11px;opacity:.75;margin-top:2px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat-item{text-align:center;background:var(--surface);border-radius:10px;padding:12px 8px;border:2px solid black;box-shadow:2px 2px 0 rgba(0,0,0,1);transition:transform .15s ease;cursor:default}
+.stat-item:hover{transform:scale(1.08) rotate(-1deg)}
+.stat-val{font-size:20px;font-weight:900;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px}
 
-.appeal-badge{margin-top:6px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;text-align:center}
-.appeal-PENDING{background:rgba(251,191,36,.2);color:#fef3c7}
-.appeal-APPROVED{background:rgba(16,185,129,.2);color:#d1fae5}
-.appeal-REJECTED{background:rgba(239,68,68,.2);color:#fee2e2}
+.appeal-badge{margin-top:10px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;text-align:center}
+.appeal-PENDING{background:var(--warning-light);color:var(--warning);font-weight:700;border:1px solid var(--warning)}
+.appeal-APPROVED{background:var(--success-light);color:var(--success);font-weight:700;border:1px solid var(--success)}
+.appeal-REJECTED{background:var(--danger-light);color:var(--danger);font-weight:700;border:1px solid var(--danger)}
 
-.ph-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-.ph-btn{padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid rgba(255,255,255,.5);color:#fff;cursor:pointer}
-.chk-btn{background:rgba(255,255,255,.25)}
-.chk-btn:hover{background:rgba(255,255,255,.4)}
-.checked-btn{background:rgba(255,255,255,.15);cursor:default;opacity:.7}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.ph-btn{padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;border:1.5px solid var(--border);color:var(--text);cursor:pointer;background:var(--surface);transition:all .2s}
+.ph-btn:hover{background:var(--border)}
+.chk-btn{font-weight:700}
+.checked-btn{cursor:default;opacity:.5}
 .warn-btn{background:rgba(251,191,36,.25)}
 .warn-btn:hover{background:rgba(251,191,36,.4)}
 .danger-btn{background:rgba(239,68,68,.25)}
