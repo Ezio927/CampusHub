@@ -51,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
         createDto.setPassword(req.getPassword());
         createDto.setStudentId(req.getStudentId());
         createDto.setRealName(req.getRealName());
+        createDto.setGender(req.getGender());
         createDto.setPhone(req.getPhone());
         createDto.setEmail(req.getEmail());
         return userService.createUser(createDto);

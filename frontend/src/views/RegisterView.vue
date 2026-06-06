@@ -4,7 +4,7 @@
     <form @submit.prevent="reg">
       <div class="rr"><input class="inp" v-model="f.username" placeholder="用户名" required /><input class="inp" v-model="f.password" type="password" placeholder="密码" required /></div>
       <div class="rr"><input class="inp" v-model="f.studentId" placeholder="学号" required /><input class="inp" v-model="f.realName" placeholder="真实姓名" required /></div>
-      <input class="inp" v-model="f.phone" placeholder="手机号（选填）" />
+      <div class="rr"><select class="inp" v-model="f.gender" required><option value="" disabled hidden>性别</option><option value="UNDISCLOSED">不愿透露</option><option value="MALE">男</option><option value="FEMALE">女</option></select><input class="inp" v-model="f.phone" placeholder="手机号（选填）" /></div>
       <input class="inp" v-model="f.email" placeholder="邮箱（选填）" />
       <p v-if="err" class="form-error">{{ err }}</p>
       <button type="submit" class="btn-primary btn-block rbn" :disabled="ing">{{ ing? '注册中...' : '注 册' }}</button>
@@ -25,7 +25,7 @@ import {
 } from '@/utils/validators'
 const r = useRouter()
 const auth = useAuthStore()
-const f = reactive({ username:'', password:'', studentId:'', realName:'', phone:'', email:'' })
+const f = reactive({ username:'', password:'', studentId:'', realName:'', gender:'', phone:'', email:'' })
 const err = ref('')
 const ing = ref(false)
 async function reg() {
