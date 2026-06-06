@@ -53,10 +53,10 @@
 
     <!-- ========== 2. 积分规则（默认折叠） ========== -->
     <div class="section-card">
-      <button type="button" class="section-header" @click="toggleSection('rules')">
+      <div class="section-header">
         <h3>积分规则</h3>
-        <span class="fold-arrow" :class="{ open: isExpanded('rules') }">&#9662;</span>
-      </button>
+        <button type="button" class="btn-outline btn-sm" @click.stop="toggleSection('rules')">{{ isExpanded('rules') ? '收起' : '展开' }}</button>
+      </div>
       <div v-show="isExpanded('rules')" class="rules-grid">
         <div class="rule-col">
           <h4>信用分</h4>
@@ -90,10 +90,10 @@
 
     <!-- ========== 3. 账户管理 ========== -->
     <div class="section-card">
-      <button type="button" class="section-header" @click="toggleSection('account')">
+      <div class="section-header">
         <h3>账户管理</h3>
-        <span class="fold-arrow" :class="{ open: isExpanded('account') }">&#9662;</span>
-      </button>
+        <button type="button" class="btn-outline btn-sm" @click.stop="toggleSection('account')">{{ isExpanded('account') ? '收起' : '展开' }}</button>
+      </div>
       <div v-show="isExpanded('account')">
         <!-- 编辑资料 -->
         <div class="sub-block">
@@ -189,10 +189,10 @@
 
     <!-- ========== 4. 记录与申诉 ========== -->
     <div class="section-card">
-      <button type="button" class="section-header" @click="toggleSection('records')">
+      <div class="section-header">
         <h3>记录与申诉</h3>
-        <span class="fold-arrow" :class="{ open: isExpanded('records') }">&#9662;</span>
-      </button>
+        <button type="button" class="btn-outline btn-sm" @click.stop="toggleSection('records')">{{ isExpanded('records') ? '收起' : '展开' }}</button>
+      </div>
       <div v-show="isExpanded('records')">
         <!-- 信用分申诉 -->
         <div class="sub-block">
@@ -215,9 +215,9 @@
 
         <!-- 信用分记录 -->
         <div class="sub-block">
-          <div class="flex-between clickable" @click="toggleSection('creditRecords')">
-            <h4 class="sub-title">信用分记录</h4>
-            <span class="text-sm text-muted">{{ creditList.length }} 条 &#9662;</span>
+          <div class="flex-between">
+            <h4 class="sub-title">信用分记录 <span class="text-sm text-muted">({{ creditList.length }})</span></h4>
+            <button type="button" class="btn-outline btn-sm" @click="toggleSection('creditRecords')">{{ isExpanded('creditRecords') ? '收起' : '展开' }}</button>
           </div>
           <div v-show="isExpanded('creditRecords')">
             <div v-if="creditList.length === 0" class="text-sm text-muted">暂无记录</div>
@@ -237,9 +237,9 @@
 
         <!-- 额度分记录 -->
         <div class="sub-block">
-          <div class="flex-between clickable" @click="toggleSection('quotaRecords')">
-            <h4 class="sub-title">额度分记录</h4>
-            <span class="text-sm text-muted">{{ quotaList.length }} 条 &#9662;</span>
+          <div class="flex-between">
+            <h4 class="sub-title">额度分记录 <span class="text-sm text-muted">({{ quotaList.length }})</span></h4>
+            <button type="button" class="btn-outline btn-sm" @click="toggleSection('quotaRecords')">{{ isExpanded('quotaRecords') ? '收起' : '展开' }}</button>
           </div>
           <div v-show="isExpanded('quotaRecords')">
             <div v-if="quotaList.length === 0" class="text-sm text-muted">暂无记录</div>
@@ -261,9 +261,9 @@
 
         <!-- 我的申诉 -->
         <div class="sub-block">
-          <div class="flex-between clickable" @click="toggleSection('appeals')">
-            <h4 class="sub-title">仲裁申诉</h4>
-            <span class="text-sm text-muted">{{ arbitrationList.length }} 条 &#9662;</span>
+          <div class="flex-between">
+            <h4 class="sub-title">仲裁申诉 <span class="text-sm text-muted">({{ arbitrationList.length }})</span></h4>
+            <button type="button" class="btn-outline btn-sm" @click="toggleSection('appeals')">{{ isExpanded('appeals') ? '收起' : '展开' }}</button>
           </div>
           <div v-show="isExpanded('appeals')">
             <div v-if="arbitrationList.length === 0" class="text-sm text-muted">暂无记录</div>
@@ -280,10 +280,10 @@
 
     <!-- ========== 5. 社交管理 ========== -->
     <div class="section-card">
-      <button type="button" class="section-header" @click="toggleSection('social')">
+      <div class="section-header">
         <h3>社交管理</h3>
-        <span class="fold-arrow" :class="{ open: isExpanded('social') }">&#9662;</span>
-      </button>
+        <button type="button" class="btn-outline btn-sm" @click.stop="toggleSection('social')">{{ isExpanded('social') ? '收起' : '展开' }}</button>
+      </div>
       <div v-show="isExpanded('social')">
         <!-- 我的评价 -->
         <div class="sub-block">
@@ -550,11 +550,8 @@ onMounted(async () => {
 
 /* ---- 分区卡片 ---- */
 .section-card{background:var(--card);border-radius:12px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);margin-bottom:16px;overflow:hidden}
-.section-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:none;border:none;cursor:pointer;font:inherit;color:var(--text)}
-.section-header:hover{background:var(--surface)}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
 .section-header h3{margin:0;font-size:16px;font-weight:900}
-.fold-arrow{font-size:14px;transition:transform .2s}
-.fold-arrow.open{transform:rotate(180deg)}
 .section-card > div:not(.section-header){padding:0 20px 16px}
 
 /* ---- 子内容块 ---- */
@@ -600,8 +597,6 @@ onMounted(async () => {
 .image-viewer{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:56px 20px;background:rgba(15,23,42,.82)}
 .image-viewer img{max-width:min(920px,96vw);max-height:86vh;border-radius:12px;background:#fff;border:2px solid black}
 .viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text)}
-
-.clickable{cursor:pointer}
 
 @media(max-width:860px){
   .stats-row{grid-template-columns:repeat(2,1fr)}
