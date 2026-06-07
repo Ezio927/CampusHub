@@ -20,11 +20,11 @@
 
       <div class="publisher">
         <div class="publisher-avatar-wrap">
-          <button type="button" class="avatar" :class="{ hasAvatar: demand.publisher?.avatarUrl }" :style="demand.publisher?.avatarUrl ? {} : { background: avatarColor }" @click="openPublisherAvatar">
+          <button type="button" class="avatar" :class="{ hasAvatar: demand.publisher?.avatarUrl }" :style="demand.publisher?.avatarUrl ? {} : { background: avatarColor }" @click="openPublisherAvatar" @mouseenter="checkPopoverDir">
             <img v-if="demand.publisher?.avatarUrl" :src="demand.publisher.avatarUrl" alt="发布者头像" />
             <span v-else>{{ userInitial(demand.publisher) }}</span>
           </button>
-          <div class="profile-popover">
+          <div class="profile-popover" :class="{ 'popover-top': popoverAbove }">
             <div class="popover-name">{{ demand.publisher?.realName || demand.publisher?.username || '发布者' }}</div>
             <div class="popover-row"><span>信用分</span><strong>{{ demand.publisher?.creditScore ?? '-' }}</strong></div>
             <div class="popover-row"><span>性别</span><strong>{{ genderText(demand.publisher) }}</strong></div>
@@ -72,6 +72,7 @@ const auth = useAuthStore()
 const modal = useModal()
 const demand = ref(null)
 const imgViewer = ref('')
+const popoverAbove = ref(false)
 const colors = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c']
 const avatarColor = computed(() => colors[(demand.value?.publisher?.username?.charCodeAt(0) || 0) % colors.length])
 
@@ -93,6 +94,22 @@ function statusColor(status) {
 
 function rewardText(item) {
   return item.rewardType === 'MONEY' ? `¥${item.rewardAmount || 0}` : `${item.rewardAmount || 0}额度分`
+}
+
+function checkPopoverDir(e) {
+  const btn = e.currentTarget
+  const popover = btn.nextElementSibling
+  if (!popover) return
+  const btnRect = btn.getBoundingClientRect()
+  const spaceBelow = window.innerHeight - btnRect.bottom
+  popover.style.visibility = 'hidden'
+  popover.style.position = 'fixed'
+  popover.style.left = '0'
+  const popoverHeight = popover.offsetHeight
+  popover.style.visibility = ''
+  popover.style.position = ''
+  popover.style.left = ''
+  popoverAbove.value = spaceBelow < popoverHeight + 12
 }
 
 function openPublisherAvatar() {
@@ -139,7 +156,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.detail-card { background: var(--card); border-radius: 12px; padding: 24px; margin-bottom: 14px; border: 3px solid black; box-shadow: 6px 6px 0 rgba(0,0,0,1); max-width: 720px; margin-left: auto; margin-right: auto; }
+.detail-card { background: var(--card); border-radius: 12px; padding: 24px; margin-bottom: 14px; border: 2px solid black; box-shadow: 4px 4px 0 rgba(0,0,0,1); max-width: 720px; margin-left: auto; margin-right: auto; }
 h1 { font-size: 22px; font-weight: 900; flex: 1; margin-right: 12px; }
 .category { display: inline-flex; padding: 5px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; color: #111; border: 2px solid black; }
 .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
@@ -149,15 +166,16 @@ h1 { font-size: 22px; font-weight: 900; flex: 1; margin-right: 12px; }
 .reward { color: var(--danger); }
 .description { white-space: pre-wrap; line-height: 1.8; color: var(--text-secondary); padding: 16px; background: var(--surface); border-radius: 10px; margin: 16px 0; border: 2px solid black; }
 .detail-images { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.detail-images img { width: 100px; height: 100px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid black; }
+.detail-images img { width: 100px; height: 100px; border-radius: 10px; object-fit: contain; cursor: pointer; border: 2px solid black; }
 .detail-images img:hover { opacity: .85; }
 .publisher { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--surface); border-radius: 10px; border: 2px solid black; }
 .publisher-avatar-wrap { position: relative; flex-shrink: 0; }
 .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 18px; border: 2px solid black; padding: 0; overflow: hidden; }
 .avatar.hasAvatar { background: #fff; cursor: zoom-in; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.profile-popover { position: absolute; left: 0; top: 54px; z-index: 20; width: 260px; padding: 12px; border: 2px solid black; border-radius: 10px; background: var(--card); box-shadow: 6px 6px 0 rgba(0,0,0,1); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .14s ease .45s, transform .14s ease .45s; }
+.avatar img { width: 100%; height: 100%; object-fit: contain; }
+.profile-popover { position: absolute; left: 0; top: 54px; z-index: 20; width: 260px; padding: 12px; border: 2px solid black; border-radius: 10px; background: var(--card); box-shadow: 4px 4px 0 rgba(0,0,0,1); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .14s ease .45s, transform .14s ease .45s; }
 .publisher-avatar-wrap:hover .profile-popover { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.profile-popover.popover-top { top: auto; bottom: 54px; }
 .popover-name { font-size: 15px; font-weight: 900; margin-bottom: 8px; word-break: break-word; }
 .popover-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
 .popover-row strong { color: var(--text); text-align: right; }

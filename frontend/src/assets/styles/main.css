@@ -30,43 +30,44 @@ body{
 }
 a{color:var(--primary);text-decoration:none}
 
-/* Inputs - Soft Neo-Brutalism: border:2px solid black, border-radius:10px */
+/* Inputs - border:1.5px solid black, border-radius:10px */
 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 textarea,select{
   font-family:inherit;font-size:15px;font-weight:500;
   padding:10px 14px;
-  border:2px solid black;
+  border:1.5px solid black;
   border-radius:var(--radius-sm);width:100%;
   background:var(--surface);color:var(--text);
   transition:all 0.2s ease
 }
+textarea{resize:vertical;min-height:80px}
 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
 textarea:focus,select:focus{outline:none;border-color:var(--primary)}
 input[type="checkbox"],input[type="radio"]{width:auto;border:none;box-shadow:none}
 input[type="file"]{border:none;padding:0}
 
-/* Buttons - Soft Neo-Brutalism: border:2px solid black, border-radius:10px, box-shadow:4px 4px 0px */
+/* Buttons */
 button{
-  cursor:pointer;border:2px solid black;
+  cursor:pointer;border:1.5px solid black;
   border-radius:var(--radius-sm);
   padding:10px 20px;font-weight:700;font-size:15px;
   transition:all 0.2s ease;font-family:inherit
 }
-.btn-primary{background:var(--primary);color:#fff;box-shadow:4px 4px 0px rgba(0,0,0,1)}
-.btn-primary:hover{transform:translate(1px,1px);box-shadow:none}
-.btn-danger{background:var(--danger);color:#fff;box-shadow:4px 4px 0px rgba(0,0,0,1)}
-.btn-danger:hover{transform:translate(1px,1px);box-shadow:none}
-.btn-outline{background:var(--surface);color:var(--text);box-shadow:4px 4px 0px rgba(0,0,0,1)}
-.btn-outline:hover{background:#111;color:#fff;transform:translate(1px,1px);box-shadow:none}
+.btn-primary{background:var(--text);color:var(--bg);box-shadow:3px 3px 0px rgba(0,0,0,.2)}
+.btn-primary:hover{background:var(--primary);color:#fff;transform:translate(1px,1px);box-shadow:none}
+.btn-danger{background:var(--text);color:var(--bg);box-shadow:3px 3px 0px rgba(0,0,0,.2)}
+.btn-danger:hover{background:var(--danger);color:#fff;transform:translate(1px,1px);box-shadow:none}
+.btn-outline{background:var(--surface);color:var(--text);box-shadow:3px 3px 0px rgba(0,0,0,.1)}
+.btn-outline:hover{background:var(--text);color:var(--bg);transform:translate(1px,1px);box-shadow:none}
 .btn-sm{padding:6px 16px;font-size:13px;border-radius:8px}
 .btn-block{width:100%;justify-content:center;display:flex}
 
-/* Cards - Soft Neo-Brutalism: border:3px solid black, border-radius:12px, box-shadow:6px 6px 0px */
+/* Cards */
 .card{
   background:var(--card);border-radius:var(--radius);padding:24px;
   margin-bottom:14px;
-  border:3px solid black;
-  box-shadow:6px 6px 0px rgba(0,0,0,1)
+  border:2px solid black;
+  box-shadow:4px 4px 0px rgba(0,0,0,1)
 }
 
 /* Form */
@@ -83,7 +84,7 @@ button{
   display:inline-flex;padding:3px 12px;
   border-radius:var(--radius-sm);
   font-size:12px;font-weight:700;color:var(--text);
-  border:2px solid black
+  border:1.5px solid black
 }
 
 /* Page layout */
@@ -92,12 +93,12 @@ button{
 .back{
   display:inline-flex;align-items:center;justify-content:center;
   width:36px;height:36px;border-radius:var(--radius-sm);
-  background:var(--surface);border:2px solid black;
-  box-shadow:4px 4px 0px rgba(0,0,0,1);
+  background:var(--surface);border:1.5px solid black;
+  box-shadow:3px 3px 0px rgba(0,0,0,1);
   font-size:18px;color:var(--text-secondary);
   margin-bottom:16px;transition:all 0.2s ease
 }
-.back:hover{background:#111;border-color:#111;color:#fff;transform:translate(1px,1px);box-shadow:none}
+.back:hover{background:var(--text);border-color:var(--text);color:var(--bg);transform:translate(1px,1px);box-shadow:none}
 
 .page-title{font-size:22px;font-weight:900;margin-bottom:20px}
 .empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-weight:500}

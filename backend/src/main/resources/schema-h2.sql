@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     real_name VARCHAR(50),
     avatar_url VARCHAR(255),
     gender VARCHAR(20),
+    campus VARCHAR(100),
     credit_score INT NOT NULL DEFAULT 100,
     publisher_rating DECIMAL(3,2) NOT NULL DEFAULT 0,
     publisher_rating_count INT NOT NULL DEFAULT 0,
@@ -138,6 +139,7 @@ CREATE TABLE IF NOT EXISTS demands (
     urgent TINYINT NOT NULL DEFAULT 0,
     urgent_deadline TIMESTAMP,
     location_tag VARCHAR(100),
+    campus VARCHAR(100),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );

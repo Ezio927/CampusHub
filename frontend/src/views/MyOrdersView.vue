@@ -1,7 +1,8 @@
 <template>
   <div class="page">
     <h1 class="page-title">我的订单</h1>
-    <div class="tabs">
+    <div class="tabs" ref="tabsRef">
+      <div class="tab-slider" :style="sliderStyle"></div>
       <div class="tab" :class="{ on: role === 'PUBLISHER' }" @click="switchRole('PUBLISHER')">我发布的</div>
       <div class="tab" :class="{ on: role === 'ACCEPTOR' }" @click="switchRole('ACCEPTOR')">我接单的</div>
     </div>
@@ -63,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { orderAPI } from '@/api/orders'
 import { demandAPI } from '@/api/demands'
@@ -73,6 +74,24 @@ const router = useRouter()
 const demands = ref([])
 const orders = ref([])
 const role = ref('PUBLISHER')
+const tabsRef = ref(null)
+const sliderStyle = ref({ left: '0px', width: '0px', opacity: '0' })
+
+function updateSlider() {
+  if (!tabsRef.value) return
+  const active = tabsRef.value.querySelector('.tab.on')
+  if (active) {
+    const container = tabsRef.value.getBoundingClientRect()
+    const el = active.getBoundingClientRect()
+    sliderStyle.value = {
+      left: (el.left - container.left) + 'px',
+      width: el.width + 'px',
+      opacity: '1'
+    }
+  }
+}
+
+watch(role, () => nextTick(() => updateSlider()))
 
 function orderStatusText(status) {
   return {
@@ -160,16 +179,18 @@ async function load() {
 onMounted(async () => {
   role.value = route.query.role === 'ACCEPTOR' ? 'ACCEPTOR' : 'PUBLISHER'
   await load()
+  nextTick(() => updateSlider())
 })
 </script>
 
 <style scoped>
-.tabs{display:flex;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px;border:2px solid black}
-.tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:all .2s ease}
-.tab.on{background:var(--primary);color:#fff}
+.tabs{position:relative;display:flex;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px;border:2px solid black}
+.tab-slider{position:absolute;top:4px;height:calc(100% - 8px);background:var(--text);border-radius:8px;transition:left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),opacity .2s;pointer-events:none}
+.tab{position:relative;z-index:1;flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:color .2s ease}
+.tab.on{color:var(--bg)}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
 .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.oc{background:var(--card);border-radius:12px;padding:18px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
-.oc:hover{transform:scale(1.03);box-shadow:8px 8px 0 rgba(0,0,0,1)}
+.oc{background:var(--card);border-radius:12px;padding:18px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
+.oc:hover{transform:scale(1.02);box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 </style>

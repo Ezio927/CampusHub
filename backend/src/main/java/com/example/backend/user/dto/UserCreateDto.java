@@ -6,6 +6,7 @@ public class UserCreateDto {
     private String password;
     private String studentId;
     private String realName;
+    private String gender;
     private String phone;
     private String email;
 
@@ -42,6 +43,14 @@ public class UserCreateDto {
 
     public void setRealName(String realName) {
         this.realName = realName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getPhone() {

@@ -65,7 +65,7 @@ const auth = useAuthStore()
 const modal = useModal()
 
 const order = ref(null)
-const showReview = ref(false)
+const myReview = ref(null)
 const reviewRating = ref(0)
 const reviewContent = ref('')
 const reviewErr = ref('')
@@ -112,6 +112,16 @@ const targetUserId = computed(() => {
   return null
 })
 
+const showReview = computed(() => {
+  if (!order.value || !auth.user?.id) return false
+  const uid = auth.user.id
+  const isParticipant = uid === order.value.publisherId || uid === order.value.acceptorId
+  if (!isParticipant) return false
+  if (!['COMPLETED', 'PENDING_CONFIRM'].includes(order.value.status)) return false
+  if (myReview.value) return false
+  return true
+})
+
 const canAppeal = computed(() => {
   if (!order.value) return false
   const uid = auth.user?.id
@@ -127,6 +137,7 @@ async function loadReviews() {
   try {
     const res = await reviewAPI.byOrder(route.params.id)
     reviews.value = res.data || []
+    myReview.value = reviews.value.find(r => r.reviewerId === auth.user?.id) || null
   } catch {
     reviews.value = []
   }
@@ -141,7 +152,6 @@ async function doAction(key) {
     }
     if (key === 'confirm') {
       await orderAPI.confirm(order.value.id)
-      showReview.value = true
       await refresh()
       return
     }
@@ -174,14 +184,15 @@ async function submitReviewAction() {
   try {
     const revieweeId = targetUserId.value
     if (!revieweeId) throw new Error('无法确定评价对象')
-    await reviewAPI.submit({
+    const res = await reviewAPI.submit({
       orderId: order.value.id,
       revieweeId,
       rating: reviewRating.value,
       content: reviewContent.value.trim() || undefined,
       imageUrls: []
     })
-    router.push('/reviews/' + revieweeId)
+    myReview.value = res.data
+    await loadReviews()
   } catch (e) {
     reviewErr.value = errorMessage(e)
   } finally {
@@ -231,13 +242,13 @@ onMounted(refresh)
 </script>
 
 <style scoped>
-.dc{background:var(--card);border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
+.dc{background:var(--card);border-radius:12px;padding:24px;margin-bottom:14px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
 .mi{padding:12px;background:var(--surface);border-radius:10px;display:flex;flex-direction:column;gap:4px;border:2px solid black}
 .lbl{font-size:12px;color:var(--text-muted);font-weight:500}
 .val{font-size:16px;font-weight:700}
 .acts{display:flex;flex-direction:column;gap:8px;max-width:680px;margin-left:auto;margin-right:auto}
 .acts button{padding:14px;border-radius:10px;font-size:15px;font-weight:700}
-.review-card{background:var(--card);border-radius:12px;padding:20px 24px;margin-bottom:14px;border:3px solid black;box-shadow:6px 6px 0 rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
+.review-card{background:var(--card);border-radius:12px;padding:20px 24px;margin-bottom:14px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);max-width:680px;margin-left:auto;margin-right:auto}
 .review-card h3{font-size:15px;font-weight:900;margin:0 0 12px}
 .review-item{padding:10px 0;border-top:1px solid var(--border)}
 .review-item:first-of-type{border-top:none;padding-top:0}

@@ -3,6 +3,7 @@ package com.example.backend.user.service.impl;
 import com.example.backend.auth.security.PasswordHasher;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.ErrorCode;
+import com.example.backend.common.enums.UserGender;
 import com.example.backend.common.enums.UserRole;
 import com.example.backend.common.enums.UserStatus;
 import com.example.backend.common.moderation.ContentModerationService;
@@ -59,6 +60,7 @@ public class UserServiceImpl implements UserService {
         user.setRealName(realName);
         user.setPhone(phone);
         user.setEmail(email);
+        user.setGender(parseGender(req.getGender()));
         user.setAvatarUrl(null);
         user.setCreditScore(100);
         user.setQuotaAvailable(0);
@@ -111,6 +113,9 @@ public class UserServiceImpl implements UserService {
         if (req.getCampus() != null) {
             user.setCampus(req.getCampus().trim().isEmpty() ? null : req.getCampus().trim());
         }
+        if (req.getGender() != null) {
+            user.setGender(parseGender(req.getGender()));
+        }
         userRepository.save(user);
         grantProfileRewards(userId, user.getPhone(), user.getEmail(), hadPhone, hadEmail);
         return UserDto.from(findUser(userId));
@@ -135,5 +140,14 @@ public class UserServiceImpl implements UserService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private UserGender parseGender(String gender) {
+        if (isBlank(gender)) return UserGender.UNDISCLOSED;
+        try {
+            return UserGender.valueOf(gender.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return UserGender.UNDISCLOSED;
+        }
     }
 }

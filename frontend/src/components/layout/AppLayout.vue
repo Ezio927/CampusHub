@@ -27,7 +27,7 @@ import NavBar from './NavBar.vue'
 <style scoped>
 .layout { min-height: 100vh; display: flex; flex-direction: column; }
 .main { flex: 1; min-width: 0; width: 80%; margin: 0 auto; }
-.footer { margin-top: 48px; border-top: 3px solid black; background: var(--card); }
+.footer { margin-top: 48px; border-top: 2px solid black; background: var(--card); }
 .footer-inner { width: 80%; margin: 0 auto; padding: 28px 0; display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 .footer-left { display: flex; flex-direction: column; gap: 4px; }
 .footer-right { display: flex; flex-direction: column; gap: 4px; text-align: right; }

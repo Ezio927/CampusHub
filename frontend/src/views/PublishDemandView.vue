@@ -19,7 +19,7 @@
           />
         </div>
       </div>
-      <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="POINT">额度分</option></select></div>
+      <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="QUOTA">额度分</option></select></div>
       <div class="form-group"><label>校区</label><select v-model="f.campus"><option value="">不限</option><option value="鼓楼校区">鼓楼校区</option><option value="仙林校区">仙林校区</option><option value="浦口校区">浦口校区</option><option value="苏州校区">苏州校区</option></select></div>
 
       <!-- 跑腿：必填位置 -->
@@ -107,7 +107,7 @@ async function pub(){
 }
 </script>
 <style scoped>
-.pc{background:var(--card);border-radius:12px;padding:28px;border:3px solid black;box-shadow:6px 6px 0px rgba(0,0,0,1)}
+.pc{background:var(--card);border-radius:12px;padding:24px;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);max-width:680px;margin:0 auto}
 .rr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .hint{font-size:12px;color:var(--text-muted);margin-top:4px}
 .pbn{padding:14px;border-radius:10px;font-size:16px;font-weight:700;margin-top:8px}
