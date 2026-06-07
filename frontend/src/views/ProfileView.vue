@@ -15,25 +15,14 @@
         <button v-else class="check-in-btn" @click="checkIn">签到 +3</button>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-item">
-          <div class="stat-val">{{ auth.user?.creditScore }}</div>
-          <div class="stat-lbl">信用分</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val" :style="auth.user?.status === 'BANNED' ? { color: 'var(--danger)' } : {}">{{ statusText }}</div>
-          <div class="stat-lbl">账户状态</div>
-        </div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-item">
-          <div class="stat-val">{{ auth.user?.quotaAvailable || 0 }}</div>
-          <div class="stat-lbl">可用额度</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val">{{ auth.user?.quotaFrozen || 0 }}</div>
-          <div class="stat-lbl">冻结额度</div>
-        </div>
+      <div class="stats-line">
+        <span><strong>{{ auth.user?.creditScore }}</strong> 信用</span>
+        <span class="dot">·</span>
+        <span><strong>{{ auth.user?.quotaAvailable || 0 }}</strong> 可用</span>
+        <span class="dot">·</span>
+        <span><strong>{{ auth.user?.quotaFrozen || 0 }}</strong> 冻结</span>
+        <span class="dot">·</span>
+        <span :style="auth.user?.status === 'BANNED' ? { color: 'var(--danger)' } : {}"><strong>{{ statusText }}</strong></span>
       </div>
 
       <div v-if="creditAppeal || banAppeal" class="appeal-row">
@@ -561,7 +550,7 @@ onMounted(async () => {
 .page{max-width:680px}
 
 /* ---- 账户概览 ---- */
-.ph{background:var(--primary-light);border-radius:14px;padding:24px 24px 20px;margin-bottom:16px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
+.ph{background:var(--card);border-radius:14px;padding:24px 24px 20px;margin-bottom:16px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
 
 .ph-top{display:flex;align-items:center;gap:16px;margin-bottom:24px}
 .pav{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
@@ -576,11 +565,9 @@ onMounted(async () => {
 .check-in-btn.done{background:var(--surface);color:var(--text-muted);cursor:default;box-shadow:none}
 .check-in-btn.done:hover{transform:none}
 
-.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px}
-.stat-item{text-align:center;background:var(--card);border-radius:10px;padding:8px 12px;border:2px solid black;box-shadow:2px 2px 0 rgba(0,0,0,1);transition:transform .15s ease;cursor:default}
-.stat-item:hover{transform:scale(1.06)}
-.stat-val{font-size:20px;font-weight:900;color:var(--text)}
-.stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px}
+.stats-line{display:flex;gap:2px;align-items:center;flex-wrap:wrap;font-size:15px;color:var(--text-secondary);margin-bottom:10px}
+.stats-line strong{color:var(--text);font-weight:800}
+.stats-line .dot{margin:0 4px;color:var(--text-muted)}
 
 .appeal-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .appeal-tag{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;border:1.5px solid black}
@@ -651,7 +638,6 @@ onMounted(async () => {
 .viewer-close{position:absolute;top:18px;right:18px;background:#fff;color:var(--text)}
 
 @media(max-width:860px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
   .rules-grid{grid-template-columns:1fr}
   .rr{grid-template-columns:1fr}
   .blocked-row{align-items:flex-start;flex-direction:column}
