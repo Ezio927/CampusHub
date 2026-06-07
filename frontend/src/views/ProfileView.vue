@@ -11,12 +11,21 @@
           <div class="pn">{{ auth.user?.username }}</div>
           <div class="pi">学号 {{ auth.user?.studentId }} · {{ statusText }}</div>
         </div>
+        <button v-if="checkedInToday" class="check-in-btn done" disabled>已签到</button>
+        <button v-else class="check-in-btn" @click="checkIn">签到 +3</button>
       </div>
+
       <div class="stats-row">
         <div class="stat-item">
           <div class="stat-val">{{ auth.user?.creditScore }}</div>
           <div class="stat-lbl">信用分</div>
         </div>
+        <div class="stat-item">
+          <div class="stat-val" :style="auth.user?.status === 'BANNED' ? { color: 'var(--danger)' } : {}">{{ statusText }}</div>
+          <div class="stat-lbl">账户状态</div>
+        </div>
+      </div>
+      <div class="stats-row">
         <div class="stat-item">
           <div class="stat-val">{{ auth.user?.quotaAvailable || 0 }}</div>
           <div class="stat-lbl">可用额度</div>
@@ -25,32 +34,20 @@
           <div class="stat-val">{{ auth.user?.quotaFrozen || 0 }}</div>
           <div class="stat-lbl">冻结额度</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-val" :style="auth.user?.status === 'BANNED' ? { color: 'var(--danger)' } : {}">{{ statusText }}</div>
-          <div class="stat-lbl">账户状态</div>
+      </div>
+
+      <div v-if="creditAppeal || banAppeal" class="appeal-row">
+        <div v-if="creditAppeal" class="appeal-tag" :class="'appeal-' + creditAppeal.status">
+          信用申诉 {{ {PENDING:'审核中',APPROVED:'已通过',REJECTED:'已驳回'}[creditAppeal.status] }}
+        </div>
+        <div v-if="banAppeal" class="appeal-tag" :class="'appeal-' + banAppeal.status">
+          封禁申诉 {{ {PENDING:'审核中',APPROVED:'已通过',REJECTED:'已驳回'}[banAppeal.status] }}
         </div>
       </div>
 
-      <div v-if="creditAppeal" class="appeal-badge" :class="'appeal-' + creditAppeal.status">
-        <span>信用申诉：{{ {PENDING:'审核中',APPROVED:'已通过',REJECTED:'已驳回'}[creditAppeal.status] }}</span>
-      </div>
-      <div v-if="banAppeal" class="appeal-badge" :class="'appeal-' + banAppeal.status">
-        <span>封禁申诉：{{ {PENDING:'审核中',APPROVED:'已通过',REJECTED:'已驳回'}[banAppeal.status] }}</span>
-      </div>
-
       <div class="ph-actions">
-        <button
-          v-if="auth.user?.creditScore < 60 && (!creditAppeal || creditAppeal.status === 'REJECTED')"
-          class="ph-btn warn-btn"
-          @click="submitCreditAppeal"
-        >信用分申诉</button>
-        <button
-          v-if="auth.user?.status === 'BANNED' && (!banAppeal || banAppeal.status === 'REJECTED')"
-          class="ph-btn danger-btn"
-          @click="submitBanAppeal"
-        >封禁申诉</button>
-        <button v-if="checkedInToday" class="ph-btn checked-btn" disabled>今日已签到</button>
-        <button v-else class="ph-btn chk-btn" @click="checkIn">签到 +3</button>
+        <button v-if="auth.user?.creditScore < 60 && (!creditAppeal || creditAppeal.status === 'REJECTED')" class="app-btn warn" @click="submitCreditAppeal">信用分申诉</button>
+        <button v-if="auth.user?.status === 'BANNED' && (!banAppeal || banAppeal.status === 'REJECTED')" class="app-btn danger" @click="submitBanAppeal">封禁申诉</button>
       </div>
     </div>
 
@@ -564,35 +561,38 @@ onMounted(async () => {
 .page{max-width:680px}
 
 /* ---- 账户概览 ---- */
-.ph{background:var(--card);border-radius:12px;padding:24px;margin-bottom:16px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
-.ph-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}
-.pav{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
+.ph{background:var(--primary-light);border-radius:14px;padding:24px 24px 20px;margin-bottom:16px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1)}
+
+.ph-top{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.pav{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;flex-shrink:0;border:2px solid black;overflow:hidden;color:#fff}
 .pav.has-avatar{background:#fff;padding:0}
 .pav img{width:100%;height:100%;object-fit:contain}
-.ph-info{min-width:0}
-.pn{font-size:20px;font-weight:900;color:var(--text)}
+.ph-info{flex:1;min-width:0}
+.pn{font-size:19px;font-weight:900;color:var(--text);line-height:1.3}
 .pi{font-size:13px;color:var(--text-muted);margin-top:4px}
 
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.stat-item{text-align:center;background:var(--surface);border-radius:10px;padding:12px 8px;border:2px solid black;box-shadow:2px 2px 0 rgba(0,0,0,1);transition:transform .15s ease;cursor:default}
-.stat-item:hover{transform:scale(1.08) rotate(-1deg)}
+.check-in-btn{flex-shrink:0;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid black;background:var(--primary);color:#fff;box-shadow:2px 2px 0 rgba(0,0,0,1);cursor:pointer;transition:all .12s}
+.check-in-btn:hover{transform:translate(1px,1px);box-shadow:none}
+.check-in-btn.done{background:var(--surface);color:var(--text-muted);cursor:default;box-shadow:none}
+.check-in-btn.done:hover{transform:none}
+
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px}
+.stat-item{text-align:center;background:var(--card);border-radius:10px;padding:8px 12px;border:2px solid black;box-shadow:2px 2px 0 rgba(0,0,0,1);transition:transform .15s ease;cursor:default}
+.stat-item:hover{transform:scale(1.06)}
 .stat-val{font-size:20px;font-weight:900;color:var(--text)}
 .stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px}
 
-.appeal-badge{margin-top:10px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;text-align:center}
-.appeal-PENDING{background:var(--warning-light);color:var(--warning);font-weight:700;border:1px solid var(--warning)}
-.appeal-APPROVED{background:var(--success-light);color:var(--success);font-weight:700;border:1px solid var(--success)}
-.appeal-REJECTED{background:var(--danger-light);color:var(--danger);font-weight:700;border:1px solid var(--danger)}
+.appeal-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.appeal-tag{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;border:1.5px solid black}
+.appeal-PENDING{background:#fef9c3;color:#854d0e}
+.appeal-APPROVED{background:#dcfce7;color:#166534}
+.appeal-REJECTED{background:#fee2e2;color:#991b1b}
 
-.ph-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-.ph-btn{padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;border:1.5px solid var(--border);color:var(--text);cursor:pointer;background:var(--surface);transition:all .2s}
-.ph-btn:hover{background:var(--border)}
-.chk-btn{font-weight:700}
-.checked-btn{cursor:default;opacity:.5}
-.warn-btn{background:rgba(251,191,36,.25)}
-.warn-btn:hover{background:rgba(251,191,36,.4)}
-.danger-btn{background:rgba(239,68,68,.25)}
-.danger-btn:hover{background:rgba(239,68,68,.4)}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap}
+.app-btn{padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;border:1.5px solid black;cursor:pointer;transition:all .12s}
+.app-btn:hover{transform:translate(1px,1px);box-shadow:none}
+.app-btn.warn{background:#fef9c3;color:#854d0e;box-shadow:2px 2px 0 rgba(0,0,0,1)}
+.app-btn.danger{background:#fee2e2;color:#991b1b;box-shadow:2px 2px 0 rgba(0,0,0,1)}
 
 /* ---- 分区卡片 ---- */
 .section-card{background:var(--card);border-radius:12px;border:3px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);margin-bottom:16px;overflow:hidden}
