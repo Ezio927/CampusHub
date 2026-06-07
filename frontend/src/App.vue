@@ -1,11 +1,14 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <AppLayout>
+    <router-view />
+  </AppLayout>
+  <ModalContainer />
 </template>
-
-<style scoped></style>
+<script setup>
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import AppLayout from '@/components/layout/AppLayout.vue'
+import ModalContainer from '@/components/common/ModalContainer.vue'
+const auth = useAuthStore()
+onMounted(() => auth.restoreSession())
+</script>

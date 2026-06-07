@@ -1,0 +1,188 @@
+
+digraph G {
+  graph [
+    rankdir=LR,
+    bgcolor="white",
+    fontname="Noto Sans CJK SC",
+    fontsize=22,
+    labelloc="t",
+    label="CampusHub Service 层类图（优化版）",
+    pad="0.45",
+    nodesep="0.55",
+    ranksep="0.85",
+    splines=ortho,
+    outputorder=edgesfirst
+  ];
+  node [shape=plaintext, fontname="Noto Sans CJK SC", fontsize=12, margin=0];
+  edge [fontname="Noto Sans CJK SC", fontsize=10, color="#475569", penwidth=1.25, arrowsize=0.75];
+  subgraph cluster_auth {
+    label="认证权限 auth";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#BFDBFE";
+    style="rounded,dashed";
+    penwidth=1.2;
+    AuthService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>AuthService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ register(req): UserDTO<BR ALIGN="LEFT"/>+ login(req): TokenDTO<BR ALIGN="LEFT"/>+ logout(userId): void<BR ALIGN="LEFT"/>+ validateToken(token): boolean</FONT></TD></TR>
+</TABLE>
+>];
+    JwtTokenProvider [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DBEAFE" ALIGN="CENTER"><B>JwtTokenProvider</B><BR/><FONT POINT-SIZE="10">«component»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#EFF6FF"><FONT POINT-SIZE="10">+ generateToken(user): String<BR ALIGN="LEFT"/>+ parseUserId(token): Long<BR ALIGN="LEFT"/>+ validate(token): boolean</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_user {
+    label="用户中心 user";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#BBF7D0";
+    style="rounded,dashed";
+    penwidth=1.2;
+    UserService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>UserService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ getProfile(userId): UserDTO<BR ALIGN="LEFT"/>+ updateProfile(req): UserDTO<BR ALIGN="LEFT"/>+ getPublicInfo(userId): UserPublicDTO</FONT></TD></TR>
+</TABLE>
+>];
+    CertificationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>CertificationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ submit(req): CertificationDTO<BR ALIGN="LEFT"/>+ getMyCertification(userId): CertificationDTO<BR ALIGN="LEFT"/>+ review(id, decision): void</FONT></TD></TR>
+</TABLE>
+>];
+    CreditService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#DCFCE7" ALIGN="CENTER"><B>CreditService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F0FDF4"><FONT POINT-SIZE="10">+ checkCredit(userId): boolean<BR ALIGN="LEFT"/>+ addCredit(userId, amount, reason)<BR ALIGN="LEFT"/>+ deductCredit(userId, amount, reason)<BR ALIGN="LEFT"/>+ listRecords(userId): Page&lt;CreditRecord&gt;</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_business {
+    label="核心业务 experiment";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#FED7AA";
+    style="rounded,dashed";
+    penwidth=1.2;
+    DemandService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>DemandService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ createDemand(req): DemandDTO<BR ALIGN="LEFT"/>+ updateDemand(id, req): DemandDTO<BR ALIGN="LEFT"/>+ cancelDemand(id): void<BR ALIGN="LEFT"/>+ search(criteria): Page&lt;DemandDTO&gt;</FONT></TD></TR>
+</TABLE>
+>];
+    OrderService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>OrderService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ acceptDemand(demandId): OrderDTO<BR ALIGN="LEFT"/>+ markDelivered(orderId): void<BR ALIGN="LEFT"/>+ confirmCompleted(orderId): void<BR ALIGN="LEFT"/>+ cancelOrder(orderId, reason): void<BR ALIGN="LEFT"/>+ autoConfirmExpired(): void</FONT></TD></TR>
+</TABLE>
+>];
+    ReviewService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>ReviewService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ submitReview(req): ReviewDTO<BR ALIGN="LEFT"/>+ listUserReviews(userId): Page&lt;ReviewDTO&gt;<BR ALIGN="LEFT"/>+ getOrderReviews(orderId): List&lt;ReviewDTO&gt;</FONT></TD></TR>
+</TABLE>
+>];
+    ArbitrationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FFEDD5" ALIGN="CENTER"><B>ArbitrationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFF7ED"><FONT POINT-SIZE="10">+ createTicket(req): TicketDTO<BR ALIGN="LEFT"/>+ processTicket(id, decision): void<BR ALIGN="LEFT"/>+ listPending(): Page&lt;TicketDTO&gt;</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_notification {
+    label="消息通知 notification";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#E9D5FF";
+    style="rounded,dashed";
+    penwidth=1.2;
+    NotificationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F3E8FF" ALIGN="CENTER"><B>NotificationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FAF5FF"><FONT POINT-SIZE="10">+ createNotification(req): void<BR ALIGN="LEFT"/>+ listNotifications(userId): Page&lt;NotificationDTO&gt;<BR ALIGN="LEFT"/>+ countUnread(userId): long<BR ALIGN="LEFT"/>+ markRead(id): void<BR ALIGN="LEFT"/>+ markAllRead(userId): void</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_chat {
+    label="即时通讯 chat";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#FCE7F3";
+    style="rounded,dashed";
+    penwidth=1.2;
+    ConversationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FCE7F3" ALIGN="CENTER"><B>ConversationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FDF2F8"><FONT POINT-SIZE="10">+ createConversation(req): ConversationDTO<BR ALIGN="LEFT"/>+ listConversations(userId): List&lt;ConversationDTO&gt;<BR ALIGN="LEFT"/>+ sendMessage(req): MessageDTO<BR ALIGN="LEFT"/>+ listMessages(conversationId): Page&lt;MessageDTO&gt;<BR ALIGN="LEFT"/>+ markConversationRead(id): void</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_recommend {
+    label="智能推荐 recommend";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#FEF3C7";
+    style="rounded,dashed";
+    penwidth=1.2;
+    RecommendationService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#FEF3C7" ALIGN="CENTER"><B>RecommendationService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFFBEB"><FONT POINT-SIZE="10">+ recommendDemands(userId): List&lt;DemandDTO&gt;<BR ALIGN="LEFT"/>+ recommendAcceptors(demandId): List&lt;UserDTO&gt;</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  subgraph cluster_admin {
+    label="后台管理 admin";
+    fontname="Noto Sans CJK SC";
+    fontsize=15;
+    color="#E2E8F0";
+    style="rounded,dashed";
+    penwidth=1.2;
+    AdminService [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#334155" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#E2E8F0" ALIGN="CENTER"><B>AdminService</B><BR/><FONT POINT-SIZE="10">«service»</FONT></TD></TR>
+  
+  <TR><TD ALIGN="LEFT" BGCOLOR="#F8FAFC"><FONT POINT-SIZE="10">+ dashboard(): DashboardDTO<BR ALIGN="LEFT"/>+ banUser(userId, reason): void<BR ALIGN="LEFT"/>+ unbanUser(userId): void<BR ALIGN="LEFT"/>+ listUsers(criteria): Page&lt;UserDTO&gt;</FONT></TD></TR>
+</TABLE>
+>];
+  }
+  LayerNote [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#CBD5E1" STYLE="ROUNDED">
+  <TR><TD BGCOLOR="#F8FAFC" ALIGN="CENTER"><B>分层边界</B></TD></TR>
+  <TR><TD ALIGN="LEFT" BGCOLOR="#FFFFFF"><FONT POINT-SIZE="10">Controller 只依赖 Service 接口<BR ALIGN="LEFT"/>Service 负责业务编排与跨模块调用<BR ALIGN="LEFT"/>Repository / Entity 位于下层，图中省略实现细节</FONT></TD></TR>
+</TABLE>
+>];
+
+  AuthService -> JwtTokenProvider [label="生成/解析 JWT", arrowhead=vee, color="#2563EB"];
+  AuthService -> UserService [label="注册/登录用户", arrowhead=vee, color="#16A34A"];
+  CertificationService -> UserService [label="更新认证状态", arrowhead=vee, color="#16A34A"];
+  CreditService -> UserService [label="更新信用分", arrowhead=vee, color="#16A34A"];
+  DemandService -> RecommendationService [label="匹配标签/用户", arrowhead=vee, style=dashed, color="#D97706"];
+  OrderService -> DemandService [label="读取/更新需求状态", arrowhead=vee, color="#EA580C"];
+  OrderService -> CreditService [label="信用门槛/扣分", arrowhead=vee, color="#EA580C"];
+  OrderService -> NotificationService [label="订单事件通知", arrowhead=vee, style=dashed, color="#EA580C"];
+  ReviewService -> ArbitrationService [label="低分触发仲裁", arrowhead=vee, color="#DC2626"];
+  ReviewService -> CreditService [label="评价影响信用", arrowhead=vee, style=dashed, color="#DC2626"];
+  ArbitrationService -> NotificationService [label="仲裁进度通知", arrowhead=vee, color="#9333EA"];
+  ConversationService -> NotificationService [label="新消息提醒", arrowhead=vee, style=dashed, color="#9333EA"];
+  AdminService -> CertificationService [label="认证审核", arrowhead=vee, style=dashed];
+  AdminService -> ArbitrationService [label="处理工单", arrowhead=vee, style=dashed];
+  AdminService -> UserService [label="封禁/解封", arrowhead=vee, style=dashed];
+  LayerNote -> DemandService [style=dotted, arrowhead=none, color="#94A3B8"];
+}
