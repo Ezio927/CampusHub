@@ -4,6 +4,7 @@ import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
 import com.example.backend.auth.dto.TokenResponse;
 import com.example.backend.auth.security.JwtTokenProvider;
+import com.example.backend.auth.security.LoginRateLimiter;
 import com.example.backend.auth.security.PasswordHasher;
 import com.example.backend.auth.service.AuthService;
 import com.example.backend.common.BusinessException;
@@ -24,13 +25,16 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final LoginRateLimiter loginRateLimiter;
 
     public AuthServiceImpl(UserRepository userRepository,
                            UserService userService,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider,
+                           LoginRateLimiter loginRateLimiter) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.loginRateLimiter = loginRateLimiter;
     }
 
     @Override
@@ -63,11 +67,18 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码不能为空");
         }
 
+        if (loginRateLimiter.isBlocked(req.getUsername())) {
+            throw new BusinessException(ErrorCode.RATE_LIMITED, "登录尝试过于频繁，请15分钟后再试");
+        }
+
         User user = userRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if (!PasswordHasher.matches(req.getPassword(), user.getPasswordHash())) {
+                .orElse(null);
+        if (user == null || !PasswordHasher.matches(req.getPassword(), user.getPasswordHash())) {
+            loginRateLimiter.recordFailure(req.getUsername());
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
         }
+
+        loginRateLimiter.clear(req.getUsername());
 
         String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), user.getRole());
         Instant expiresAt = Instant.ofEpochMilli(jwtTokenProvider.parseExpiresAt(token));

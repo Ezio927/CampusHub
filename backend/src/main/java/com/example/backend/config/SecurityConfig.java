@@ -2,6 +2,7 @@ package com.example.backend.config;
 
 import com.example.backend.auth.security.JwtAuthFilter;
 import com.example.backend.auth.security.JwtTokenProvider;
+import com.example.backend.auth.security.LoginRateLimiter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,11 @@ public class SecurityConfig {
     @Bean
     public JwtAuthFilter jwtAuthFilter(JwtTokenProvider jwtTokenProvider) {
         return new JwtAuthFilter(jwtTokenProvider);
+    }
+
+    @Bean
+    public LoginRateLimiter loginRateLimiter() {
+        return new LoginRateLimiter();
     }
 
     @Bean

@@ -65,19 +65,6 @@ public class AdminServiceImpl implements AdminService {
     private final ArbitrationService arbitrationService;
     private final QuotaService quotaService;
 
-    public AdminServiceImpl(UserRepository userRepository,
-                            DemandRepository demandRepository,
-                            DemandImageRepository demandImageRepository,
-                            OrderRepository orderRepository,
-                            ReviewRepository reviewRepository,
-                            ArbitrationTicketRepository arbitrationTicketRepository,
-                            OrderStatusLogRepository orderStatusLogRepository,
-                            NotificationService notificationService,
-                            AdminOperationLogRepository adminOperationLogRepository) {
-        this(userRepository, demandRepository, demandImageRepository, orderRepository, reviewRepository, arbitrationTicketRepository,
-                orderStatusLogRepository, notificationService, adminOperationLogRepository, null, null, null);
-    }
-
     @Autowired
     public AdminServiceImpl(UserRepository userRepository,
                             DemandRepository demandRepository,
@@ -208,9 +195,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public CertificationDto reviewCertification(Long certificationId, Long adminId, CertificationReviewDto req) {
-        if (certificationService == null) {
-            throw new BusinessException(ErrorCode.SERVER_ERROR, "认证服务不可用");
-        }
         if (req == null || req.getApprove() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "请选择通过或拒绝");
         }
@@ -223,9 +207,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ArbitrationDto resolveArbitration(Long ticketId, Long adminId, ArbitrationResolveDto req) {
-        if (arbitrationService == null) {
-            throw new BusinessException(ErrorCode.SERVER_ERROR, "仲裁服务不可用");
-        }
         ArbitrationDto resolved = arbitrationService.resolve(ticketId, adminId, req);
         String detail = req == null ? null : req.getAction() + ": " + req.getResolution();
         log(adminId, "RESOLVE_ARBITRATION", "arbitration", ticketId, detail);
@@ -246,7 +227,7 @@ public class AdminServiceImpl implements AdminService {
                 demand.setStatus(DemandStatus.OPEN);
                 demandRepository.save(demand);
             });
-            if (quotaService != null && order.getAcceptorDepositAmount() > 0) {
+            if (order.getAcceptorDepositAmount() > 0) {
                 quotaService.refundOrderDeposit(order.getAcceptorId(), order.getId(),
                         order.getAcceptorDepositAmount(), "管理员删除订单，退回接单保证金");
             }
@@ -271,7 +252,7 @@ public class AdminServiceImpl implements AdminService {
         }
         demandImageRepository.deleteByDemandId(demandId);
         demandRepository.deleteById(demandId);
-        if (quotaService != null && demand.getStatus() != DemandStatus.CANCELLED && demand.getStatus() != DemandStatus.COMPLETED) {
+        if (demand.getStatus() != DemandStatus.CANCELLED && demand.getStatus() != DemandStatus.COMPLETED) {
             quotaService.refundDemandReward(demand.getPublisherId(), demand.getId(),
                     demand.getRewardType(), demand.getRewardAmount(), "管理员删除需求");
         }

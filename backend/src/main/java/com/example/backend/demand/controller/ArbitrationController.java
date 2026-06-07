@@ -61,6 +61,9 @@ public class ArbitrationController {
     public ApiResponse<ArbitrationDto> resolve(
             @Parameter(description = "仲裁工单ID") @PathVariable Long id,
             @RequestBody ArbitrationResolveDto request) {
+        if (!AuthContext.hasRole(UserRole.ADMIN)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         return ApiResponse.success(arbitrationService.resolve(id, AuthContext.requireUserId(), request));
     }
 }
