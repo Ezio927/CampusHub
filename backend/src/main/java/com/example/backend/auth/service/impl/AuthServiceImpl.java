@@ -75,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElse(null);
         if (user == null || !PasswordHasher.matches(req.getPassword(), user.getPasswordHash())) {
             loginRateLimiter.recordFailure(req.getUsername());
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "用户名或密码错误");
         }
 
         loginRateLimiter.clear(req.getUsername());

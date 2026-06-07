@@ -31,7 +31,7 @@ class DemandIntegrationTest {
     void setUp() throws Exception {
         baseUrl = "http://localhost:" + port + "/api";
         var resp = rt.postForObject(baseUrl + "/auth/login",
-                Map.of("username","1","password","1"), Map.class);
+                Map.of("username","admin","password","admin123"), Map.class);
         token = (String) ((Map<?,?>)resp.get("data")).get("token");
     }
 
