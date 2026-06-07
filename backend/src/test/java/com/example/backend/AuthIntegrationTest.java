@@ -64,7 +64,7 @@ class AuthIntegrationTest {
                     Map.of("username","itest_auth","password","wrong"), Map.class);
             fail("Expected exception");
         } catch (HttpClientErrorException e) {
-            assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
+            assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
         }
     }
 

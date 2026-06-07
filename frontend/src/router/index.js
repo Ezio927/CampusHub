@@ -27,13 +27,12 @@ const routes = [
 const router = createRouter({ history: createWebHistory(), routes })
 
 router.beforeEach(async (to) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.auth && !token) return '/login'
-  if (to.meta.admin) {
+  if (to.meta.auth || to.meta.admin) {
     const { useAuthStore } = await import('@/stores/auth')
     const store = useAuthStore()
     if (!store.user) await store.restoreSession()
-    if (store.user?.role !== 'ADMIN') return '/'
+    if (!store.user) return '/login'
+    if (to.meta.admin && store.user.role !== 'ADMIN') return '/'
   }
 })
 

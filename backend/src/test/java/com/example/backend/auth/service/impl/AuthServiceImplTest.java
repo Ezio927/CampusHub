@@ -4,6 +4,7 @@ import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
 import com.example.backend.auth.dto.TokenResponse;
 import com.example.backend.auth.security.JwtTokenProvider;
+import com.example.backend.auth.security.LoginRateLimiter;
 import com.example.backend.auth.security.PasswordHasher;
 import com.example.backend.common.BusinessException;
 import com.example.backend.common.enums.UserRole;
@@ -33,6 +34,7 @@ class AuthServiceImplTest {
     @Mock private UserRepository userRepository;
     @Mock private UserService userService;
 
+    private LoginRateLimiter loginRateLimiter;
     private AuthServiceImpl authService;
 
     @BeforeEach
@@ -41,7 +43,8 @@ class AuthServiceImplTest {
         jwtConfig.setSecret("test-secret");
         jwtConfig.setExpirationMinutes(60);
         JwtTokenProvider jwtProvider = new JwtTokenProvider(jwtConfig);
-        authService = new AuthServiceImpl(userRepository, userService, jwtProvider);
+        loginRateLimiter = new LoginRateLimiter();
+        authService = new AuthServiceImpl(userRepository, userService, jwtProvider, loginRateLimiter);
     }
 
     @Test
@@ -139,7 +142,7 @@ class AuthServiceImplTest {
         jwtConfig.setSecret("test");
         jwtConfig.setExpirationMinutes(1);
         JwtTokenProvider p = new JwtTokenProvider(jwtConfig);
-        AuthServiceImpl svc = new AuthServiceImpl(userRepository, userService, p);
+        AuthServiceImpl svc = new AuthServiceImpl(userRepository, userService, p, new LoginRateLimiter());
 
         String token = p.generateToken(1L, "x", UserRole.STUDENT);
         assertTrue(svc.validateToken(token));
