@@ -27,7 +27,7 @@ class OrderIntegrationTest {
     void setUp() throws Exception {
         baseUrl = "http://localhost:" + port + "/api";
         Thread.sleep(15000); // rate limit from prior tests
-        var resp = rt.postForObject(baseUrl + "/auth/login", Map.of("username","1","password","1"), Map.class);
+        var resp = rt.postForObject(baseUrl + "/auth/login", Map.of("username","admin","password","admin123"), Map.class);
         pubToken = (String) ((Map<?,?>)resp.get("data")).get("token");
     }
 

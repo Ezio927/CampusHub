@@ -1,5 +1,6 @@
 package com.example.backend.common;
 
+import com.example.backend.auth.security.AuthContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,7 @@ public class FileUploadController {
     @Operation(summary = "上传图片")
     @PostMapping("/image")
     public ApiResponse<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        AuthContext.requireUserId();
         String url = fileStorageService.store(file);
         return ApiResponse.success(Map.of("url", url));
     }
