@@ -1,0 +1,74 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Microsoft YaHei, Noto Sans CJK SC, Arial", "primaryColor": "#F8FAFC", "primaryTextColor": "#0F172A", "primaryBorderColor": "#334155", "lineColor": "#475569", "secondaryColor": "#EFF6FF", "tertiaryColor": "#FFFFFF"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 35, "rankSpacing": 50}}}%%
+flowchart TB
+  %% Service 层类图 - Mermaid source generated from the original Graphviz DOT source
+  LayerNote["分层边界<br/>Controller 只依赖 Service 接口<br/>Service 负责业务编排与跨模块调用<br/>Repository / Entity 位于下层，图中省略实现细节"]
+
+  subgraph cluster_auth["认证权限 auth"]
+    direction TB
+    AuthService["AuthService<br/>«service»<br/>+ register(req): UserDTO<br/>+ login(req): TokenDTO<br/>+ logout(userId): void<br/>+ validateToken(token): boolean"]
+    JwtTokenProvider["JwtTokenProvider<br/>«component»<br/>+ generateToken(user): String<br/>+ parseUserId(token): Long<br/>+ validate(token): boolean"]
+  end
+
+  subgraph cluster_user["用户中心 user"]
+    direction TB
+    UserService["UserService<br/>«service»<br/>+ getProfile(userId): UserDTO<br/>+ updateProfile(req): UserDTO<br/>+ getPublicInfo(userId): UserPublicDTO"]
+    CertificationService["CertificationService<br/>«service»<br/>+ submit(req): CertificationDTO<br/>+ getMyCertification(userId): CertificationDTO<br/>+ review(id, decision): void"]
+    CreditService["CreditService<br/>«service»<br/>+ checkCredit(userId): boolean<br/>+ addCredit(userId, amount, reason)<br/>+ deductCredit(userId, amount, reason)<br/>+ listRecords(userId): Page&lt;CreditRecord&gt;"]
+  end
+
+  subgraph cluster_business["核心业务 experiment"]
+    direction TB
+    DemandService["DemandService<br/>«service»<br/>+ createDemand(req): DemandDTO<br/>+ updateDemand(id, req): DemandDTO<br/>+ cancelDemand(id): void<br/>+ search(criteria): Page&lt;DemandDTO&gt;"]
+    OrderService["OrderService<br/>«service»<br/>+ acceptDemand(demandId): OrderDTO<br/>+ markDelivered(orderId): void<br/>+ confirmCompleted(orderId): void<br/>+ cancelOrder(orderId, reason): void<br/>+ autoConfirmExpired(): void"]
+    ReviewService["ReviewService<br/>«service»<br/>+ submitReview(req): ReviewDTO<br/>+ listUserReviews(userId): Page&lt;ReviewDTO&gt;<br/>+ getOrderReviews(orderId): List&lt;ReviewDTO&gt;"]
+    ArbitrationService["ArbitrationService<br/>«service»<br/>+ createTicket(req): TicketDTO<br/>+ processTicket(id, decision): void<br/>+ listPending(): Page&lt;TicketDTO&gt;"]
+  end
+
+  subgraph cluster_notification["消息通知 notification"]
+    direction TB
+    NotificationService["NotificationService<br/>«service»<br/>+ createNotification(req): void<br/>+ listNotifications(userId): Page&lt;NotificationDTO&gt;<br/>+ countUnread(userId): long<br/>+ markRead(id): void<br/>+ markAllRead(userId): void"]
+  end
+
+  subgraph cluster_chat["即时通讯 chat"]
+    direction TB
+    ConversationService["ConversationService<br/>«service»<br/>+ createConversation(req): ConversationDTO<br/>+ listConversations(userId): List&lt;ConversationDTO&gt;<br/>+ sendMessage(req): MessageDTO<br/>+ listMessages(conversationId): Page&lt;MessageDTO&gt;<br/>+ markConversationRead(id): void"]
+  end
+
+  subgraph cluster_recommend["智能推荐 recommend"]
+    direction TB
+    RecommendationService["RecommendationService<br/>«service»<br/>+ recommendDemands(userId): List&lt;DemandDTO&gt;<br/>+ recommendAcceptors(demandId): List&lt;UserDTO&gt;"]
+  end
+
+  subgraph cluster_admin["后台管理 admin"]
+    direction TB
+    AdminService["AdminService<br/>«service»<br/>+ dashboard(): DashboardDTO<br/>+ banUser(userId, reason): void<br/>+ unbanUser(userId): void<br/>+ listUsers(criteria): Page&lt;UserDTO&gt;"]
+  end
+
+  AuthService ~~~ UserService ~~~ DemandService ~~~ NotificationService ~~~ ConversationService ~~~ RecommendationService ~~~ AdminService
+
+  AuthService -->|"生成/解析 JWT"| JwtTokenProvider
+  AuthService -->|"注册/登录用户"| UserService
+  CertificationService -->|"更新认证状态"| UserService
+  CreditService -->|"更新信用分"| UserService
+  DemandService -.->|"匹配标签/用户"| RecommendationService
+  OrderService -->|"读取/更新需求状态"| DemandService
+  OrderService -->|"信用门槛/扣分"| CreditService
+  OrderService -.->|"订单事件通知"| NotificationService
+  ReviewService -->|"低分触发仲裁"| ArbitrationService
+  ReviewService -.->|"评价影响信用"| CreditService
+  ArbitrationService -->|"仲裁进度通知"| NotificationService
+  ConversationService -.->|"新消息提醒"| NotificationService
+  AdminService -.->|"认证审核"| CertificationService
+  AdminService -.->|"处理工单"| ArbitrationService
+  AdminService -.->|"封禁/解封"| UserService
+  LayerNote -.-> DemandService
+
+  classDef controller fill:#EFF6FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
+  classDef service fill:#F0FDF4,stroke:#16A34A,stroke-width:1px,color:#0F172A;
+  classDef entity fill:#FFF7ED,stroke:#EA580C,stroke-width:1px,color:#0F172A;
+  classDef interface fill:#FAF5FF,stroke:#9333EA,stroke-width:1px,color:#0F172A;
+  classDef pattern fill:#FFFBEB,stroke:#D97706,stroke-width:1px,color:#0F172A;
+  classDef enum fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#0F172A;
+  class AuthService,JwtTokenProvider,UserService,CertificationService,CreditService,DemandService,OrderService,ReviewService,ArbitrationService,NotificationService,ConversationService,RecommendationService,AdminService service;
+  class LayerNote note;

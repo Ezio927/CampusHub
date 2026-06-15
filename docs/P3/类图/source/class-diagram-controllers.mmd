@@ -1,0 +1,89 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Microsoft YaHei, Noto Sans CJK SC, Arial", "primaryColor": "#F8FAFC", "primaryTextColor": "#0F172A", "primaryBorderColor": "#334155", "lineColor": "#475569", "secondaryColor": "#EFF6FF", "tertiaryColor": "#FFFFFF"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 35, "rankSpacing": 50}}}%%
+flowchart TB
+  %% Controller 层类图 - Mermaid source generated from the original Graphviz DOT source
+  ApiResponse["ApiResponse&lt;T&gt;<br/>«统一响应»<br/>code: Integer<br/>message: String<br/>data: T"]
+  AuthNote["统一约定<br/>所有鉴权接口读取 Authorization: Bearer &lt;JWT_TOKEN&gt;<br/>URL 使用小写复数名词；请求/响应字段使用 camelCase<br/>Controller 只负责参数接收、鉴权入口和统一响应"]
+
+  subgraph cluster_auth["认证接口"]
+    direction TB
+    AuthController["AuthController<br/>«controller»<br/>baseUrl: /api/auth<br/>POST /register<br/>POST /login<br/>POST /logout"]
+    S_AuthService["AuthService<br/>«service interface»"]
+  end
+
+  subgraph cluster_cert["实名认证接口"]
+    direction TB
+    CertificationController["CertificationController<br/>«controller»<br/>baseUrl: /api/certifications<br/>POST /<br/>GET /me<br/>PUT /{id}/review"]
+    S_CertificationService["CertificationService<br/>«service interface»"]
+  end
+
+  subgraph cluster_user["用户信息接口"]
+    direction TB
+    UserController["UserController<br/>«controller»<br/>baseUrl: /api/users<br/>GET /me<br/>PUT /me<br/>GET /{id}<br/>GET /me/credit-records"]
+    S_UserService["UserService<br/>«service interface»"]
+  end
+
+  subgraph cluster_demand["需求发布接口"]
+    direction TB
+    DemandController["DemandController<br/>«controller»<br/>baseUrl: /api/demands<br/>POST /<br/>GET /<br/>GET /{id}<br/>PUT /{id}<br/>PUT /{id}/cancel"]
+    S_DemandService["DemandService<br/>«service interface»"]
+  end
+
+  subgraph cluster_order["订单业务接口"]
+    direction TB
+    OrderController["OrderController<br/>«controller»<br/>baseUrl: /api/orders<br/>POST /<br/>GET /mine<br/>GET /{id}<br/>PUT /{id}/delivered<br/>PUT /{id}/confirm<br/>PUT /{id}/cancel"]
+    S_OrderService["OrderService<br/>«service interface»"]
+  end
+
+  subgraph cluster_review["评价管理接口"]
+    direction TB
+    ReviewController["ReviewController<br/>«controller»<br/>baseUrl: /api/reviews<br/>POST /<br/>GET /users/{id}<br/>GET /orders/{id}"]
+    S_ReviewService["ReviewService<br/>«service interface»"]
+  end
+
+  subgraph cluster_arb["纠纷仲裁接口"]
+    direction TB
+    ArbitrationController["ArbitrationController<br/>«controller»<br/>baseUrl: /api/arbitrations<br/>POST /<br/>PUT /{id}/process<br/>GET /pending"]
+    S_ArbitrationService["ArbitrationService<br/>«service interface»"]
+  end
+
+  subgraph cluster_notif["站内通知接口"]
+    direction TB
+    NotificationController["NotificationController<br/>«controller»<br/>baseUrl: /api/notifications<br/>GET /<br/>GET /unread-count<br/>PUT /{id}/read<br/>PUT /read-all"]
+    S_NotificationService["NotificationService<br/>«service interface»"]
+  end
+
+  subgraph cluster_conv["聊天会话接口"]
+    direction TB
+    ConversationController["ConversationController<br/>«controller»<br/>baseUrl: /api/conversations<br/>POST /<br/>GET /<br/>POST /{id}/messages<br/>GET /{id}/messages<br/>PUT /{id}/read"]
+    S_ConversationService["ConversationService<br/>«service interface»"]
+  end
+
+  subgraph cluster_admin["后台管理接口"]
+    direction TB
+    AdminController["AdminController<br/>«controller»<br/>baseUrl: /api/admin<br/>GET /dashboard<br/>GET /users<br/>PUT /users/{id}/ban<br/>PUT /users/{id}/unban"]
+    S_AdminService["AdminService<br/>«service interface»"]
+  end
+
+  AuthController ~~~ CertificationController ~~~ UserController ~~~ DemandController ~~~ OrderController ~~~ ReviewController ~~~ ArbitrationController ~~~ NotificationController ~~~ ConversationController ~~~ AdminController
+
+  AuthController -->|"调用"| S_AuthService
+  CertificationController -->|"调用"| S_CertificationService
+  UserController -->|"调用"| S_UserService
+  DemandController -->|"调用"| S_DemandService
+  OrderController -->|"调用"| S_OrderService
+  ReviewController -->|"调用"| S_ReviewService
+  ArbitrationController -->|"调用"| S_ArbitrationService
+  NotificationController -->|"调用"| S_NotificationService
+  ConversationController -->|"调用"| S_ConversationService
+  AdminController -->|"调用"| S_AdminService
+
+  classDef controller fill:#EFF6FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
+  classDef service fill:#F0FDF4,stroke:#16A34A,stroke-width:1px,color:#0F172A;
+  classDef entity fill:#FFF7ED,stroke:#EA580C,stroke-width:1px,color:#0F172A;
+  classDef interface fill:#FAF5FF,stroke:#9333EA,stroke-width:1px,color:#0F172A;
+  classDef pattern fill:#FFFBEB,stroke:#D97706,stroke-width:1px,color:#0F172A;
+  classDef enum fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#0F172A;
+  class AuthController,CertificationController,UserController,DemandController,OrderController,ReviewController,ArbitrationController,NotificationController,ConversationController,AdminController controller;
+  class S_AuthService,S_CertificationService,S_UserService,S_DemandService,S_OrderService,S_ReviewService,S_ArbitrationService,S_NotificationService,S_ConversationService,S_AdminService service;
+  class ApiResponse,AuthNote note;
