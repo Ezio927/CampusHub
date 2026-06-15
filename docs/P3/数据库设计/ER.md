@@ -2,7 +2,7 @@
 
 ## 1. Chen 风格 ER 图
 
-源码文件：`er-chen-complete.puml`
+源码文件：`er-chen.mmd`
 
 图中符号约定：
 
