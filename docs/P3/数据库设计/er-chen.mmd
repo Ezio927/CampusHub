@@ -1,0 +1,257 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Microsoft YaHei, Noto Sans CJK SC, Arial", "primaryColor": "#F8FAFC", "primaryTextColor": "#0F172A", "primaryBorderColor": "#334155", "lineColor": "#475569", "secondaryColor": "#EFF6FF", "tertiaryColor": "#FFFFFF"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 35, "rankSpacing": 50}}}%%
+flowchart LR
+  %% Entity nodes, relationship diamonds and attribute ovals generated from the original ER source
+  U["用户<br/>users"]
+  U_id(["PK id"])
+  U_username(["username UNIQUE"])
+  U_password(["password_hash"])
+  U_phone(["phone_cipher / phone_hash"])
+  U_student(["student_id UNIQUE"])
+  U_real(["real_name"])
+  U_credit(["credit_score"])
+  U_status(["role / status"])
+  CERT["实名认证<br/>certifications"]
+  CERT_id(["PK id"])
+  CERT_user(["FK user_id UNIQUE"])
+  CERT_type(["cert_type"])
+  CERT_student(["student_id"])
+  CERT_card(["card_image_url"])
+  CERT_status(["status"])
+  CERT_reviewer(["FK reviewed_by"])
+  CR["信用记录<br/>credit_records"]
+  CR_id(["PK id"])
+  CR_user(["FK user_id"])
+  CR_amount(["change_amount"])
+  CR_reason(["reason"])
+  CR_order(["FK related_order_id"])
+  D["需求<br/>demands"]
+  D_id(["PK id"])
+  D_publisher(["FK publisher_id"])
+  D_title(["title"])
+  D_description(["description"])
+  D_category(["category"])
+  D_reward(["reward_amount / reward_type"])
+  D_status(["status"])
+  D_urgent(["is_urgent / urgent_deadline"])
+  D_location(["location_tag"])
+  DI["需求图片<br/>demand_images"]
+  DI_id(["PK id"])
+  DI_demand(["FK demand_id"])
+  DI_url(["image_url"])
+  DI_sort(["sort_order"])
+  T["标签<br/>tags"]
+  T_id(["PK id"])
+  T_name(["name UNIQUE"])
+  DT["需求标签<br/>demand_tags"]
+  DT_demand(["PK/FK demand_id"])
+  DT_tag(["PK/FK tag_id"])
+  O["订单<br/>orders"]
+  O_id(["PK id"])
+  O_demand(["FK demand_id UNIQUE"])
+  O_publisher(["FK publisher_id"])
+  O_acceptor(["FK acceptor_id"])
+  O_status(["status"])
+  O_accepted(["accepted_at"])
+  O_deadline(["auto_confirm_deadline"])
+  O_finish(["completed_at / cancelled_at"])
+  OSL["订单状态日志<br/>order_status_logs"]
+  OSL_id(["PK id"])
+  OSL_order(["FK order_id"])
+  OSL_status(["from_status / to_status"])
+  OSL_operator(["FK operator_id"])
+  OSL_remark(["remark"])
+  R["评价<br/>reviews"]
+  R_id(["PK id"])
+  R_order(["FK order_id"])
+  R_reviewer(["FK reviewer_id"])
+  R_reviewee(["FK reviewee_id"])
+  R_role(["reviewer_role"])
+  R_rating(["rating"])
+  R_content(["content / image_urls"])
+  AT["仲裁工单<br/>arbitration_tickets"]
+  AT_id(["PK id"])
+  AT_review(["FK review_id"])
+  AT_order(["FK order_id"])
+  AT_reporter(["FK reporter_id"])
+  AT_reason(["reason / evidence_urls"])
+  AT_status(["status / resolution"])
+  AT_resolver(["FK resolved_by"])
+  N["通知<br/>notifications"]
+  N_id(["PK id"])
+  N_user(["FK user_id"])
+  N_type(["type"])
+  N_content(["title / content"])
+  N_related(["related_id"])
+  N_read(["is_read"])
+  C["会话<br/>conversations"]
+  C_id(["PK id"])
+  C_user1(["FK user1_id"])
+  C_user2(["FK user2_id"])
+  C_demand(["FK related_demand_id"])
+  C_last(["last_message_content"])
+  M["消息<br/>messages"]
+  M_id(["PK id"])
+  M_conversation(["FK conversation_id"])
+  M_sender(["FK sender_id"])
+  M_content(["content"])
+  M_type(["message_type"])
+  M_read(["is_read"])
+  AOL["管理员操作日志<br/>admin_operation_logs"]
+  AOL_id(["PK id"])
+  AOL_admin(["FK admin_id"])
+  AOL_operation(["operation"])
+  AOL_target(["target_type / target_id"])
+  AOL_detail(["detail"])
+  REL_PUBLISH{"发布"}
+  REL_CERT{"提交认证"}
+  REL_CREDIT{"产生信用流水"}
+  REL_IMAGE{"包含图片"}
+  REL_DEMAND_TAG{"需求-标签关联"}
+  REL_TAG_DEMAND{"标签-需求关联"}
+  REL_ORDER{"生成订单"}
+  REL_ORDER_PUB{"作为需求方"}
+  REL_ORDER_ACC{"作为服务方"}
+  REL_STATUS_LOG{"记录状态变化"}
+  REL_REVIEW{"收到评价"}
+  REL_REVIEWER{"评价人"}
+  REL_REVIEWEE{"被评价人"}
+  REL_ARBITRATION{"触发仲裁"}
+  REL_NOTIFY{"接收通知"}
+  REL_CONV_A{"参与会话A"}
+  REL_MESSAGE{"包含消息"}
+  REL_SEND{"发送消息"}
+  REL_ADMIN_LOG{"产生审计日志"}
+
+  U --- U_id
+  U --- U_username
+  U --- U_password
+  U --- U_phone
+  U --- U_student
+  U --- U_real
+  U --- U_credit
+  U --- U_status
+  CERT --- CERT_id
+  CERT --- CERT_user
+  CERT --- CERT_type
+  CERT --- CERT_student
+  CERT --- CERT_card
+  CERT --- CERT_status
+  CERT --- CERT_reviewer
+  CR --- CR_id
+  CR --- CR_user
+  CR --- CR_amount
+  CR --- CR_reason
+  CR --- CR_order
+  D --- D_id
+  D --- D_publisher
+  D --- D_title
+  D --- D_description
+  D --- D_category
+  D --- D_reward
+  D --- D_status
+  D --- D_urgent
+  D --- D_location
+  DI --- DI_id
+  DI --- DI_demand
+  DI --- DI_url
+  DI --- DI_sort
+  T --- T_id
+  T --- T_name
+  DT --- DT_demand
+  DT --- DT_tag
+  O --- O_id
+  O --- O_demand
+  O --- O_publisher
+  O --- O_acceptor
+  O --- O_status
+  O --- O_accepted
+  O --- O_deadline
+  O --- O_finish
+  OSL --- OSL_id
+  OSL --- OSL_order
+  OSL --- OSL_status
+  OSL --- OSL_operator
+  OSL --- OSL_remark
+  R --- R_id
+  R --- R_order
+  R --- R_reviewer
+  R --- R_reviewee
+  R --- R_role
+  R --- R_rating
+  R --- R_content
+  AT --- AT_id
+  AT --- AT_review
+  AT --- AT_order
+  AT --- AT_reporter
+  AT --- AT_reason
+  AT --- AT_status
+  AT --- AT_resolver
+  N --- N_id
+  N --- N_user
+  N --- N_type
+  N --- N_content
+  N --- N_related
+  N --- N_read
+  C --- C_id
+  C --- C_user1
+  C --- C_user2
+  C --- C_demand
+  C --- C_last
+  M --- M_id
+  M --- M_conversation
+  M --- M_sender
+  M --- M_content
+  M --- M_type
+  M --- M_read
+  AOL --- AOL_id
+  AOL --- AOL_admin
+  AOL --- AOL_operation
+  AOL --- AOL_target
+  AOL --- AOL_detail
+  U ---|"1"| REL_PUBLISH
+  REL_PUBLISH ---|"N"| D
+  U ---|"1"| REL_CERT
+  REL_CERT ---|"0..1"| CERT
+  U ---|"1"| REL_CREDIT
+  REL_CREDIT ---|"N"| CR
+  D ---|"1"| REL_IMAGE
+  REL_IMAGE ---|"N"| DI
+  D ---|"1"| REL_DEMAND_TAG
+  REL_DEMAND_TAG ---|"N"| DT
+  T ---|"1"| REL_TAG_DEMAND
+  REL_TAG_DEMAND ---|"N"| DT
+  D ---|"1"| REL_ORDER
+  REL_ORDER ---|"0..1"| O
+  U ---|"1"| REL_ORDER_PUB
+  REL_ORDER_PUB ---|"N"| O
+  U ---|"1"| REL_ORDER_ACC
+  REL_ORDER_ACC ---|"N"| O
+  O ---|"1"| REL_STATUS_LOG
+  REL_STATUS_LOG ---|"N"| OSL
+  O ---|"1"| REL_REVIEW
+  REL_REVIEW ---|"0..2"| R
+  U ---|"1"| REL_REVIEWER
+  REL_REVIEWER ---|"N"| R
+  U ---|"1"| REL_REVIEWEE
+  REL_REVIEWEE ---|"N"| R
+  R ---|"1"| REL_ARBITRATION
+  REL_ARBITRATION ---|"0..1"| AT
+  U ---|"1"| REL_NOTIFY
+  REL_NOTIFY ---|"N"| N
+  U ---|"1"| REL_CONV_A
+  REL_CONV_A ---|"N"| C
+  C ---|"1"| REL_MESSAGE
+  REL_MESSAGE ---|"N"| M
+  U ---|"1"| REL_SEND
+  REL_SEND ---|"N"| M
+  U ---|"1"| REL_ADMIN_LOG
+  REL_ADMIN_LOG ---|"N"| AOL
+
+  classDef entity fill:#F8FAFC,stroke:#334155,stroke-width:1px,color:#0F172A;
+  classDef rel fill:#EFF6FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
+  classDef attr fill:#FFFFFF,stroke:#64748B,stroke-width:1px,color:#0F172A;
+  class U,CERT,CR,D,DI,T,DT,O,OSL,R,AT,N,C,M,AOL entity;
+  class REL_PUBLISH,REL_CERT,REL_CREDIT,REL_IMAGE,REL_DEMAND_TAG,REL_TAG_DEMAND,REL_ORDER,REL_ORDER_PUB,REL_ORDER_ACC,REL_STATUS_LOG,REL_REVIEW,REL_REVIEWER,REL_REVIEWEE,REL_ARBITRATION,REL_NOTIFY,REL_CONV_A,REL_MESSAGE,REL_SEND,REL_ADMIN_LOG rel;
+  class U_id,U_username,U_password,U_phone,U_student,U_real,U_credit,U_status,CERT_id,CERT_user,CERT_type,CERT_student,CERT_card,CERT_status,CERT_reviewer,CR_id,CR_user,CR_amount,CR_reason,CR_order,D_id,D_publisher,D_title,D_description,D_category,D_reward,D_status,D_urgent,D_location,DI_id attr;
+  class DI_demand,DI_url,DI_sort,T_id,T_name,DT_demand,DT_tag,O_id,O_demand,O_publisher,O_acceptor,O_status,O_accepted,O_deadline,O_finish,OSL_id,OSL_order,OSL_status,OSL_operator,OSL_remark,R_id,R_order,R_reviewer,R_reviewee,R_role,R_rating,R_content,AT_id,AT_review,AT_order attr;
+  class AT_reporter,AT_reason,AT_status,AT_resolver,N_id,N_user,N_type,N_content,N_related,N_read,C_id,C_user1,C_user2,C_demand,C_last,M_id,M_conversation,M_sender,M_content,M_type,M_read,AOL_id,AOL_admin,AOL_operation,AOL_target,AOL_detail attr;

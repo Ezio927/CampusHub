@@ -1,0 +1,69 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Microsoft YaHei, Noto Sans CJK SC, Arial", "primaryColor": "#F8FAFC", "primaryTextColor": "#0F172A", "primaryBorderColor": "#334155", "lineColor": "#475569", "secondaryColor": "#EFF6FF", "tertiaryColor": "#FFFFFF"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 35, "rankSpacing": 50}}}%%
+flowchart TB
+  %% 核心实体类图 - Mermaid source generated from the original Graphviz DOT source
+  Enums["全局枚举 Enums<br/>UserRole / UserStatus<br/>CertType / CertStatus<br/>DemandCategory / DemandStatus<br/>RewardType / OrderStatus<br/>ReviewerRole / ArbitrationStatus<br/>NotificationType / MessageType"]
+
+  subgraph cluster_user["用户中心 / User Center"]
+    direction TB
+    User["User 用户<br/>«Entity»<br/>- id: Long<br/>- username: String {unique}<br/>- passwordHash: String<br/>- phoneCipher / phoneHash: String<br/>- studentId: String {unique}<br/>- realName: String<br/>- avatarUrl: String<br/>- creditScore: Integer<br/>- role: UserRole<br/>- status: UserStatus<br/>- createdAt / updatedAt: LocalDateTime<br/>+ isCreditSufficient(): boolean<br/>+ addCredit(amount: int): void<br/>+ deductCredit(amount: int): void"]
+    Certification["Certification 实名认证<br/>«Entity»<br/>- id: Long<br/>- userId: Long {FK, unique}<br/>- certType: CertType<br/>- studentId: String<br/>- cardImageUrl: String<br/>- status: CertStatus<br/>- rejectReason: String<br/>- reviewedBy: Long<br/>- reviewedAt / createdAt: LocalDateTime<br/>+ approve(reviewerId: Long): void<br/>+ reject(reviewerId: Long, reason: String): void"]
+    CreditRecord["CreditRecord 信用流水<br/>«Entity»<br/>- id: Long<br/>- userId: Long {FK}<br/>- changeAmount: Integer<br/>- reason: String<br/>- relatedOrderId: Long {FK}<br/>- createdAt: LocalDateTime"]
+  end
+
+  subgraph cluster_demand["需求与标签 / Demand &amp; Tag"]
+    direction TB
+    Demand["Demand 校园需求<br/>«Entity»<br/>- id: Long<br/>- publisherId: Long {FK}<br/>- title: String<br/>- description: String<br/>- category: DemandCategory<br/>- rewardAmount: BigDecimal<br/>- rewardType: RewardType<br/>- status: DemandStatus<br/>- isUrgent: Boolean<br/>- urgentDeadline: LocalDateTime<br/>- locationTag: String<br/>- createdAt / updatedAt: LocalDateTime<br/>+ isOpen(): boolean<br/>+ markAsAccepted(): void<br/>+ markAsCompleted(): void<br/>+ cancel(): void"]
+    DemandImage["DemandImage 需求图片<br/>«Entity»<br/>- id: Long<br/>- demandId: Long {FK}<br/>- imageUrl: String<br/>- sortOrder: Integer"]
+    Tag["Tag 标签<br/>«Entity»<br/>- id: Long<br/>- name: String {unique}"]
+    DemandTag["DemandTag 需求标签<br/>«Join Entity»<br/>- demandId: Long {PK, FK}<br/>- tagId: Long {PK, FK}"]
+  end
+
+  subgraph cluster_order["订单评价 / Order &amp; Review"]
+    direction TB
+    Order["Order 订单<br/>«Entity»<br/>- id: Long<br/>- demandId: Long {FK, unique}<br/>- publisherId: Long {FK}<br/>- acceptorId: Long {FK}<br/>- status: OrderStatus<br/>- acceptedAt: LocalDateTime<br/>- completedAt / cancelledAt: LocalDateTime<br/>- cancelReason: String<br/>- autoConfirmDeadline: LocalDateTime<br/>- createdAt / updatedAt: LocalDateTime<br/>+ canAccept(): boolean<br/>+ canCancel(): boolean<br/>+ isAutoConfirmExpired(): boolean"]
+    OrderStatusLog["OrderStatusLog 状态日志<br/>«Entity»<br/>- id: Long<br/>- orderId: Long {FK}<br/>- fromStatus: OrderStatus<br/>- toStatus: OrderStatus<br/>- operatorId: Long {FK}<br/>- remark: String<br/>- createdAt: LocalDateTime"]
+    Review["Review 双向评价<br/>«Entity»<br/>- id: Long<br/>- orderId: Long {FK}<br/>- reviewerId: Long {FK}<br/>- revieweeId: Long {FK}<br/>- reviewerRole: ReviewerRole<br/>- rating: Integer<br/>- content: String<br/>- imageUrls: JSON<br/>- createdAt: LocalDateTime"]
+    ArbitrationTicket["ArbitrationTicket 仲裁工单<br/>«Entity»<br/>- id: Long<br/>- reviewId: Long {FK}<br/>- orderId: Long {FK}<br/>- reporterId: Long {FK}<br/>- reason / evidenceUrls<br/>- status: ArbitrationStatus<br/>- resolution: String<br/>- resolvedBy / resolvedAt<br/>- createdAt: LocalDateTime"]
+  end
+
+  subgraph cluster_comm["消息、会话与后台 / Messaging &amp; Admin"]
+    direction TB
+    Notification["Notification 站内通知<br/>«Entity»<br/>- id: Long<br/>- userId: Long {FK}<br/>- type: NotificationType<br/>- title: String<br/>- content: String<br/>- relatedId: Long<br/>- isRead: Boolean<br/>- createdAt: LocalDateTime"]
+    Conversation["Conversation 会话<br/>«Entity»<br/>- id: Long<br/>- user1Id / user2Id: Long {FK}<br/>- relatedDemandId: Long {FK}<br/>- lastMessageContent: String<br/>- lastMessageAt: LocalDateTime<br/>- createdAt: LocalDateTime"]
+    Message["Message 消息<br/>«Entity»<br/>- id: Long<br/>- conversationId: Long {FK}<br/>- senderId: Long {FK}<br/>- content: String<br/>- messageType: MessageType<br/>- isRead: Boolean<br/>- createdAt: LocalDateTime"]
+    AdminOperationLog["AdminOperationLog 管理日志<br/>«Entity»<br/>- id: Long<br/>- adminId: Long {FK}<br/>- operation: String<br/>- targetType: String<br/>- targetId: Long<br/>- detail: String<br/>- createdAt: LocalDateTime"]
+  end
+
+  User ~~~ Demand ~~~ Order ~~~ Notification
+
+  User -->|"提交认证 1:0..1"| Certification
+  User -->|"产生信用流水 1:N"| CreditRecord
+  User -->|"发布 1:N"| Demand
+  Demand -->|"包含图片 1:N"| DemandImage
+  Demand -->|"标记 1:N"| DemandTag
+  Tag -->|"关联 1:N"| DemandTag
+  Demand -->|"生成订单 1:0..1"| Order
+  User -->|"作为需求方/服务方 1:N"| Order
+  Order -->|"记录状态 1:N"| OrderStatusLog
+  Order -->|"收到评价 1:0..2"| Review
+  User -->|"评价人/被评价人 1:N"| Review
+  Review -->|"触发仲裁 1:0..1"| ArbitrationTicket
+  User -->|"接收通知 1:N"| Notification
+  User -->|"参与会话 1:N"| Conversation
+  Conversation -->|"包含消息 1:N"| Message
+  User -->|"发送 1:N"| Message
+  User -->|"产生审计日志 1:N"| AdminOperationLog
+  CreditRecord -.->|"关联订单"| Order
+  Notification -.-> Enums
+  Demand -.-> Enums
+  Order -.-> Enums
+
+  classDef controller fill:#EFF6FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
+  classDef service fill:#F0FDF4,stroke:#16A34A,stroke-width:1px,color:#0F172A;
+  classDef entity fill:#FFF7ED,stroke:#EA580C,stroke-width:1px,color:#0F172A;
+  classDef interface fill:#FAF5FF,stroke:#9333EA,stroke-width:1px,color:#0F172A;
+  classDef pattern fill:#FFFBEB,stroke:#D97706,stroke-width:1px,color:#0F172A;
+  classDef enum fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#0F172A;
+  class User,Certification,CreditRecord,Demand,DemandImage,Tag,DemandTag,Order,OrderStatusLog,Review,ArbitrationTicket,Notification,Conversation,Message,AdminOperationLog entity;
+  class Enums enum;

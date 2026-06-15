@@ -1,0 +1,88 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Microsoft YaHei, Noto Sans CJK SC, Arial", "primaryColor": "#F8FAFC", "primaryTextColor": "#0F172A", "primaryBorderColor": "#334155", "lineColor": "#475569", "secondaryColor": "#EFF6FF", "tertiaryColor": "#FFFFFF"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 35, "rankSpacing": 50}}}%%
+flowchart LR
+  %% 系统设计模式类图 - Mermaid source generated from the original Graphviz DOT source
+
+  subgraph cluster_strategy["1. 策略模式：订单状态流转"]
+    direction TB
+    OrderService["OrderService<br/>«service»<br/>+ acceptDemand(demandId)<br/>+ markDelivered(orderId)<br/>+ confirmCompleted(orderId)<br/>+ cancelOrder(orderId)"]
+    OrderStateContext["OrderStateContext<br/>«context»<br/>- strategies: Map&lt;OrderStatus, IOrderStateStrategy&gt;<br/>+ getStrategy(status)<br/>+ canOperate(order, action)"]
+    IOrderStateStrategy["IOrderStateStrategy<br/>«interface»<br/>+ canAccept(order): boolean<br/>+ canComplete(order): boolean<br/>+ canCancel(order): boolean<br/>+ canConfirm(order): boolean<br/>+ nextStatuses(): List&lt;OrderStatus&gt;"]
+    PendingAcceptStrategy["PendingAcceptStrategy<br/>«strategy»<br/>待接单：接单 / 取消"]
+    AcceptedStrategy["AcceptedStrategy<br/>«strategy»<br/>已接单：开始 / 取消"]
+    InProgressStrategy["InProgressStrategy<br/>«strategy»<br/>进行中：完成 / 取消"]
+    PendingConfirmStrategy["PendingConfirmStrategy<br/>«strategy»<br/>待确认：确认完成"]
+    CompletedStrategy["CompletedStrategy<br/>«strategy»<br/>已完成：终态"]
+    CancelledStrategy["CancelledStrategy<br/>«strategy»<br/>已取消：终态"]
+  end
+
+  subgraph cluster_factory["2. 工厂模式：多类型需求创建校验"]
+    direction TB
+    DemandParam["DemandParam<br/>«DTO»<br/>title, description, category<br/>rewardAmount, rewardType<br/>locationTag, tagIds, imageUrls"]
+    DemandFactory["DemandFactory<br/>«factory»<br/>- validators: Map&lt;DemandCategory, DemandValidator&gt;<br/>+ createDemand(param): Demand"]
+    DemandValidator["DemandValidator<br/>«interface»<br/>+ validate(param: DemandParam): void"]
+    ErrandValidator["ErrandValidator<br/>«validator»<br/>强制位置标签"]
+    SkillValidator["SkillValidator<br/>«validator»<br/>强制技能标签"]
+    StudyValidator["StudyValidator<br/>«validator»<br/>强制时间段"]
+    SecondhandValidator["SecondhandValidator<br/>«validator»<br/>强制实物配图"]
+  end
+
+  subgraph cluster_observer["3. 观察者模式：订单事件解耦通知"]
+    direction TB
+    OrderEventPublisher["OrderEventPublisher<br/>«publisher»<br/>- applicationEventPublisher<br/>+ publish(event): void"]
+    OrderStatusChangedEvent["OrderStatusChangedEvent<br/>«event»<br/>orderId: Long<br/>fromStatus / toStatus<br/>operatorId: Long"]
+    NotificationListener["NotificationListener<br/>«listener»<br/>监听：接单/完成/取消<br/>+ onOrderChanged(event): void"]
+    CreditScoreListener["CreditScoreListener<br/>«listener»<br/>监听：完结/违约<br/>+ onOrderChanged(event): void"]
+    DemandStatusListener["DemandStatusListener<br/>«listener»<br/>监听：需求状态同步<br/>+ onOrderChanged(event): void"]
+    NotificationService["NotificationService<br/>«service»<br/>创建站内通知"]
+    CreditService["CreditService<br/>«service»<br/>信用分变动流水"]
+  end
+
+  subgraph cluster_matcher["4. 组合策略模式：智能匹配推荐"]
+    direction TB
+    RecommendationService["RecommendationService<br/>«service»<br/>需求推荐 / 接单人推荐"]
+    CompositeDemandMatcher["CompositeDemandMatcher<br/>«composite»<br/>- matchers: List&lt;DemandMatcher&gt;<br/>+ match(demand): List&lt;User&gt;"]
+    DemandMatcher["DemandMatcher<br/>«interface»<br/>+ match(demand): List&lt;User&gt;<br/>+ score(user, demand): double"]
+    LocationMatcher["LocationMatcher<br/>«matcher»<br/>位置标签匹配"]
+    SkillMatcher["SkillMatcher<br/>«matcher»<br/>技能标签匹配"]
+    CreditScoreMatcher["CreditScoreMatcher<br/>«matcher»<br/>信用分权重排序"]
+  end
+
+  OrderService ~~~ DemandParam ~~~ OrderEventPublisher ~~~ RecommendationService
+
+  OrderService -->|"委托状态校验"| OrderStateContext
+  OrderStateContext -->|"选择策略"| IOrderStateStrategy
+  PendingAcceptStrategy -.->|"实现"| IOrderStateStrategy
+  AcceptedStrategy -.->|"实现"| IOrderStateStrategy
+  InProgressStrategy -.->|"实现"| IOrderStateStrategy
+  PendingConfirmStrategy -.->|"实现"| IOrderStateStrategy
+  CompletedStrategy -.->|"实现"| IOrderStateStrategy
+  CancelledStrategy -.->|"实现"| IOrderStateStrategy
+  DemandParam -->|"输入"| DemandFactory
+  DemandFactory -->|"Map 注册/选择"| DemandValidator
+  ErrandValidator -.->|"实现"| DemandValidator
+  SkillValidator -.->|"实现"| DemandValidator
+  StudyValidator -.->|"实现"| DemandValidator
+  SecondhandValidator -.->|"实现"| DemandValidator
+  OrderEventPublisher -->|"发布"| OrderStatusChangedEvent
+  NotificationListener -.->|"订阅"| OrderStatusChangedEvent
+  CreditScoreListener -.->|"订阅"| OrderStatusChangedEvent
+  DemandStatusListener -.->|"订阅"| OrderStatusChangedEvent
+  NotificationListener -->|"调用"| NotificationService
+  CreditScoreListener -->|"调用"| CreditService
+  RecommendationService -->|"使用"| CompositeDemandMatcher
+  CompositeDemandMatcher -->|"组合"| DemandMatcher
+  LocationMatcher -.->|"实现"| DemandMatcher
+  SkillMatcher -.->|"实现"| DemandMatcher
+  CreditScoreMatcher -.->|"实现"| DemandMatcher
+
+  classDef controller fill:#EFF6FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
+  classDef service fill:#F0FDF4,stroke:#16A34A,stroke-width:1px,color:#0F172A;
+  classDef entity fill:#FFF7ED,stroke:#EA580C,stroke-width:1px,color:#0F172A;
+  classDef interface fill:#FAF5FF,stroke:#9333EA,stroke-width:1px,color:#0F172A;
+  classDef pattern fill:#FFFBEB,stroke:#D97706,stroke-width:1px,color:#0F172A;
+  classDef enum fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#0F172A;
+  class OrderService,NotificationService,CreditService,RecommendationService service;
+  class IOrderStateStrategy,DemandValidator,DemandMatcher interface;
+  class DemandParam note;
+  class OrderStateContext,PendingAcceptStrategy,AcceptedStrategy,InProgressStrategy,PendingConfirmStrategy,CompletedStrategy,CancelledStrategy,DemandFactory,ErrandValidator,SkillValidator,StudyValidator,SecondhandValidator,OrderEventPublisher,OrderStatusChangedEvent,NotificationListener,CreditScoreListener,DemandStatusListener,CompositeDemandMatcher,LocationMatcher,SkillMatcher,CreditScoreMatcher pattern;
