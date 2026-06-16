@@ -5,7 +5,7 @@
       <div class="form-group"><label>标题 *</label><input v-model="f.title" placeholder="简单描述你要什么帮助" required /></div>
       <div class="form-group"><label>详细描述 *</label><textarea v-model="f.description" rows="4" placeholder="详细说明需求内容、要求等" required></textarea></div>
       <div class="rr">
-        <div class="form-group"><label>分类 *</label><select v-model="f.category" required><option value="">选择分类</option><option value="ERRAND">跑腿代办</option><option value="SKILL">技能求助</option><option value="STUDY">学习互助</option><option value="SECONDHAND">二手交易</option><option value="OTHER">其他</option></select></div>
+        <div class="form-group"><label>分类 *</label><NeoDropdown v-model="f.category" :options="pubCatOptions" placeholder="选择分类" /></div>
         <div class="form-group">
           <label>报酬金额 *</label>
           <input
@@ -19,8 +19,8 @@
           />
         </div>
       </div>
-      <div class="form-group"><label>报酬类型</label><select v-model="f.rewardType"><option value="MONEY">现金</option><option value="QUOTA">额度分</option></select></div>
-      <div class="form-group"><label>校区</label><select v-model="f.campus"><option value="">不限</option><option value="鼓楼校区">鼓楼校区</option><option value="仙林校区">仙林校区</option><option value="浦口校区">浦口校区</option><option value="苏州校区">苏州校区</option></select></div>
+      <div class="form-group"><label>报酬类型</label><NeoDropdown v-model="f.rewardType" :options="rewardTypeOptions" placeholder="报酬类型" /></div>
+      <div class="form-group"><label>校区</label><NeoDropdown v-model="f.campus" :options="pubCampusOptions" placeholder="不限" /></div>
 
       <!-- 跑腿：必填位置 -->
       <div v-if="f.category==='ERRAND'" class="form-group"><label>位置 *</label><input v-model="f.locationTag" placeholder="如：图书馆、校门口、3号宿舍楼" required /></div>
@@ -66,8 +66,12 @@ import { demandAPI } from '@/api/demands'
 import { uploadImage } from '@/api/upload'
 import { errorMessage } from '@/utils/errors'
 import { useModal } from '@/composables/useModal'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 const ro=useRouter()
 const modal = useModal()
+const pubCatOptions = [{ value:'ERRAND',label:'跑腿代办' },{ value:'SKILL',label:'技能求助' },{ value:'STUDY',label:'学习互助' },{ value:'SECONDHAND',label:'二手交易' },{ value:'OTHER',label:'其他' }]
+const rewardTypeOptions = [{ value:'MONEY',label:'现金' },{ value:'QUOTA',label:'额度分' }]
+const pubCampusOptions = [{ value:'',label:'不限' },{ value:'鼓楼校区',label:'鼓楼校区' },{ value:'仙林校区',label:'仙林校区' },{ value:'浦口校区',label:'浦口校区' },{ value:'苏州校区',label:'苏州校区' }]
 const f=reactive({title:'',description:'',category:'',rewardAmount:'0',rewardType:'MONEY',locationTag:'',campus:'',urgentDeadline:null,urgent:false,tagIds:[],imageUrls:[]})
 const tagInput=ref('')
 const err=ref('');const ing=ref(false)
@@ -96,6 +100,7 @@ async function pub(){
   sanitizeReward()
   const rewardAmount=Number.parseInt(f.rewardAmount||'0',10)
   if(Number.isNaN(rewardAmount)||rewardAmount<0){err.value='报酬金额必须是非负整数';ing.value=false;return}
+  if(!f.category){err.value='请选择需求分类';ing.value=false;return}
   const body={...f,rewardAmount}
   if(f.category==='SECONDHAND'&&!body.imageUrls.length){err.value='请至少上传一张实物图片';ing.value=false;return}
   if(f.category==='STUDY'&&!body.urgentDeadline){err.value='请选择截止时间';ing.value=false;return}

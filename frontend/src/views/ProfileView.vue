@@ -115,22 +115,11 @@
           </div>
           <div class="form-group">
             <label>性别</label>
-            <select v-model="form.gender">
-              <option value="" disabled hidden>性别</option>
-              <option value="UNDISCLOSED">不愿透露</option>
-              <option value="MALE">男</option>
-              <option value="FEMALE">女</option>
-            </select>
+            <NeoDropdown v-model="form.gender" :options="genderOptions" placeholder="性别" />
           </div>
           <div class="form-group">
             <label>校区</label>
-            <select v-model="form.campus">
-              <option value="">未选择</option>
-              <option value="鼓楼校区">鼓楼校区</option>
-              <option value="仙林校区">仙林校区</option>
-              <option value="浦口校区">浦口校区</option>
-              <option value="苏州校区">苏州校区</option>
-            </select>
+            <NeoDropdown v-model="form.campus" :options="profileCampusOptions" placeholder="未选择" />
           </div>
           <button class="btn-primary btn-sm" @click="update">保存修改</button>
         </div>
@@ -150,18 +139,11 @@
           <template v-if="canSubmitCert">
             <div class="form-group">
               <label>类型</label>
-              <select v-model="certForm.certType">
-                <option value="STUDENT_ID">学生证</option>
-                <option value="STUDENT_CARD">校园卡</option>
-              </select>
+              <NeoDropdown v-model="certForm.certType" :options="certTypeOptions" placeholder="选择类型" />
             </div>
             <div class="form-group">
               <label>性别</label>
-              <select v-model="certForm.gender">
-                <option value="MALE">男</option>
-                <option value="FEMALE">女</option>
-                <option value="UNDISCLOSED">保密</option>
-              </select>
+              <NeoDropdown v-model="certForm.gender" :options="certGenderOptions" placeholder="性别" />
             </div>
             <div class="form-group">
               <label>学号</label>
@@ -345,7 +327,12 @@ import { arbitrationAPI } from '@/api/arbitrations'
 import { uploadImage } from '@/api/upload'
 import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { useModal } from '@/composables/useModal'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 
+const genderOptions = [{ value:'UNDISCLOSED',label:'不愿透露' },{ value:'MALE',label:'男' },{ value:'FEMALE',label:'女' }]
+const certGenderOptions = [{ value:'MALE',label:'男' },{ value:'FEMALE',label:'女' },{ value:'UNDISCLOSED',label:'保密' }]
+const certTypeOptions = [{ value:'STUDENT_ID',label:'学生证' },{ value:'STUDENT_CARD',label:'校园卡' }]
+const profileCampusOptions = [{ value:'',label:'未选择' },{ value:'鼓楼校区',label:'鼓楼校区' },{ value:'仙林校区',label:'仙林校区' },{ value:'浦口校区',label:'浦口校区' },{ value:'苏州校区',label:'苏州校区' }]
 const modal = useModal()
 const router = useRouter()
 const auth = useAuthStore()

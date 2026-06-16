@@ -9,26 +9,9 @@
       <router-link to="/login" class="btn-primary btn-sm">去登录</router-link>
     </div>
     <div class="filter-bar">
-      <select v-model="store.filters.category" @change="store.fetch()" class="sel">
-        <option value="">全部分类</option>
-        <option value="ERRAND">跑腿代办</option>
-        <option value="SKILL">技能求助</option>
-        <option value="STUDY">学习互助</option>
-        <option value="SECONDHAND">二手交易</option>
-        <option value="OTHER">其他</option>
-      </select>
-      <select v-model="store.filters.sortBy" @change="store.fetch()" class="sel">
-        <option value="createdAt">最新发布</option>
-        <option value="recommended">推荐排序</option>
-        <option value="rewardAmount">报酬高低</option>
-      </select>
-      <select v-model="store.filters.campus" @change="store.fetch()" class="sel">
-        <option value="">全部校区</option>
-        <option value="鼓楼校区">鼓楼校区</option>
-        <option value="仙林校区">仙林校区</option>
-        <option value="浦口校区">浦口校区</option>
-        <option value="苏州校区">苏州校区</option>
-      </select>
+      <NeoDropdown v-model="store.filters.category" :options="catOptions" placeholder="全部分类" @change="store.fetch()" />
+      <NeoDropdown v-model="store.filters.sortBy" :options="sortOptions" placeholder="最新发布" @change="store.fetch()" />
+      <NeoDropdown v-model="store.filters.campus" :options="campusOptions" placeholder="全部校区" @change="store.fetch()" />
       <input v-model="store.filters.keyword" placeholder="搜索关键词..." @input="debounce" class="kw" />
       <label class="open-only" :class="{ active: store.filters.openOnly }"><input type="checkbox" v-model="store.filters.openOnly" @change="store.fetch()" /> 仅看可接单</label>
     </div>
@@ -51,6 +34,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDemandStore } from '@/stores/demands'
 import { useAuthStore } from '@/stores/auth'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 const store = useDemandStore()
 const auth = useAuthStore()
 const router = useRouter()
@@ -58,6 +42,9 @@ let t
 function debounce() { clearTimeout(t); t = setTimeout(() => store.fetch(), 300) }
 function catTxt(c) { return { ERRAND:'跑腿代办', SKILL:'技能求助', STUDY:'学习互助', SECONDHAND:'二手交易', OTHER:'其他' }[c] || c }
 function catBg(c) { return { ERRAND:'#fef08a', SKILL:'#c7d2fe', STUDY:'#bbf7d0', SECONDHAND:'#fecdd3', OTHER:'#e9d5ff' }[c] || '#e5e7eb' }
+const catOptions = [{ value:'',label:'全部分类' },{ value:'ERRAND',label:'跑腿代办' },{ value:'SKILL',label:'技能求助' },{ value:'STUDY',label:'学习互助' },{ value:'SECONDHAND',label:'二手交易' },{ value:'OTHER',label:'其他' }]
+const sortOptions = [{ value:'createdAt',label:'最新发布' },{ value:'recommended',label:'推荐排序' },{ value:'rewardAmount',label:'报酬高低' }]
+const campusOptions = [{ value:'',label:'全部校区' },{ value:'鼓楼校区',label:'鼓楼校区' },{ value:'仙林校区',label:'仙林校区' },{ value:'浦口校区',label:'浦口校区' },{ value:'苏州校区',label:'苏州校区' }]
 function goDetail(id) { router.push('/demands/' + id) }
 onMounted(() => store.fetch())
 </script>
