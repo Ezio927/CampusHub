@@ -21,7 +21,7 @@
       <div class="dt"><span class="dtl">{{ d.title }}</span><span class="cat" :style="{background:catBg(d.category)}">{{ catTxt(d.category) }}</span></div>
       <p class="dd">{{ d.description }}</p>
       <div class="df">
-        <span class="text-muted text-sm">{{ d.campus || d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
+        <span class="text-muted text-sm">{{ d.campus || '不限校区' }} · {{ d.locationTag || '不限位置' }} · {{ d.publisher?.username }}</span>
         <span class="dp">{{ d.rewardType === 'MONEY' ? '¥' + d.rewardAmount : d.rewardAmount + '额度分' }}</span>
       </div>
       <div v-if="d.urgent" class="mt-sm"><span class="du">紧急</span></div>
@@ -55,14 +55,15 @@ onMounted(() => store.fetch())
 .kw{flex:1;min-width:140px;border:2px solid black;box-shadow:3px 3px 0 rgba(0,0,0,1)}
 .open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;font-weight:600}
 .open-only input{width:auto}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.dc{background:var(--card);border-radius:12px;padding:20px;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:50px}
+.dc{display:flex;flex-direction:column;background:var(--card);border-radius:12px;padding:20px;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease;overflow:hidden}
 .dc:hover{transform:scale(1.02);box-shadow:6px 6px 0px rgba(0,0,0,1)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.dtl{font-size:17px;font-weight:700;flex:1;margin-right:10px}
-.cat{display:inline-flex;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:1.5px solid black;white-space:nowrap}
-.dd{font-size:14px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.df{display:flex;justify-content:space-between;align-items:center}
+.dtl{font-size:17px;font-weight:700;flex:1;margin-right:10px;word-break:break-word;min-width:0}
+.cat{display:inline-flex;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:1.5px solid black;white-space:nowrap;flex-shrink:0}
+.dd{font-size:14px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.df{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
 .du{display:inline-flex;align-items:center;gap:3px;padding:3px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#111;border:1.5px solid black;background:#fef08a}
+@media (max-width: 640px){.card-grid{grid-template-columns:1fr;max-width:100%}}
 </style>
