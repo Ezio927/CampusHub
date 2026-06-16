@@ -4,8 +4,8 @@
       <h1>欢迎回来</h1>
       <p class="ls">登录 CampusHub 校园互助平台</p>
       <form @submit.prevent="login">
-        <input class="inp" v-model="username" placeholder="用户名" required />
-        <input class="inp" v-model="password" type="password" placeholder="密码" required />
+        <input class="inp" v-model="username" placeholder="用户名" />
+        <input class="inp" v-model="password" type="password" placeholder="密码" />
         <p v-if="err" class="form-error">{{ err }}</p>
         <button type="submit" class="btn-primary btn-block lbn" :disabled="ing">{{ ing? '登录中...' : '登 录' }}</button>
       </form>
@@ -26,6 +26,7 @@ const err = ref('')
 const ing = ref(false)
 async function login() {
   err.value = ''; ing.value = true
+  if (!username.value.trim() || !password.value) { err.value = '请输入用户名和密码'; ing.value = false; return }
   try { await auth.login(username.value, password.value); r.push('/') }
   catch (e) { err.value = e.message || '登录失败' }
   finally { ing.value = false }
