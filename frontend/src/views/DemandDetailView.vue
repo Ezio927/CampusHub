@@ -11,7 +11,7 @@
     <!-- 主卡片 -->
     <div class="main-card">
       <div class="card-head">
-        <span class="cat-tag" :style="{ background: categoryColor(demand.category) }">{{ categoryText(demand.category) }}</span>
+        <span class="cat-tag" :style="{ background: categoryColor(demand.category) }"><img :src="'/icons/cat-' + demand.category.toLowerCase() + '.png'" class="cat-icon" alt="" />{{ categoryText(demand.category) }}</span>
         <span class="time-text">{{ demand.createdAt?.substring(0, 10) }}</span>
       </div>
 
@@ -147,7 +147,8 @@ onMounted(async () => { try { demand.value = (await demandAPI.detail(route.param
 .main-card { background: var(--card); border-radius: 16px; padding: 28px 24px 24px; border: 2px solid black; box-shadow: 4px 4px 0 rgba(0,0,0,1); max-width: 720px; margin: 0 auto 14px; }
 
 .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.cat-tag { padding: 4px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #111; border: 2px solid black; }
+.cat-tag { display:inline-flex; align-items:center; gap:5px; padding: 4px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #111; border: 2px solid black; }
+.cat-icon{width:16px;height:16px;image-rendering:pixelated}
 .time-text { font-size: 13px; color: var(--text-muted); }
 
 .title { font-size: 22px; font-weight: 900; line-height: 1.35; margin: 0 0 20px; }
