@@ -147,11 +147,11 @@
             </div>
             <div class="form-group">
               <label>学号</label>
-              <input :value="auth.user?.studentId" readonly />
+              <input v-model="certForm.studentId" placeholder="请输入学号" />
             </div>
             <div class="form-group">
               <label>姓名</label>
-              <input :value="auth.user?.realName" readonly />
+              <input v-model="certForm.realName" placeholder="请输入真实姓名" />
             </div>
             <div class="form-group">
               <label>认证图片</label>
@@ -343,7 +343,7 @@ const certInput = ref(null)
 const avatarPreview = ref('')
 const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0) || 0) % colors.length])
-const certForm = reactive({ certType: 'STUDENT_ID', gender: 'MALE', studentId: '', cardImageUrl: '' })
+const certForm = reactive({ certType: 'STUDENT_ID', gender: 'MALE', studentId: '', realName: '', cardImageUrl: '' })
 
 const cert = ref(null)
 const certErr = ref('')
@@ -464,7 +464,7 @@ async function submitCert() {
   certSubmitting.value = true
   try {
     if (!certForm.cardImageUrl) { certErr.value = '请先上传认证图片'; return }
-    await certAPI.submit({ ...certForm, studentId: auth.user?.studentId || '' })
+    await certAPI.submit({ ...certForm })
     clearCertImage()
     await loadCert()
   } catch (e) { modal.alert('提交失败', e.message) }
@@ -498,8 +498,8 @@ function removeAvatar() { avatarPreview.value = 'removed' }
 function clearCertImage() { certForm.cardImageUrl = '' }
 
 async function loadCert() {
-  try { const r = await certAPI.mine(); cert.value = r.data; certForm.studentId = auth.user?.studentId || '' }
-  catch { cert.value = null; certForm.studentId = auth.user?.studentId || '' }
+  try { const r = await certAPI.mine(); cert.value = r.data }
+  catch { cert.value = null }
 }
 async function loadCredit() {
   try { const r = await userAPI.creditRecords(); creditList.value = r.data || [] }

@@ -39,14 +39,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDto register(RegisterRequest req) {
-        if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())
-                || isBlank(req.getStudentId()) || isBlank(req.getRealName())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码/学号/姓名不能为空");
+        if (req == null || isBlank(req.getUsername()) || isBlank(req.getPassword())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码不能为空");
         }
         if (userRepository.existsByUsername(req.getUsername())) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
-        if (userRepository.existsByStudentId(req.getStudentId())) {
+        if (!isBlank(req.getStudentId()) && userRepository.existsByStudentId(req.getStudentId())) {
             throw new BusinessException(ErrorCode.STUDENT_ID_EXISTS);
         }
 

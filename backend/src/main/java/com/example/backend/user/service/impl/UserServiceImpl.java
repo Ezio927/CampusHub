@@ -36,28 +36,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserCreateDto req) {
-        if (req == null || isBlank(req.getPassword()) || isBlank(req.getStudentId())) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码/学号/姓名不能为空");
+        if (req == null || isBlank(req.getPassword())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "用户名/密码不能为空");
         }
         String username = UserProfileValidator.requireValidUsername(req.getUsername());
-        String realName = UserProfileValidator.requireValidRealName(req.getRealName());
         String phone = UserProfileValidator.normalizeOptionalPhone(req.getPhone());
         String email = UserProfileValidator.normalizeOptionalEmail(req.getEmail());
-        String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
         contentModerationService.assertUsernameAllowed(username);
 
         if (userRepository.existsByUsername(username)) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
-        if (userRepository.existsByStudentId(studentId)) {
-            throw new BusinessException(ErrorCode.STUDENT_ID_EXISTS);
-        }
 
         User user = new User();
         user.setUsername(username);
         user.setPasswordHash(PasswordHasher.hash(req.getPassword()));
-        user.setStudentId(studentId);
-        user.setRealName(realName);
+        String realName = req.getRealName();
+        if (!isBlank(realName)) {
+            user.setRealName(UserProfileValidator.requireValidRealName(realName));
+        }
+        String studentId = req.getStudentId();
+        if (!isBlank(studentId)) {
+            studentId = UserProfileValidator.requireValidStudentId(studentId);
+            if (userRepository.existsByStudentId(studentId)) {
+                throw new BusinessException(ErrorCode.STUDENT_ID_EXISTS);
+            }
+            user.setStudentId(studentId);
+        }
         user.setPhone(phone);
         user.setEmail(email);
         user.setGender(parseGender(req.getGender()));
