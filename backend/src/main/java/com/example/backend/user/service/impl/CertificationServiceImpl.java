@@ -53,9 +53,6 @@ public class CertificationServiceImpl implements CertificationService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "认证类型、学号和性别不能为空");
         }
         String studentId = UserProfileValidator.requireValidStudentId(req.getStudentId());
-        if (user.getStudentId() == null || !studentId.equalsIgnoreCase(user.getStudentId())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "实名认证学号必须与账号注册学号一致");
-        }
         String cardImageUrl = ImageDataUrlValidator.requireValidImageDataUrl(req.getCardImageUrl(), "认证图片");
 
         certificationRepository.findByUserId(userId).ifPresent(existing -> {
@@ -71,6 +68,7 @@ public class CertificationServiceImpl implements CertificationService {
         certification.setUserId(userId);
         certification.setCertType(req.getCertType());
         certification.setStudentId(studentId);
+        certification.setRealName(req.getRealName());
         certification.setGender(req.getGender());
         certification.setCardImageUrl(cardImageUrl);
         certification.setStatus(CertStatus.PENDING);
@@ -114,6 +112,8 @@ public class CertificationServiceImpl implements CertificationService {
         if (approve) {
             certification.approve(reviewerId);
             applicant.setStatus(UserStatus.ACTIVE);
+            applicant.setStudentId(certification.getStudentId());
+            applicant.setRealName(certification.getRealName());
             applicant.setGender(certification.getGender());
             quotaService.grantCertificationReward(applicant.getId(), reviewerId);
         } else {

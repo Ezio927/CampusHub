@@ -3,14 +3,7 @@
     <a href="#" class="back" @click.prevent="$router.back()">←</a>
     <h1 class="page-title">订单管理</h1>
     <div class="toolbar mb-md">
-      <select v-model="status" @change="load">
-        <option value="">全部状态</option>
-        <option value="OPEN">待接单需求</option>
-        <option value="ACCEPTED">已接单</option>
-        <option value="PENDING_CONFIRM">待确认</option>
-        <option value="COMPLETED">已完成</option>
-        <option value="CANCELLED">已取消</option>
-      </select>
+      <NeoDropdown v-model="status" :options="orderStatusOptions" placeholder="全部状态" @change="load" />
       <button class="btn-outline btn-sm" @click="load">刷新</button>
     </div>
     <div v-if="orders.length===0" class="card empty">暂无订单</div>
@@ -33,7 +26,9 @@
 import { onMounted, ref } from 'vue'
 import { adminAPI } from '@/api/admin'
 import { useModal } from '@/composables/useModal'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 
+const orderStatusOptions = [{ value:'',label:'全部状态' },{ value:'OPEN',label:'待接单需求' },{ value:'ACCEPTED',label:'已接单' },{ value:'PENDING_CONFIRM',label:'待确认' },{ value:'COMPLETED',label:'已完成' },{ value:'CANCELLED',label:'已取消' }]
 const modal = useModal()
 const status = ref('')
 const orders = ref([])

@@ -69,13 +69,7 @@
         </button>
         <template v-else>{{ reportTarget.content }}</template>
       </div>
-      <select v-model="reportForm.category" class="mt-sm">
-        <option value="SEXUAL">色情擦边玩笑</option>
-        <option value="ABUSE">骂人（轻度/重度）</option>
-        <option value="POLITICAL">涉政讨论</option>
-        <option value="LINK_OR_QR">外链/二维码</option>
-        <option value="CONTACT_INFO">发布手机号/微信号/QQ号</option>
-      </select>
+      <NeoDropdown v-model="reportForm.category" :options="reportCatOptions" placeholder="举报类型" />
       <textarea v-model="reportForm.reason" rows="3" placeholder="补充说明（选填）"></textarea>
       <input v-model="reportForm.evidence" placeholder="证据链接，多个用逗号分隔（选填）" />
       <button type="button" class="btn-primary btn-sm" :disabled="reporting" @click="submitReport">
@@ -128,6 +122,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { chatAPI } from '@/api/chat'
 import { uploadImage } from '@/api/upload'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 import { errorMessage } from '@/utils/errors'
 import { userInitial } from '@/utils/userDisplay'
 import { useModal } from '@/composables/useModal'
@@ -151,6 +146,7 @@ const clrs = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => clrs[(conversation.value?.targetUser?.username?.charCodeAt(0) || 0) % clrs.length])
 const searchKeyword = ref('')
 const searchResults = ref([])
+const reportCatOptions = [{ value:'SEXUAL',label:'色情擦边玩笑' },{ value:'ABUSE',label:'骂人（轻度/重度）' },{ value:'POLITICAL',label:'涉政讨论' },{ value:'LINK_OR_QR',label:'外链/二维码' },{ value:'CONTACT_INFO',label:'发布手机号/微信号/QQ号' }]
 const reportForm = reactive({ category: 'ABUSE', reason: '', evidence: '' })
 const emojis = ['😀','😂','😊','👍','🙏','🎉','❤️','😅','👌','🔥','🌟','📌']
 let syncTimer = null

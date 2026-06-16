@@ -13,6 +13,7 @@ public class CertificationDto {
     private Long userId;
     private CertType certType;
     private String studentId;
+    private String realName;
     private UserGender gender;
     private String cardImageUrl;
     private CertStatus status;
@@ -33,6 +34,7 @@ public class CertificationDto {
         dto.setUserId(certification.getUserId());
         dto.setCertType(certification.getCertType());
         dto.setStudentId(certification.getStudentId());
+        dto.setRealName(certification.getRealName());
         dto.setGender(certification.getGender());
         dto.setCardImageUrl(certification.getCardImageUrl());
         dto.setStatus(certification.getStatus());
@@ -73,6 +75,14 @@ public class CertificationDto {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
     }
 
     public UserGender getGender() {

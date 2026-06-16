@@ -9,7 +9,7 @@
         </button>
         <div>
           <div class="text-bold">用户ID: {{ c.userId }}</div>
-          <div class="text-sm text-muted">{{ c.studentId }} · {{ c.certType }} · {{ genderText(c.gender) }} · {{ c.status }}</div>
+          <div class="text-sm text-muted">{{ c.realName || '未填姓名' }} · {{ c.studentId }} · {{ c.certType }} · {{ genderText(c.gender) }} · {{ c.status }}</div>
         </div>
       </div>
       <div class="flex gap-sm">
