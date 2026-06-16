@@ -35,6 +35,7 @@ public class SchemaMigrationRunner implements CommandLineRunner {
         executeIgnoreDuplicate("ALTER TABLE certifications MODIFY card_image_url MEDIUMTEXT");
         executeIgnoreDuplicate("ALTER TABLE certifications ALTER COLUMN card_image_url CLOB");
         executeIgnoreDuplicate("ALTER TABLE certifications ADD COLUMN gender VARCHAR(20)");
+        executeIgnoreDuplicate("ALTER TABLE certifications ADD COLUMN real_name VARCHAR(50)");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN gender VARCHAR(20)");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN publisher_rating DECIMAL(3,2) NOT NULL DEFAULT 0");
         executeIgnoreDuplicate("ALTER TABLE users ADD COLUMN publisher_rating_count INT NOT NULL DEFAULT 0");

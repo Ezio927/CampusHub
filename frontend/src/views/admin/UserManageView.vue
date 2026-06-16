@@ -22,7 +22,7 @@
         <button class="btn-outline btn-sm" @click="adjustCredit(user.id)">调信用</button>
         <button class="btn-outline btn-sm" @click="adjustQuota(user.id)">调额度</button>
         <button v-if="user.status !== 'BANNED' && user.role !== 'ADMIN'" class="btn-danger btn-sm" @click="ban(user.id)">封禁</button>
-        <button v-else-if="user.status === 'BANNED'" class="btn-outline btn-sm" @click="unban(user.id)">解封</button>
+        <button v-else-if="user.status === 'BANNED'" class="btn-success btn-sm" @click="unban(user.id)">解封</button>
       </div>
     </div>
   </div>

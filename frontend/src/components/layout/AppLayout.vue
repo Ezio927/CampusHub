@@ -1,5 +1,6 @@
 <template>
   <div class="layout">
+    <BackgroundParallax />
     <NavBar />
     <main class="main"><slot /></main>
     <footer class="footer">
@@ -23,6 +24,7 @@
 </template>
 <script setup>
 import NavBar from './NavBar.vue'
+import BackgroundParallax from '@/components/common/BackgroundParallax.vue'
 </script>
 <style scoped>
 .layout { min-height: 100vh; display: flex; flex-direction: column; }

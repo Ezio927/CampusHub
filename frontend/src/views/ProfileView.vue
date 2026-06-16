@@ -94,10 +94,8 @@
                 <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
                 <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
               </div>
-              <label class="btn-outline btn-sm file-btn">
-                选择图片
-                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickAvatar" />
-              </label>
+              <input ref="avatarInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickAvatar" hidden />
+              <button type="button" class="btn-outline btn-sm" @click="avatarInput?.click()">选择图片</button>
               <button v-if="avatarPreview && avatarPreview !== auth.user?.avatarUrl" type="button" class="btn-outline btn-sm" @click="removeAvatar">移除</button>
             </div>
           </div>
@@ -117,22 +115,11 @@
           </div>
           <div class="form-group">
             <label>性别</label>
-            <select v-model="form.gender">
-              <option value="" disabled hidden>性别</option>
-              <option value="UNDISCLOSED">不愿透露</option>
-              <option value="MALE">男</option>
-              <option value="FEMALE">女</option>
-            </select>
+            <NeoDropdown v-model="form.gender" :options="genderOptions" placeholder="性别" />
           </div>
           <div class="form-group">
             <label>校区</label>
-            <select v-model="form.campus">
-              <option value="">未选择</option>
-              <option value="鼓楼校区">鼓楼校区</option>
-              <option value="仙林校区">仙林校区</option>
-              <option value="浦口校区">浦口校区</option>
-              <option value="苏州校区">苏州校区</option>
-            </select>
+            <NeoDropdown v-model="form.campus" :options="profileCampusOptions" placeholder="未选择" />
           </div>
           <button class="btn-primary btn-sm" @click="update">保存修改</button>
         </div>
@@ -141,37 +128,36 @@
 
         <!-- 实名认证 -->
         <div class="sub-block">
-          <h4 class="sub-title">实名认证</h4>
-          <div v-if="cert" class="cert-state">
-            状态：
-            <span :style="{ color: cert.status === 'APPROVED' ? 'var(--success)' : cert.status === 'REJECTED' ? 'var(--danger)' : 'var(--warning)' }" class="text-bold">
-              {{ cert.status === 'APPROVED' ? '已通过' : cert.status === 'REJECTED' ? '已驳回' : '审核中' }}
+          <div class="cert-head">
+            <h4 class="sub-title">实名认证</h4>
+            <span v-if="(cert && cert.status === 'APPROVED') || auth.user?.status === 'ACTIVE'" class="cert-badge cert-badge--approved">已通过</span>
+            <span v-else-if="cert" :style="{ color: cert.status === 'REJECTED' ? 'var(--danger)' : 'var(--warning)' }" class="text-bold">
+              {{ cert.status === 'REJECTED' ? '已驳回' : '审核中' }}
             </span>
-            <span v-if="cert.status === 'REJECTED' && cert.rejectReason" class="text-sm text-muted"> — {{ cert.rejectReason }}</span>
+            <span v-if="cert && cert.status === 'REJECTED' && cert.rejectReason" class="text-sm text-muted"> — {{ cert.rejectReason }}</span>
           </div>
           <template v-if="canSubmitCert">
             <div class="form-group">
               <label>类型</label>
-              <select v-model="certForm.certType">
-                <option value="STUDENT_ID">学生证</option>
-                <option value="STUDENT_CARD">校园卡</option>
-              </select>
+              <NeoDropdown v-model="certForm.certType" :options="certTypeOptions" placeholder="选择类型" />
+            </div>
+            <div class="form-group">
+              <label>性别</label>
+              <NeoDropdown v-model="certForm.gender" :options="certGenderOptions" placeholder="性别" />
             </div>
             <div class="form-group">
               <label>学号</label>
-              <input :value="auth.user?.studentId" readonly />
+              <input v-model="certForm.studentId" placeholder="请输入学号" />
             </div>
             <div class="form-group">
               <label>姓名</label>
-              <input :value="auth.user?.realName" readonly />
+              <input v-model="certForm.realName" placeholder="请输入真实姓名" />
             </div>
             <div class="form-group">
               <label>认证图片</label>
               <div class="upload-row">
-                <label class="btn-outline btn-sm file-btn">
-                  选择图片
-                  <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickCertImage" />
-                </label>
+                <input ref="certInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickCertImage" hidden />
+                <button type="button" class="btn-outline btn-sm" @click="certInput?.click()">选择图片</button>
                 <button v-if="certForm.cardImageUrl" type="button" class="btn-outline btn-sm" @click="clearCertImage">移除</button>
               </div>
               <button v-if="certForm.cardImageUrl" type="button" class="cert-preview" @click="certImageViewer = certForm.cardImageUrl">
@@ -183,7 +169,7 @@
               {{ certSubmitting ? '提交中...' : '提交认证' }}
             </button>
           </template>
-          <button v-else-if="cert?.cardImageUrl" type="button" class="cert-preview compact-preview" @click="certImageViewer = cert.cardImageUrl">
+          <button v-else-if="cert?.cardImageUrl && cert.status !== 'APPROVED'" type="button" class="cert-preview compact-preview" @click="certImageViewer = cert.cardImageUrl">
             <img :src="cert.cardImageUrl" alt="认证图片" />
           </button>
         </div>
@@ -341,16 +327,23 @@ import { arbitrationAPI } from '@/api/arbitrations'
 import { uploadImage } from '@/api/upload'
 import { normalizeEmail, normalizePhone, normalizeUsername } from '@/utils/validators'
 import { useModal } from '@/composables/useModal'
+import NeoDropdown from '@/components/common/NeoDropdown.vue'
 
+const genderOptions = [{ value:'UNDISCLOSED',label:'不愿透露' },{ value:'MALE',label:'男' },{ value:'FEMALE',label:'女' }]
+const certGenderOptions = [{ value:'MALE',label:'男' },{ value:'FEMALE',label:'女' },{ value:'UNDISCLOSED',label:'保密' }]
+const certTypeOptions = [{ value:'STUDENT_ID',label:'学生证' },{ value:'STUDENT_CARD',label:'校园卡' }]
+const profileCampusOptions = [{ value:'',label:'未选择' },{ value:'鼓楼校区',label:'鼓楼校区' },{ value:'仙林校区',label:'仙林校区' },{ value:'浦口校区',label:'浦口校区' },{ value:'苏州校区',label:'苏州校区' }]
 const modal = useModal()
 const router = useRouter()
 const auth = useAuthStore()
 
 const form = reactive({ username: '', phone: '', email: '', gender: '', campus: '' })
+const avatarInput = ref(null)
+const certInput = ref(null)
 const avatarPreview = ref('')
 const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0) || 0) % colors.length])
-const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
+const certForm = reactive({ certType: 'STUDENT_ID', gender: 'MALE', studentId: '', realName: '', cardImageUrl: '' })
 
 const cert = ref(null)
 const certErr = ref('')
@@ -378,7 +371,10 @@ const statusText = computed(() => ({
   PENDING_CERT: '待认证'
 }[auth.user?.status] || auth.user?.status))
 
-const canSubmitCert = computed(() => !cert.value || cert.value.status === 'REJECTED')
+const canSubmitCert = computed(() => {
+  if (auth.user?.status === 'ACTIVE') return false
+  return !cert.value || cert.value.status === 'REJECTED'
+})
 const canSubmitCreditAppeal = computed(() =>
   Number(auth.user?.creditScore ?? 0) < 60 && (!creditAppeal.value || creditAppeal.value.status === 'REJECTED')
 )
@@ -468,7 +464,7 @@ async function submitCert() {
   certSubmitting.value = true
   try {
     if (!certForm.cardImageUrl) { certErr.value = '请先上传认证图片'; return }
-    await certAPI.submit({ ...certForm, studentId: auth.user?.studentId || '' })
+    await certAPI.submit({ ...certForm })
     clearCertImage()
     await loadCert()
   } catch (e) { modal.alert('提交失败', e.message) }
@@ -502,8 +498,8 @@ function removeAvatar() { avatarPreview.value = 'removed' }
 function clearCertImage() { certForm.cardImageUrl = '' }
 
 async function loadCert() {
-  try { const r = await certAPI.mine(); cert.value = r.data; certForm.studentId = auth.user?.studentId || '' }
-  catch { cert.value = null; certForm.studentId = auth.user?.studentId || '' }
+  try { const r = await certAPI.mine(); cert.value = r.data }
+  catch { cert.value = null }
 }
 async function loadCredit() {
   try { const r = await userAPI.creditRecords(); creditList.value = r.data || [] }
@@ -602,10 +598,11 @@ onMounted(async () => {
 .avatar-preview img{width:100%;height:100%;object-fit:contain}
 
 /* ---- 认证 ---- */
-.cert-state{margin-bottom:8px}
+.cert-head{display:flex;align-items:center;gap:20px;margin-bottom:8px}
+.cert-head .sub-title{margin-bottom:0}
+.cert-badge{display:inline-block;padding:4px 14px;border-radius:8px;font-weight:700;font-size:14px;border:2px solid black}
+.cert-badge--approved{background:#dcfce7;color:#166534}
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.file-btn{position:relative;overflow:hidden;cursor:pointer}
-.file-btn input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:var(--surface)}
 .compact-preview{width:220px;height:150px}
 .cert-preview img{display:block;width:100%;height:100%;object-fit:contain}
@@ -624,7 +621,7 @@ onMounted(async () => {
 
 /* ---- 退出 ---- */
 .logout-btn{width:100%;padding:12px;border-radius:10px;background:#fee2e2;color:var(--danger);font-weight:700;font-size:14px;border:2px solid var(--danger);box-shadow:4px 4px 0 rgba(0,0,0,1);margin-top:4px}
-.logout-btn:hover{background:#fecaca;transform:translate(1px,1px);box-shadow:none}
+.logout-btn:hover{background:#fca5a5;color:#991b1b;transform:translate(1px,1px);box-shadow:none}
 
 /* ---- 规则 ---- */
 .rules-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}

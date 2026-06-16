@@ -7,6 +7,7 @@ public class CertificationSubmitDto {
 
     private CertType certType;
     private String studentId;
+    private String realName;
     private UserGender gender;
     private String cardImageUrl;
 
@@ -27,6 +28,14 @@ public class CertificationSubmitDto {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
     }
 
     public UserGender getGender() {
