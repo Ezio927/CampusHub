@@ -156,6 +156,14 @@
               </select>
             </div>
             <div class="form-group">
+              <label>性别</label>
+              <select v-model="certForm.gender">
+                <option value="MALE">男</option>
+                <option value="FEMALE">女</option>
+                <option value="UNDISCLOSED">保密</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>学号</label>
               <input :value="auth.user?.studentId" readonly />
             </div>
@@ -348,7 +356,7 @@ const certInput = ref(null)
 const avatarPreview = ref('')
 const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0) || 0) % colors.length])
-const certForm = reactive({ certType: 'STUDENT_ID', studentId: '', cardImageUrl: '' })
+const certForm = reactive({ certType: 'STUDENT_ID', gender: 'MALE', studentId: '', cardImageUrl: '' })
 
 const cert = ref(null)
 const certErr = ref('')
