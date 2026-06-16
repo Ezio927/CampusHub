@@ -50,12 +50,12 @@ onMounted(() => store.fetch())
 </script>
 <style scoped>
 .login-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:14px;background:var(--primary-light);border-radius:10px;border:2px solid var(--primary);font-size:14px;color:var(--primary);font-weight:700}
-.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.filter-bar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px}
 .sel{width:auto;min-width:100px;border:2px solid black;box-shadow:3px 3px 0 rgba(0,0,0,1)}
 .kw{flex:1;min-width:140px;border:2px solid black;box-shadow:3px 3px 0 rgba(0,0,0,1)}
 .open-only{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;font-weight:600}
 .open-only input{width:auto}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:50px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
 .dc{display:flex;flex-direction:column;background:var(--card);border-radius:12px;padding:20px;border:2px solid black;box-shadow:4px 4px 0px rgba(0,0,0,1);cursor:pointer;transition:all 0.2s ease;overflow:hidden}
 .dc:hover{transform:scale(1.02);box-shadow:6px 6px 0px rgba(0,0,0,1)}
 .dt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}

@@ -73,8 +73,8 @@ function select(value) {
   justify-content: flex-start;
   gap: 12px;
   min-width: 140px;
-  padding: 8px 14px 8px 14px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
   font-weight: 700;
   font-family: inherit;
   background: #fff;
