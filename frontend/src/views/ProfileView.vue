@@ -139,13 +139,13 @@
 
         <!-- 实名认证 -->
         <div class="sub-block">
-          <h4 class="sub-title">实名认证</h4>
-          <div v-if="cert" class="cert-state">
-            状态：
-            <span :style="{ color: cert.status === 'APPROVED' ? 'var(--success)' : cert.status === 'REJECTED' ? 'var(--danger)' : 'var(--warning)' }" class="text-bold">
-              {{ cert.status === 'APPROVED' ? '已通过' : cert.status === 'REJECTED' ? '已驳回' : '审核中' }}
+          <div class="cert-head">
+            <h4 class="sub-title">实名认证</h4>
+            <span v-if="(cert && cert.status === 'APPROVED') || auth.user?.status === 'ACTIVE'" class="cert-badge cert-badge--approved">已通过</span>
+            <span v-else-if="cert" :style="{ color: cert.status === 'REJECTED' ? 'var(--danger)' : 'var(--warning)' }" class="text-bold">
+              {{ cert.status === 'REJECTED' ? '已驳回' : '审核中' }}
             </span>
-            <span v-if="cert.status === 'REJECTED' && cert.rejectReason" class="text-sm text-muted"> — {{ cert.rejectReason }}</span>
+            <span v-if="cert && cert.status === 'REJECTED' && cert.rejectReason" class="text-sm text-muted"> — {{ cert.rejectReason }}</span>
           </div>
           <template v-if="canSubmitCert">
             <div class="form-group">
@@ -187,7 +187,7 @@
               {{ certSubmitting ? '提交中...' : '提交认证' }}
             </button>
           </template>
-          <button v-else-if="cert?.cardImageUrl" type="button" class="cert-preview compact-preview" @click="certImageViewer = cert.cardImageUrl">
+          <button v-else-if="cert?.cardImageUrl && cert.status !== 'APPROVED'" type="button" class="cert-preview compact-preview" @click="certImageViewer = cert.cardImageUrl">
             <img :src="cert.cardImageUrl" alt="认证图片" />
           </button>
         </div>
@@ -384,7 +384,10 @@ const statusText = computed(() => ({
   PENDING_CERT: '待认证'
 }[auth.user?.status] || auth.user?.status))
 
-const canSubmitCert = computed(() => !cert.value || cert.value.status === 'REJECTED')
+const canSubmitCert = computed(() => {
+  if (auth.user?.status === 'ACTIVE') return false
+  return !cert.value || cert.value.status === 'REJECTED'
+})
 const canSubmitCreditAppeal = computed(() =>
   Number(auth.user?.creditScore ?? 0) < 60 && (!creditAppeal.value || creditAppeal.value.status === 'REJECTED')
 )
@@ -608,7 +611,10 @@ onMounted(async () => {
 .avatar-preview img{width:100%;height:100%;object-fit:contain}
 
 /* ---- 认证 ---- */
-.cert-state{margin-bottom:8px}
+.cert-head{display:flex;align-items:center;gap:20px;margin-bottom:8px}
+.cert-head .sub-title{margin-bottom:0}
+.cert-badge{display:inline-block;padding:4px 14px;border-radius:8px;font-weight:700;font-size:14px;border:2px solid black}
+.cert-badge--approved{background:#dcfce7;color:#166534}
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:var(--surface)}
 .compact-preview{width:220px;height:150px}
