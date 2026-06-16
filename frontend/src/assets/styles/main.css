@@ -48,7 +48,7 @@ input[type="file"]{border:none;padding:0}
 
 /* Buttons */
 button{
-  cursor:pointer;border:1.5px solid black;
+  appearance:none;-webkit-appearance:none;cursor:pointer;border:1.5px solid black;
   border-radius:var(--radius-sm);
   padding:10px 20px;font-weight:700;font-size:15px;
   transition:all 0.2s ease;font-family:inherit
@@ -76,7 +76,7 @@ button{
 .form-error{
   color:var(--danger);font-size:13px;padding:10px 14px;
   background:var(--danger-light);border-radius:var(--radius-sm);
-  border:2px solid var(--danger)
+  border:2px solid var(--danger);margin-bottom:12px
 }
 
 /* Badges - Soft Neo-Brutalism: border:2px solid black, font-weight:700, color:#111 */

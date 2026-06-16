@@ -67,9 +67,10 @@ function updateSlider() {
   if (active) {
     const container = linksRef.value.getBoundingClientRect()
     const el = active.getBoundingClientRect()
+    const w = el.width * 0.8
     sliderStyle.value = {
-      left: (el.left - container.left) + 'px',
-      width: el.width + 'px',
+      left: (el.left - container.left + (el.width - w) / 2) + 'px',
+      width: w + 'px',
       opacity: '1'
     }
   } else {

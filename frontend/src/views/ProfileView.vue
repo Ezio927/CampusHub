@@ -94,10 +94,8 @@
                 <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
                 <span v-else>{{ auth.user?.username?.[0]?.toUpperCase() }}</span>
               </div>
-              <label class="btn-outline btn-sm file-btn">
-                选择图片
-                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickAvatar" />
-              </label>
+              <input ref="avatarInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickAvatar" hidden />
+              <button type="button" class="btn-outline btn-sm" @click="avatarInput?.click()">选择图片</button>
               <button v-if="avatarPreview && avatarPreview !== auth.user?.avatarUrl" type="button" class="btn-outline btn-sm" @click="removeAvatar">移除</button>
             </div>
           </div>
@@ -168,10 +166,8 @@
             <div class="form-group">
               <label>认证图片</label>
               <div class="upload-row">
-                <label class="btn-outline btn-sm file-btn">
-                  选择图片
-                  <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickCertImage" />
-                </label>
+                <input ref="certInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" @change="pickCertImage" hidden />
+                <button type="button" class="btn-outline btn-sm" @click="certInput?.click()">选择图片</button>
                 <button v-if="certForm.cardImageUrl" type="button" class="btn-outline btn-sm" @click="clearCertImage">移除</button>
               </div>
               <button v-if="certForm.cardImageUrl" type="button" class="cert-preview" @click="certImageViewer = certForm.cardImageUrl">
@@ -347,6 +343,8 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const form = reactive({ username: '', phone: '', email: '', gender: '', campus: '' })
+const avatarInput = ref(null)
+const certInput = ref(null)
 const avatarPreview = ref('')
 const colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#14b8a6']
 const avatarColor = computed(() => colors[(auth.user?.username?.charCodeAt(0) || 0) % colors.length])
@@ -604,8 +602,6 @@ onMounted(async () => {
 /* ---- 认证 ---- */
 .cert-state{margin-bottom:8px}
 .upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.file-btn{position:relative;overflow:hidden;cursor:pointer}
-.file-btn input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .cert-preview{display:block;width:180px;height:120px;margin-top:10px;padding:0;border:2px solid black;border-radius:10px;overflow:hidden;background:var(--surface)}
 .compact-preview{width:220px;height:150px}
 .cert-preview img{display:block;width:100%;height:100%;object-fit:contain}
@@ -624,7 +620,7 @@ onMounted(async () => {
 
 /* ---- 退出 ---- */
 .logout-btn{width:100%;padding:12px;border-radius:10px;background:#fee2e2;color:var(--danger);font-weight:700;font-size:14px;border:2px solid var(--danger);box-shadow:4px 4px 0 rgba(0,0,0,1);margin-top:4px}
-.logout-btn:hover{background:#fecaca;transform:translate(1px,1px);box-shadow:none}
+.logout-btn:hover{background:#fca5a5;color:#991b1b;transform:translate(1px,1px);box-shadow:none}
 
 /* ---- 规则 ---- */
 .rules-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
