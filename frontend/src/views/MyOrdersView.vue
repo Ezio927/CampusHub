@@ -189,7 +189,7 @@ onMounted(async () => {
 .tab{position:relative;z-index:1;flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary);transition:color .2s ease}
 .tab.on{color:var(--bg)}
 .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-left:4px}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
 .oc{background:var(--card);border-radius:12px;padding:18px;border:2px solid black;box-shadow:4px 4px 0 rgba(0,0,0,1);cursor:pointer;transition:all .2s ease}
 .oc:hover{transform:scale(1.02);box-shadow:6px 6px 0 rgba(0,0,0,1)}
 .dp{font-size:18px;font-weight:800;color:var(--danger)}
