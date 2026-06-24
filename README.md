@@ -6,8 +6,8 @@
 
 | 层 | 技术 |
 |---|---|
-| 后端框架 | Spring Boot 3 + MyBatis-Plus |
-| 数据库 | MySQL 8.0（生产）/ H2（开发） |
+| 后端框架 | Spring Boot 4.0.5 + MyBatis-Plus |
+| 数据库 | MySQL 8.0（默认 Docker 环境）/ H2（dev profile） |
 | 缓存 | Redis 7 |
 | 前端 | Vue 3 + Vite + Pinia + Vue Router |
 | 容器化 | Docker Compose（MySQL + Redis） |
@@ -59,7 +59,7 @@ npm install
 npm run dev
 ```
 
-> 不想用 Docker 时，直接在 IDEA 启动后端即可（默认用 H2 内存库，无需任何数据库）。
+> 如需不使用 Docker，可在启动后端时显式指定 `dev` profile 使用 H2 内存库，例如 `./mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"`。
 
 ## 项目结构
 
@@ -87,11 +87,13 @@ SECIITask/
 复制 `.env.example` 为 `.env`，按需修改：
 
 ```env
-DB_ROOT_PASSWORD=campushub123    # MySQL 密码
+DB_ROOT_PASSWORD=root123         # MySQL root 密码
+DB_USERNAME=root                 # 后端连接 MySQL 的用户名
+DB_PASSWORD=root123              # 后端连接 MySQL 的密码
 DB_NAME=campushub                # 数据库名
 DB_PORT=3307                     # 宿主机端口（容器内 3306）
 REDIS_PORT=6379
-JWT_SECRET=your-secret-here
+JWT_SECRET=campushub-dev-secret-key-change-in-production
 ```
 
 ## 助教功能测试指南

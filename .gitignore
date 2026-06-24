@@ -17,6 +17,9 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+!.env.*.example
+.env.local
+.env.*.local
 *.env.docker
 
 # ===========================================
@@ -87,6 +90,7 @@ docker-compose.override.yml
 # ===========================================
 .tools/
 .claude/
+.agents/
 
 # ===========================================
 # JVM 崩溃日志
