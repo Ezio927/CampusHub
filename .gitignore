@@ -45,6 +45,10 @@ target/
 *.jar
 *.war
 *.ear
+backend/src/main/resources/static/
+
+# 产物
+SECIIDemo/
 
 # ===========================================
 # 缓存 & 临时文件
