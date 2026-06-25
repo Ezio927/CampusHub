@@ -9,6 +9,14 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  build: {
+    cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        inlineDynamicImports: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

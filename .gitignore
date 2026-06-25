@@ -17,6 +17,9 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+!.env.*.example
+.env.local
+.env.*.local
 *.env.docker
 
 # ===========================================
@@ -42,6 +45,10 @@ target/
 *.jar
 *.war
 *.ear
+backend/src/main/resources/static/
+
+# 产物
+SECIIDemo/
 
 # ===========================================
 # 缓存 & 临时文件
@@ -87,6 +94,7 @@ docker-compose.override.yml
 # ===========================================
 .tools/
 .claude/
+.agents/
 
 # ===========================================
 # JVM 崩溃日志

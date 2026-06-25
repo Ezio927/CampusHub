@@ -41,7 +41,7 @@ SECIITask/
 ├── .env                  # 环境变量（密码等，不提交 git）
 ├── .env.example          # 环境变量模板（提交 git 供队友参考）
 ├── backend/src/main/resources/
-│   ├── application.yml           # 主配置（默认 dev 用 H2）
+│   ├── application.yml           # 主配置（默认 docker profile）
 │   ├── application-dev.yml       # 开发环境（H2，免 Docker）
 │   ├── application-docker.yml    # Docker 环境（连接 MySQL）
 │   └── schema.sql                # MySQL 建表脚本（容器启动时自动执行）
@@ -51,7 +51,9 @@ SECIITask/
 
 ```env
 # --- MySQL（宿主机 3307 → 容器 3306）---
-DB_ROOT_PASSWORD=campushub123
+DB_ROOT_PASSWORD=root123
+DB_USERNAME=root
+DB_PASSWORD=root123
 DB_NAME=campushub
 DB_PORT=3307
 
@@ -125,7 +127,7 @@ docker compose restart mysql
 
 ## 4. 启动后端（关键步骤）
 
-**默认 profile 是 `dev`（H2 内存库），连 Docker 必须切换 profile：**
+**当前 `application.yml` 默认 profile 是 `docker`，会连接本机 `3307` 端口的 MySQL。通常直接启动后端即可；如果需要显式指定，也可以指定 `docker` profile。**
 
 ### IDEA 启动
 
@@ -159,13 +161,13 @@ export SPRING_PROFILES_ACTIVE=docker
 | Host | localhost |
 | Port | 3307 |
 | User | root |
-| Password | campushub123 |
+| Password | root123 |
 | Database | campushub |
 
 ### 进容器直接操作 MySQL
 
 ```bash
-docker exec -it campushub-mysql mysql -uroot -pcampushub123 campushub
+docker exec -it campushub-mysql mysql -uroot -proot123 campushub
 ```
 
 然后可以执行 SQL：
@@ -231,7 +233,7 @@ docker compose logs mysql | tail -20
 
 确认：
 1. `docker compose ps` 显示 MySQL 是 `healthy`
-2. 启动时指定了 `--spring.profiles.active=docker`（不是默认的 dev）
+2. 后端实际使用的是 `docker` profile（当前 `application.yml` 已默认指定；如有覆盖配置，请确认没有切到 `dev`）
 3. `.env` 里的 `DB_PORT` 和 `application-docker.yml` 里的端口一致
 
 ---
@@ -244,7 +246,7 @@ docker compose up -d
 
 # 2. 等 MySQL healthy（docker compose ps 确认）
 
-# 3. IDEA 里启动 BackendApplication（设 spring.profiles.active=docker）
+# 3. IDEA 里启动 BackendApplication（默认已使用 docker profile；如有覆盖配置，请设 spring.profiles.active=docker）
 
 # 4. 前端终端
 cd frontend
@@ -270,5 +272,5 @@ docker compose down
 | 看日志 | `docker compose logs -f` |
 | 停止（保留数据） | `docker compose down` |
 | 停止（清数据） | `docker compose down -v` |
-| 进 MySQL | `docker exec -it campushub-mysql mysql -uroot -pcampushub123 campushub` |
+| 进 MySQL | `docker exec -it campushub-mysql mysql -uroot -proot123 campushub` |
 | 进 Redis | `docker exec -it campushub-redis redis-cli` |
