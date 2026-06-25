@@ -530,7 +530,12 @@ async function unblockUser(item) {
   try { await chatAPI.unblock(item.id); await loadBlockedList(); modal.alert('操作成功', '已将该用户移出黑名单。') }
   catch (e) { modal.alert('操作失败', e.message) }
 }
-function logout() { auth.logout(); router.push('/login') }
+async function logout() {
+  const confirmed = await modal.confirm('确认退出登录', '退出后需要重新登录才能继续使用账号功能。')
+  if (!confirmed) return
+  auth.logout()
+  router.push('/login')
+}
 function goMyReviews() { if (auth.user?.id) router.push('/reviews/' + auth.user.id) }
 
 onMounted(async () => {
