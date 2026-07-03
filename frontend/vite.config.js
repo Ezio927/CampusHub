@@ -11,9 +11,9 @@ export default defineConfig({
   ],
   build: {
     cssCodeSplit: false,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        inlineDynamicImports: true,
+        codeSplitting: false,
       },
     },
   },

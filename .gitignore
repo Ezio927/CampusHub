@@ -48,7 +48,12 @@ target/
 backend/src/main/resources/static/
 
 # 产物
-SECIIDemo/
+SECIIDemo*/
+SECIIDemoCloud*/
+SECIIDemo*.zip
+SECIIDemoCloud*.zip
+
+docs/pre/
 
 # ===========================================
 # 缓存 & 临时文件

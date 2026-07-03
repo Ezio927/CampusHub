@@ -1,7 +1,16 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
+
+vi.mock('@/components/layout/AppLayout.vue', () => ({
+  default: { template: '<div><slot /></div>' },
+}))
+
+vi.mock('@/components/common/ModalContainer.vue', () => ({
+  default: { template: '<div />' },
+}))
+
 import App from '../App.vue'
 
 describe('App', () => {
@@ -10,10 +19,7 @@ describe('App', () => {
     const wrapper = mount(App, {
       global: {
         plugins: [createPinia()],
-        stubs: {
-          AppLayout: { template: '<div><slot /></div>' },
-          RouterView: { template: '<main>router view</main>' },
-        },
+        stubs: { RouterView: { template: '<main>router view</main>' } },
       },
     })
     expect(wrapper.text()).toContain('router view')
