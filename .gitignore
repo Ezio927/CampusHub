@@ -50,6 +50,8 @@ backend/src/main/resources/static/
 # 产物
 SECIIDemo*/
 SECIIDemoCloud*/
+SECIIDemo*.zip
+SECIIDemoCloud*.zip
 
 docs/pre/
 
