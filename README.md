@@ -2,6 +2,8 @@
 
 面向大学生的校园任务互助系统，支持需求发布、接单、信用评价、认证、实时聊天等功能。
 
+本项目由四人课程团队合作完成。成员分工及匿名署名说明见 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
+
 ## 技术栈
 
 | 层 | 技术 |
@@ -11,7 +13,9 @@
 | 缓存 | Redis 7 |
 | 前端 | Vue 3 + Vite + Pinia + Vue Router |
 | 容器化 | Docker Compose（MySQL + Redis） |
-| CI/CD | GitLab CI |
+| CI/CD | GitHub Actions |
+
+GitHub Actions 在每次 push 和 pull request 时分别运行前端构建/单元测试与后端 Maven 测试；工作流定义位于 `.github/workflows/`。
 
 ## 功能模块
 
